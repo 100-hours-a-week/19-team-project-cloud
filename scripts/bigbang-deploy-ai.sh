@@ -1,33 +1,41 @@
 #!/bin/bash
 set -e
 
-# =============================================
-# AI Big Bang 배포 스크립트
-# - 기존 AI 프로세스를 완전히 종료
-# - 최신 코드로 교체
-# - AI 서비스 재기동
-# =============================================
+# 색상 정의
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
 
-DEPLOY_TIME=$(date "+%Y-%m-%d %H:%M:%S")
-
-echo "============================================"
-echo "AI Big Bang 배포 시작: $DEPLOY_TIME"
-echo "============================================"
-
-# AI 애플리케이션 디렉토리
-APP_DIR="$HOME/refit/app/ai"
+AI_DIR=/home/ubuntu/refit/app/ai
+LOG_DIR=/home/ubuntu/refit/logs/ai
+BACKUP_DIR=/home/ubuntu/refit/backups/ai
 PORT=8000
+TIMESTAMP=$(date +%Y%m%d%H%M%S)
 
+echo "============================================"
+echo "Re-Fit AI 배포 시작: $(date)"
+echo "============================================"
+
+# 0. 로그 및 디렉토리 준비
+mkdir -p $LOG_DIR $BACKUP_DIR
+
+# 1. 기존 AI 프로세스 종료
 echo "[1/5] 기존 AI 프로세스 종료..."
 pkill -f "uvicorn main:app" || true
-pkill -f "port $PORT" || true
-
+pkill -f "uvicorn api.main:app" || true
+# 포트를 사용하는 프로세스 종료
+if lsof -ti:$PORT > /dev/null 2>&1; then
+    lsof -ti:$PORT | xargs kill -9 || true
+fi
 sleep 2
 
+# 2. 소스 코드 업데이트
 echo "[2/5] 소스 코드 업데이트..."
-cd $APP_DIR
+cd $AI_DIR
 git pull origin main
 
+# 3. 가상환경 활성화 및 의존성 설치
 echo "[3/5] 가상환경 활성화 및 의존성 설치..."
 if [ -d "venv" ]; then
     source venv/bin/activate
@@ -39,27 +47,31 @@ fi
 if [ -f "requirements.txt" ]; then
     pip install -r requirements.txt
 else
-    echo "requirements.txt 파일이 없습니다. 최소 필수 패키지를 설치합니다."
+    echo -e "${YELLOW}requirements.txt 파일이 없습니다. 최소 필수 패키지를 설치합니다.${NC}"
     pip install fastapi uvicorn
 fi
 
+# 4. AI 서비스 재기동
 echo "[4/5] AI 서비스 재기동..."
-cd "$APP_DIR/ai_app"
-nohup "$APP_DIR/venv/bin/python" -m uvicorn api.main:app \
+cd "$AI_DIR/ai_app"
+nohup "$AI_DIR/venv/bin/python" -m uvicorn api.main:app \
   --host 0.0.0.0 \
   --port $PORT \
-  > "$APP_DIR/ai.log" 2>&1 &
+  > "$AI_DIR/ai.log" 2>&1 &
 
 sleep 2
 
+# 5. AI 헬스 체크 수행
 echo "[5/5] AI 헬스 체크 수행..."
-curl -s http://localhost:$PORT/health || {
-    echo "헬스 체크 실패! 배포 중 오류 발생."
-    echo " 배포 실패: $DEPLOY_TIME"
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:$PORT/health 2>/dev/null || echo "000")
+
+if [ "$HTTP_STATUS" = "200" ]; then
+    echo -e "${GREEN}배포 성공! (HTTP $HTTP_STATUS)${NC}"
+else
+    echo -e "${RED}헬스 체크 실패! 배포 중 오류 발생. (HTTP $HTTP_STATUS)${NC}"
     exit 1
-}
+fi
 
 echo "============================================"
-echo "AI Big Bang 배포 완료!"
-echo " 배포 완료: $DEPLOY_TIME"
+echo "Re-Fit AI 배포 완료: $(date)"
 echo "============================================"

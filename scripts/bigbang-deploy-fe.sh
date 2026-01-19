@@ -1,10 +1,16 @@
 #!/bin/bash
 set -e
 
-FE_DIR=~/refit/app/frontend
-LOG_DIR=~/refit/logs/frontend
-BACKUP_DIR=~/refit/backups/frontend
-PM2_CONFIG=~/refit/infra/pm2/ecosystem.config.js
+# 색상 정의
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+FE_DIR=/home/ubuntu/refit/app/frontend
+LOG_DIR=/home/ubuntu/refit/logs/frontend
+BACKUP_DIR=/home/ubuntu/refit/backups/frontend
+PM2_CONFIG=/home/ubuntu/refit/infra/pm2/ecosystem.config.js
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
 APP_NAME="frontend"
 
@@ -18,7 +24,7 @@ mkdir -p $LOG_DIR $BACKUP_DIR
 # 1. 백업 (롤백용)
 if [ -d "$FE_DIR/.next" ]; then
     cp -r $FE_DIR/.next $BACKUP_DIR/frontend-$TIMESTAMP
-    echo "백업 완료: $BACKUP_DIR/frontend-$TIMESTAMP"
+    echo -e "${GREEN}백업 완료: $BACKUP_DIR/frontend-$TIMESTAMP${NC}"
 fi
 
 # 2. 소스 업데이트 및 설치
@@ -28,7 +34,7 @@ pnpm install --frozen-lockfile
 
 # 3. 환경 변수 체크
 if [ ! -f .env.production ]; then
-    echo "❌ 에러: .env.production 파일이 없습니다. 배포를 중단합니다."
+    echo -e "${RED}에러: .env.production 파일이 없습니다. 배포를 중단합니다.${NC}"
     exit 1
 fi
 
@@ -39,10 +45,10 @@ pnpm run build
 # 5. PM2를 이용한 무중단 재시작 (reload)
 if pm2 describe $APP_NAME > /dev/null 2>&1; then
     echo "기존 프로세스 재시작 (Reload)..."
-    pm2 reload $PM2_CONFIG --env production
+    pm2 reload $APP_NAME
 else
     echo "신규 프로세스 시작..."
-    pm2 start $PM2_CONFIG --env production
+    pm2 start $PM2_CONFIG --only $APP_NAME --env production
 fi
 
 # 6. Caddy 리로드
@@ -53,11 +59,15 @@ fi
 # 7. 배포 검증
 echo "배포 검증 중 (5초 대기)..."
 sleep 5
-HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000)
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null || echo "000")
 
 if [ "$HTTP_STATUS" = "200" ]; then
-    echo "✅ 배포 성공! (HTTP 200)"
+    echo -e "${GREEN}배포 성공! (HTTP $HTTP_STATUS)${NC}"
     pm2 save
 else
-    echo "⚠️ 배포 이상 감지! (HTTP $HTTP_STATUS) 로그를 확인하세요: pm2 logs $APP_NAME"
+    echo -e "${YELLOW}배포 이상 감지! (HTTP $HTTP_STATUS) 로그를 확인하세요: pm2 logs $APP_NAME${NC}"
 fi
+
+echo "============================================"
+echo "Re-Fit FE 배포 완료: $(date)"
+echo "============================================"
