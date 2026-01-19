@@ -4,7 +4,7 @@ set -e
 FE_DIR=~/refit/app/frontend
 LOG_DIR=~/refit/logs/frontend
 BACKUP_DIR=~/refit/backups/frontend
-PM2_CONFIG=~/infra/pm2/ecosystem.config.js
+PM2_CONFIG=~/refit/infra/pm2/ecosystem.config.js
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
 APP_NAME="frontend"
 
