@@ -21,7 +21,7 @@ echo "============================================"
 mkdir -p $LOG_DIR $BACKUP_DIR
 
 # 1. 기존 AI 프로세스 종료
-echo "[1/5] 기존 AI 프로세스 종료..."
+echo "[1/6] 기존 AI 프로세스 종료..."
 pkill -f "uvicorn main:app" || true
 pkill -f "uvicorn api.main:app" || true
 # 포트를 사용하는 프로세스 종료
@@ -30,13 +30,19 @@ if lsof -ti:$PORT > /dev/null 2>&1; then
 fi
 sleep 2
 
-# 2. 소스 코드 업데이트
-echo "[2/5] 소스 코드 업데이트..."
+# 2. 백업 (롤백용)
+if [ -d "$AI_DIR/ai_app" ]; then
+    cp -r "$AI_DIR/ai_app" "$BACKUP_DIR/ai-$TIMESTAMP"
+    echo -e "${GREEN}백업 완료: $BACKUP_DIR/ai-$TIMESTAMP${NC}"
+fi
+
+# 3. 소스 코드 업데이트
+echo "[3/6] 소스 코드 업데이트..."
 cd $AI_DIR
 git pull origin main
 
-# 3. 가상환경 활성화 및 의존성 설치
-echo "[3/5] 가상환경 활성화 및 의존성 설치..."
+# 4. 가상환경 활성화 및 의존성 설치
+echo "[4/6] 가상환경 활성화 및 의존성 설치..."
 if [ -d "venv" ]; then
     source venv/bin/activate
 else
@@ -51,8 +57,8 @@ else
     pip install fastapi uvicorn
 fi
 
-# 4. AI 서비스 재기동
-echo "[4/5] AI 서비스 재기동..."
+# 5. AI 서비스 재기동
+echo "[5/6] AI 서비스 재기동..."
 cd "$AI_DIR/ai_app"
 nohup "$AI_DIR/venv/bin/python" -m uvicorn api.main:app \
   --host 0.0.0.0 \
@@ -61,8 +67,8 @@ nohup "$AI_DIR/venv/bin/python" -m uvicorn api.main:app \
 
 sleep 2
 
-# 5. AI 헬스 체크 수행
-echo "[5/5] AI 헬스 체크 수행..."
+# 6. AI 헬스 체크 수행
+echo "[6/6] AI 헬스 체크 수행..."
 HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:$PORT/health 2>/dev/null || echo "000")
 
 if [ "$HTTP_STATUS" = "200" ]; then
