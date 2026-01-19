@@ -44,7 +44,7 @@ fi
 # 4. 프로젝트 및 인프라 디렉토리 생성
 echo "[4/6] 디렉토리 구조 설정..."
 FE_DIR=~/refit/app/frontend
-INFRA_DIR=~/infra/pm2
+INFRA_DIR=~/refit/infra/pm2
 
 # 부모 디렉토리들 생성
 mkdir -p ~/refit/app
