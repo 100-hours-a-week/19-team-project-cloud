@@ -22,15 +22,12 @@ mkdir -p $LOG_DIR $BACKUP_DIR
 
 # 1. 기존 AI 프로세스 종료
 echo "[1/6] 기존 AI 프로세스 종료..."
-pkill -f "uvicorn main:app" || true
-pkill -f "uvicorn api.main:app" || true
-# 포트를 사용하는 프로세스 종료
-if lsof -ti:$PORT > /dev/null 2>&1; then
-    lsof -ti:$PORT | xargs kill -9 || true
-fi
-sleep 2
+sudo systemctl reload caddy
 
-# 2. 백업 (롤백용)
+# 2. 기존 프로세스 정리 및 DB 백업
+echo "[2/6] 기존 프로세스 정리 및 DB 백업..."
+sudo systemctl stop fastapi || true
+
 if [ -d "$AI_DIR/ai_app" ]; then
     cp -r "$AI_DIR/ai_app" "$BACKUP_DIR/ai-$TIMESTAMP"
     echo -e "${GREEN}백업 완료: $BACKUP_DIR/ai-$TIMESTAMP${NC}"
@@ -59,14 +56,9 @@ fi
 
 # 5. AI 서비스 재기동
 echo "[5/6] AI 서비스 재기동..."
-cd "$AI_DIR/ai_app"
-nohup "$AI_DIR/venv/bin/python" -m uvicorn api.main:app \
-  --host 0.0.0.0 \
-  --port $PORT \
-  > "$AI_DIR/ai.log" 2>&1 &
+sudo systemctl restart fastapi
 
 sleep 2
-
 # 6. AI 헬스 체크 수행
 echo "[6/6] AI 헬스 체크 수행..."
 HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:$PORT/health 2>/dev/null || echo "000")
@@ -75,6 +67,7 @@ if [ "$HTTP_STATUS" = "200" ]; then
     echo -e "${GREEN}배포 성공! (HTTP $HTTP_STATUS)${NC}"
 else
     echo -e "${RED}헬스 체크 실패! 배포 중 오류 발생. (HTTP $HTTP_STATUS)${NC}"
+    echo "에러 확인: sudo journalctl -u fastapi -n 50"
     exit 1
 fi
 
