@@ -29,8 +29,8 @@ fi
 
 # 2. 소스 업데이트 및 설치
 cd $FE_DIR
-git pull origin main
-pnpm install --frozen-lockfile
+git pull origin develop
+CI=true pnpm install --frozen-lockfile --ignore-scripts
 
 # 3. 환경 변수 체크
 if [ ! -f .env.production ]; then
@@ -40,6 +40,8 @@ fi
 
 # 4. 빌드 (SSR 서버 기능 포함)
 echo "빌드 중... (잠시 시간이 걸릴 수 있습니다)"
+sudo chown -R ubuntu:ubuntu /.next 2>/dev/null || true
+rm -rf /.next 2>/dev/null || true
 pnpm run build
 
 # 5. PM2를 이용한 무중단 재시작 (reload)
