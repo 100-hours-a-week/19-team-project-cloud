@@ -37,3 +37,32 @@ pnpm-debug.log*
 # Systemd (if any local overrides are created)
 *.service
 !systemd/*.service
+
+
+# =========================
+# Terraform
+# =========================
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files (상태 파일은 절대 커밋하면 안 됨)
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude all .tfvars files (민감 정보가 포함될 수 있음)
+*.tfvars
+*.tfvars.json
+
+# Ignore override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# CLI configuration files
+.terraformrc
+terraform.rc

@@ -1,0 +1,25 @@
+# -----------------------------------------------------
+# Re-Fit Production Environment Variables (Example)
+# -----------------------------------------------------
+# 이 파일을 복사해서 terraform.tfvars로 만들고 실제 값을 입력하세요
+# cp terraform.tfvars.example terraform.tfvars
+
+# General
+aws_region   = "ap-northeast-2"
+project_name = "refit"
+environment  = "prod"
+
+# VPC
+vpc_cidr           = "10.0.0.0/16"
+public_subnet_cidr = "10.0.1.0/24"
+availability_zone  = "ap-northeast-2a"
+
+# EC2
+instance_type    = "t4g.medium"
+key_name         = "your-key-name"  # ← 실제 AWS 키페어 이름으로 변경
+root_volume_size = 30
+
+# Security Group
+# ⚠️ 보안을 위해 특정 IP로 제한하세요!
+allowed_ssh_cidr = ["YOUR_IP/32"]    # ← 본인 IP로 변경 (예: "123.45.67.89/32")
+allowed_db_cidr  = []                # ← 외부 접속 차단 권장
