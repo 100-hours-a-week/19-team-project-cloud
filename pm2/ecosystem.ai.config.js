@@ -2,7 +2,7 @@ module.exports = {
     apps: [
         {
             name: 'ai-service',
-            script: './venv/bin/uvicorn',
+            script: '/home/ubuntu/refit/app/ai/venv/bin/uvicorn',
             args: 'api.main:app --host 0.0.0.0 --port 8000',
             cwd: '/home/ubuntu/refit/app/ai/ai_app',
             interpreter: 'none',
