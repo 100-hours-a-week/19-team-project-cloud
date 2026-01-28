@@ -1,3 +1,6 @@
+// ⚠️ 민감한 정보는 /home/ubuntu/refit/app/ai/.env 파일에 저장하세요!
+// GOOGLE_API_KEY, DATABASE_URL 등은 .env에서 자동으로 로드됩니다.
+
 module.exports = {
     apps: [
         {
@@ -10,34 +13,15 @@ module.exports = {
             exec_mode: 'fork',
             autorestart: true,
             max_memory_restart: '1G',
+            // .env 파일에서 환경 변수 자동 로드 (FastAPI의 load_dotenv() 사용)
             env: {
                 PYTHONPATH: '/home/ubuntu/refit/app/ai/ai_app',
                 PORT: 8000,
-                // CloudWatch 메트릭
-                CLOUDWATCH_METRICS_ENABLED: 'true',
-                ENVIRONMENT: 'production',
-                AWS_REGION: 'ap-northeast-2',
-                // AI Service API Keys
-                GOOGLE_API_KEY: '***REMOVED***',
-                // Database
-                DATABASE_URL: 'postgresql://postgres:***REMOVED***@localhost:15432/postgres',
-                // Backend API
-                BACKEND_API_URL: 'https://re-fit.kr/',
             },
             env_production: {
                 NODE_ENV: 'production',
                 PYTHONPATH: '/home/ubuntu/refit/app/ai/ai_app',
                 PORT: 8000,
-                // CloudWatch 메트릭
-                CLOUDWATCH_METRICS_ENABLED: 'true',
-                ENVIRONMENT: 'production',
-                AWS_REGION: 'ap-northeast-2',
-                // AI Service API Keys
-                GOOGLE_API_KEY: '***REMOVED***',
-                // Database
-                DATABASE_URL: 'postgresql://postgres:***REMOVED***@localhost:15432/postgres',
-                // Backend API
-                BACKEND_API_URL: 'https://re-fit.kr/',
             },
             error_file: '/home/ubuntu/refit/logs/ai/error.log',
             out_file: '/home/ubuntu/refit/logs/ai/out.log',
