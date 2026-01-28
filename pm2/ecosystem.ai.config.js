@@ -17,11 +17,17 @@ module.exports = {
             env: {
                 PYTHONPATH: '/home/ubuntu/refit/app/ai/ai_app',
                 PORT: 8000,
+                CLOUDWATCH_METRICS_ENABLED: 'true',
+                ENVIRONMENT: 'production',
+                AWS_REGION: 'ap-northeast-2',
             },
             env_production: {
                 NODE_ENV: 'production',
                 PYTHONPATH: '/home/ubuntu/refit/app/ai/ai_app',
                 PORT: 8000,
+                CLOUDWATCH_METRICS_ENABLED: 'true',
+                ENVIRONMENT: 'production',
+                AWS_REGION: 'ap-northeast-2',
             },
             error_file: '/home/ubuntu/refit/logs/ai/error.log',
             out_file: '/home/ubuntu/refit/logs/ai/out.log',
