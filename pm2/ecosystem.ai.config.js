@@ -9,7 +9,7 @@ module.exports = {
             instances: 1,
             exec_mode: 'fork',
             autorestart: true,
-            max_memory_restart: '500M',
+            max_memory_restart: '1G',
             env: {
                 PYTHONPATH: '/home/ubuntu/refit/app/ai/ai_app',
                 PORT: 8000,
