@@ -13,8 +13,15 @@ NET_ENV_FILE="/var/tmp/refit-net.env"
 get_actuator_metric() {
   local name="$1"
   local stat="${2:-VALUE}"  # Default to VALUE, can be COUNT, TOTAL_TIME, MAX, etc.
+  local tags="${3:-}"       # Optional tags like "area:heap" (Spring Boot uses colon, not equals)
+  local url="http://localhost:8080/actuator/metrics/${name}"
+  if [ -n "$tags" ]; then
+    # Convert = to : for Spring Boot Actuator tag format
+    tags_fixed=$(echo "$tags" | sed 's/=/:/g')
+    url="${url}?tag=${tags_fixed}"
+  fi
   local resp
-  resp=$(curl -s "http://localhost:8080/actuator/metrics/${name}" 2>/dev/null || true)
+  resp=$(curl -s "$url" 2>/dev/null || true)
   # NOTE: `python3 -` consumes stdin as *code*, so we must use `-c` and pipe JSON into stdin.
   printf '%s' "$resp" | python3 -c "import sys, json
 try:
@@ -98,6 +105,74 @@ if systemctl is-active --quiet caddy 2>/dev/null; then
 else
   CADDY_STATUS=1
 fi
+
+# --- Backend HTTP metrics (Spring Boot) ---
+# HTTP 요청 수 (전체, 누적 카운터)
+HTTP_REQUESTS_COUNT=$(get_actuator_metric http.server.requests COUNT)
+# HTTP 응답 시간 (총 누적 시간 / 최대 응답 시간, 초 단위)
+HTTP_REQUESTS_TIME_TOTAL=$(get_actuator_metric http.server.requests TOTAL_TIME)
+HTTP_REQUESTS_TIME_MAX=$(get_actuator_metric http.server.requests MAX)
+# HTTP 에러 수 (5xx)
+HTTP_5XX_COUNT=$(curl -s "http://localhost:8080/actuator/metrics/http.server.requests?tag=status:5xx" 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); ms=d.get('measurements',[]); print(sum(m.get('value',0) for m in ms if m.get('statistic')=='COUNT'))" 2>/dev/null || echo 0)
+# HTTP 활성 요청 수
+HTTP_REQUESTS_ACTIVE=$(get_actuator_metric http.server.requests.active)
+# 최근 수집 주기(예: 1분) 동안의 평균 응답 시간(ms) - 누적 카운터에서 delta 계산
+HTTP_LATENCY_AVG_MS=$(
+python3 <<PY
+import json
+from pathlib import Path
+
+state_path = Path("/var/tmp/refit-http-latency.json")
+try:
+    prev = json.loads(state_path.read_text())
+except Exception:
+    prev = {"count": 0.0, "total": 0.0}
+
+try:
+    cur_count = float("${HTTP_REQUESTS_COUNT:-0}")
+except Exception:
+    cur_count = 0.0
+try:
+    cur_total = float("${HTTP_REQUESTS_TIME_TOTAL:-0}")
+except Exception:
+    cur_total = 0.0
+
+delta_count = cur_count - float(prev.get("count", 0.0))
+delta_total = cur_total - float(prev.get("total", 0.0))
+
+if delta_count <= 0 or delta_total < 0:
+    avg_ms = 0.0
+else:
+    # Actuator는 초(Seconds) 단위로 제공하므로 ms로 변환
+    avg_ms = (delta_total / delta_count) * 1000.0
+
+state_path.parent.mkdir(parents=True, exist_ok=True)
+state_path.write_text(json.dumps({"count": cur_count, "total": cur_total}))
+
+print(int(avg_ms))
+PY
+)
+
+# --- Backend JVM metrics (Spring Boot) ---
+# GC 시간 (총 GC 시간)
+JVM_GC_TIME_TOTAL=$(get_actuator_metric jvm.gc.pause TOTAL_TIME)
+# 힙 사용량 (MB) - Python으로 계산
+JVM_HEAP_USED=$(get_actuator_metric jvm.memory.used VALUE "area:heap")
+JVM_HEAP_MAX=$(get_actuator_metric jvm.memory.max VALUE "area:heap")
+JVM_HEAP_CALC=$(python3 <<PY
+used = ${JVM_HEAP_USED:-0}
+max = ${JVM_HEAP_MAX:-0}
+used_mb = int(used / 1024 / 1024)
+max_mb = int(max / 1024 / 1024)
+pct = int(used * 100 / max) if max > 0 else 0
+print(f"{used_mb},{max_mb},{pct}")
+PY
+)
+JVM_HEAP_USED_MB=$(echo "$JVM_HEAP_CALC" | cut -d',' -f1)
+JVM_HEAP_MAX_MB=$(echo "$JVM_HEAP_CALC" | cut -d',' -f2)
+JVM_HEAP_USAGE_PCT=$(echo "$JVM_HEAP_CALC" | cut -d',' -f3)
+# 스레드 수
+JVM_THREADS_LIVE=$(get_actuator_metric jvm.threads.live)
 
 # --- Backend DB pool (hikaricp.*) ---
 DB_ACTIVE=$(get_actuator_metric hikaricp.connections.active)
@@ -203,6 +278,18 @@ aws cloudwatch put-metric-data --namespace "$NAMESPACE" --region "$REGION" --met
   "MetricName=frontend_restart_count,Value=$FRONTEND_RESTARTS,Unit=Count,Dimensions=[{Name=InstanceId,Value=$INSTANCE_ID}]" \
   "MetricName=ai_service_restart_count,Value=$AI_RESTARTS,Unit=Count,Dimensions=[{Name=InstanceId,Value=$INSTANCE_ID}]" \
   "MetricName=caddy_service_status,Value=$CADDY_STATUS,Unit=None,Dimensions=[{Name=InstanceId,Value=$INSTANCE_ID}]"
+
+aws cloudwatch put-metric-data --namespace "$NAMESPACE" --region "$REGION" --metric-data \
+  "MetricName=backend_http_requests_count,Value=$HTTP_REQUESTS_COUNT,Unit=Count,Dimensions=[{Name=InstanceId,Value=$INSTANCE_ID}]" \
+  "MetricName=backend_http_latency_avg_ms,Value=$HTTP_LATENCY_AVG_MS,Unit=Milliseconds,Dimensions=[{Name=InstanceId,Value=$INSTANCE_ID}]" \
+  "MetricName=backend_http_requests_time_max,Value=$HTTP_REQUESTS_TIME_MAX,Unit=Seconds,Dimensions=[{Name=InstanceId,Value=$INSTANCE_ID}]" \
+  "MetricName=backend_http_5xx_count,Value=$HTTP_5XX_COUNT,Unit=Count,Dimensions=[{Name=InstanceId,Value=$INSTANCE_ID}]" \
+  "MetricName=backend_http_requests_active,Value=$HTTP_REQUESTS_ACTIVE,Unit=Count,Dimensions=[{Name=InstanceId,Value=$INSTANCE_ID}]" \
+  "MetricName=backend_jvm_gc_time_total,Value=$JVM_GC_TIME_TOTAL,Unit=Seconds,Dimensions=[{Name=InstanceId,Value=$INSTANCE_ID}]" \
+  "MetricName=backend_jvm_heap_used_mb,Value=$JVM_HEAP_USED_MB,Unit=Megabytes,Dimensions=[{Name=InstanceId,Value=$INSTANCE_ID}]" \
+  "MetricName=backend_jvm_heap_max_mb,Value=$JVM_HEAP_MAX_MB,Unit=Megabytes,Dimensions=[{Name=InstanceId,Value=$INSTANCE_ID}]" \
+  "MetricName=backend_jvm_heap_usage_percent,Value=$JVM_HEAP_USAGE_PCT,Unit=Percent,Dimensions=[{Name=InstanceId,Value=$INSTANCE_ID}]" \
+  "MetricName=backend_jvm_threads_live,Value=$JVM_THREADS_LIVE,Unit=Count,Dimensions=[{Name=InstanceId,Value=$INSTANCE_ID}]"
 
 aws cloudwatch put-metric-data --namespace "$NAMESPACE" --region "$REGION" --metric-data \
   "MetricName=backend_db_active_connections,Value=$DB_ACTIVE,Unit=Count,Dimensions=[{Name=InstanceId,Value=$INSTANCE_ID}]" \
