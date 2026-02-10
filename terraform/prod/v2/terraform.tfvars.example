@@ -45,7 +45,4 @@ ssm_parameter_db_password        = ""
 # frontend_asg_min_size = 1
 # frontend_asg_max_size = 2
 # frontend_instance_type = "t4g.small"
-# kafka_asg_min_size = 2
-# kafka_asg_max_size = 4
-# kafka_instance_type = "t4g.small"
 # elasticache_num_cache_clusters = 2

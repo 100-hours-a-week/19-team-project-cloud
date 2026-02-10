@@ -1,6 +1,5 @@
 # -----------------------------------------------------
 # Backend ASG (refit-prod-v2), Min 1 / Max 2
-# Kafka runs in Docker on same instances
 # -----------------------------------------------------
 
 data "aws_ami" "prod_v2_ubuntu" {
@@ -27,9 +26,10 @@ resource "aws_launch_template" "prod_v2_backend" {
   name_prefix   = "${local.name}-backend-"
   image_id      = data.aws_ami.prod_v2_ubuntu.id
   instance_type = var.instance_type
+  key_name      = var.key_name
 
   iam_instance_profile {
-    name = aws_iam_instance_profile.prod_v2_backend.name
+    name = data.aws_iam_instance_profile.refit_ec2_ssm.name
   }
 
   vpc_security_group_ids = [aws_security_group.prod_v2_backend.id]
@@ -70,6 +70,14 @@ chmod +x install && ./install auto
     }
   }
 
+  tag_specifications {
+    resource_type = "volume"
+    tags = {
+      Name = "${local.name}-backend-root"
+      tier = local.tier_backend
+    }
+  }
+
   tags = {
     Name = "${local.name}-backend-lt"
     tier = local.tier_backend
@@ -79,8 +87,8 @@ chmod +x install && ./install auto
 resource "aws_autoscaling_group" "prod_v2_backend" {
   name                = "${local.name}-backend-asg"
   vpc_zone_identifier = local.private_backend_subnet_ids
-  target_group_arns   = [aws_lb_target_group.prod_v2_backend.arn]
-  health_check_type   = "ELB"
+  target_group_arns   = [aws_lb_target_group.prod_v2_backend.arn, aws_lb_target_group.prod_v2_backend_internal.arn]
+  health_check_type   = "EC2" # 앱 배포 전까지는 EC2 사용 (ELB→8080/actuator/health 실패 시 인스턴스 교체 반복)
   health_check_grace_period = 120
 
   min_size         = var.asg_min_size
@@ -119,9 +127,10 @@ resource "aws_launch_template" "prod_v2_frontend" {
   name_prefix   = "${local.name}-frontend-"
   image_id      = data.aws_ami.prod_v2_ubuntu.id
   instance_type = var.frontend_instance_type
+  key_name      = var.key_name
 
   iam_instance_profile {
-    name = aws_iam_instance_profile.prod_v2_frontend.name
+    name = data.aws_iam_instance_profile.refit_ec2_ssm.name
   }
 
   vpc_security_group_ids = [aws_security_group.prod_v2_frontend.id]
@@ -162,6 +171,14 @@ chmod +x install && ./install auto
     }
   }
 
+  tag_specifications {
+    resource_type = "volume"
+    tags = {
+      Name = "${local.name}-frontend-root"
+      tier = local.tier_frontend
+    }
+  }
+
   tags = {
     Name = "${local.name}-frontend-lt"
     tier = local.tier_frontend
@@ -172,7 +189,7 @@ resource "aws_autoscaling_group" "prod_v2_frontend" {
   name                = "${local.name}-frontend-asg"
   vpc_zone_identifier = local.public_subnet_ids
   target_group_arns   = [aws_lb_target_group.prod_v2_frontend.arn]
-  health_check_type   = "ELB"
+  health_check_type   = "EC2" # 앱 배포 전까지는 EC2 사용 (ELB→3000/ 실패 시 인스턴스 교체 반복)
   health_check_grace_period = 120
 
   min_size         = var.frontend_asg_min_size

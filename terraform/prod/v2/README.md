@@ -1,6 +1,6 @@
 # Refit Prod v2 (Terraform)
 
-Prod v2 인프라: VPC 10.2.0.0/16, External/Internal ALB, Frontend(Next.js)·Backend(Spring Boot)·Kafka ASG, RDS, ElastiCache(Valkey), CodeDeploy.  
+Prod v2 인프라: VPC 10.2.0.0/16, External/Internal ALB, Frontend(Next.js)·Backend(Spring Boot) ASG, Kafka EC2 2대(A존 1, C존 1, ASG 없음), RDS, ElastiCache(Valkey), CodeDeploy.  
 인스턴스 식별은 **tier 태그**를 사용한다.
 
 ---
@@ -125,10 +125,10 @@ terraform apply tfplan
 |------|------|-----------|
 | 1 | VPC·서브넷·NAT·라우트 | `terraform apply -lock=false -target=aws_vpc.prod_v2 -target=aws_internet_gateway.prod_v2 -target=aws_subnet.prod_v2_public -target=aws_subnet.prod_v2_private_backend -target=aws_subnet.prod_v2_private_data -target=aws_eip.prod_v2_nat -target=aws_nat_gateway.prod_v2 -target=aws_route_table.prod_v2_public -target=aws_route_table.prod_v2_private_backend -target=aws_route_table.prod_v2_private_data -target=aws_route_table_association.prod_v2_public -target=aws_route_table_association.prod_v2_private_backend -target=aws_route_table_association.prod_v2_private_data -target=aws_vpc_endpoint.prod_v2_s3` |
 | 2 | 보안 그룹 | `terraform apply -lock=false -target=aws_security_group.prod_v2_alb_ext -target=aws_security_group.prod_v2_alb_int -target=aws_security_group.prod_v2_backend -target=aws_security_group.prod_v2_frontend -target=aws_security_group.prod_v2_rds -target=aws_security_group.prod_v2_elasticache -target=aws_security_group.prod_v2_kafka` |
-| 3 | IAM 역할 | `terraform apply -lock=false -target=aws_iam_role.prod_v2_backend -target=aws_iam_role.prod_v2_frontend -target=aws_iam_role.prod_v2_kafka -target=aws_iam_role.prod_v2_codedeploy` |
+| 3 | IAM 역할 | `terraform apply -lock=false -target=aws_iam_role.prod_v2_kafka -target=aws_iam_role.prod_v2_codedeploy` (Backend/Frontend은 RefitEC2SSMRole 사용) |
 | 4 | ElastiCache | `terraform apply -lock=false -target=aws_elasticache_subnet_group.prod_v2 -target=aws_elasticache_replication_group.prod_v2` |
 | 5 | ALB·타깃 그룹·리스너 | `terraform apply -lock=false -target=aws_lb.prod_v2_external -target=aws_lb.prod_v2_internal -target=aws_lb_listener.prod_v2_external_https -target=aws_lb_listener.prod_v2_internal_http` (필요 시 관련 리소스 추가) |
-| 6 | Launch Template·ASG | `terraform apply -lock=false -target=aws_launch_template.prod_v2_backend -target=aws_launch_template.prod_v2_frontend -target=aws_launch_template.prod_v2_kafka -target=aws_autoscaling_group.prod_v2_backend -target=aws_autoscaling_group.prod_v2_frontend -target=aws_autoscaling_group.prod_v2_kafka` |
+| 6 | Launch Template·ASG·Kafka EC2 | `terraform apply -lock=false -target=aws_launch_template.prod_v2_backend -target=aws_launch_template.prod_v2_frontend -target=aws_autoscaling_group.prod_v2_backend -target=aws_autoscaling_group.prod_v2_frontend -target=aws_instance.prod_v2_kafka` |
 | 7 | CodeDeploy·S3 | `terraform apply -lock=false -target=aws_s3_bucket.prod_v2_deployments -target=aws_codedeploy_app.prod_v2_backend -target=aws_codedeploy_deployment_group.prod_v2_backend` |
 
 각 단계 후 콘솔에서 리소스가 의도대로 생성되었는지 확인한 뒤 다음 단계를 진행한다.  
@@ -177,7 +177,7 @@ terraform plan -destroy -lock=false
 |------|------|
 | backend | Backend(Spring Boot) EC2 |
 | frontend | Frontend(Next.js) EC2 |
-| kafka | Kafka EC2 |
+| kafka | Kafka EC2 (별도 3대, ASG 없음) |
 | alb-external | External ALB |
 | alb-internal | Internal ALB |
 | rds | RDS Primary |
@@ -210,7 +210,7 @@ CodeDeploy는 **tier=backend** 인스턴스에만 배포된다.
 | waf.tf | WAF v2 Web ACL (us-east-1, CloudFront 연동) |
 | cloudfront.tf | CloudFront 배포 (오리진=ALB, WAF 연동) |
 | asg.tf | Backend·Frontend Launch Template, ASG |
-| kafka.tf | Kafka Launch Template, ASG |
+| kafka.tf | Kafka EC2 3대 (A존 2, C존 1, ASG 없음) |
 | codedeploy.tf | S3 배포 버킷, CodeDeploy 앱/배포 그룹 |
 | variables.tf | 변수 정의 |
 | outputs.tf | 출력값 |

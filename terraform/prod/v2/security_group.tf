@@ -119,7 +119,7 @@ resource "aws_vpc_security_group_egress_rule" "prod_v2_alb_internal_backend" {
 
 resource "aws_vpc_security_group_ingress_rule" "prod_v2_alb_internal_frontend" {
   security_group_id            = aws_security_group.prod_v2_alb_internal.id
-  description                  = "HTTP from Frontend (SSR -> Backend)"
+  description                  = "HTTP from Frontend SSR to Backend"
   ip_protocol                  = "tcp"
   from_port                    = 80
   to_port                      = 80
@@ -215,12 +215,12 @@ resource "aws_vpc_security_group_ingress_rule" "prod_v2_elasticache_6379" {
 }
 
 # -----------------------------------------------------
-# Kafka SG (Docker on EC2 - same as Backend or separate host)
+# Kafka SG (설계도: Kafka 별도 EC2 3대, ASG 없음)
 # -----------------------------------------------------
 
 resource "aws_security_group" "prod_v2_kafka" {
   name        = "${local.name}-kafka-sg"
-  description = "Security group for Kafka (Docker on EC2, refit prod v2)"
+  description = "Security group for Kafka EC2 (refit prod v2, separate from Backend)"
   vpc_id      = local.vpc_id
 
   tags = {
@@ -253,3 +253,4 @@ resource "aws_vpc_security_group_egress_rule" "prod_v2_kafka_all" {
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
 }
+

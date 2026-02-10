@@ -116,9 +116,9 @@ output "backend_asg_name" {
   value       = aws_autoscaling_group.prod_v2_backend.name
 }
 
-output "kafka_asg_name" {
-  description = "Kafka ASG name"
-  value       = aws_autoscaling_group.prod_v2_kafka.name
+output "kafka_instance_ids" {
+  description = "Kafka EC2 instance IDs (A존 2, C존 1)"
+  value       = aws_instance.prod_v2_kafka[*].id
 }
 
 # -----------------------------------------------------

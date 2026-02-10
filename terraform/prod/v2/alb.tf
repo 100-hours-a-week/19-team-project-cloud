@@ -55,6 +55,31 @@ resource "aws_lb_target_group" "prod_v2_frontend" {
   }
 }
 
+# Internal ALB 전용 Backend Target Group (TG는 1개 LB에만 연결 가능)
+resource "aws_lb_target_group" "prod_v2_backend_internal" {
+  name     = "${local.name}-be-int-tg"
+  port     = 8080
+  protocol = "HTTP"
+  vpc_id   = local.vpc_id
+
+  health_check {
+    enabled             = true
+    path                = "/actuator/health"
+    protocol            = "HTTP"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+  }
+
+  deregistration_delay = 30
+
+  tags = {
+    Name = "${local.name}-be-int-tg"
+    tier = local.tier_backend
+  }
+}
+
 # -----------------------------------------------------
 # External ALB (internet-facing)
 # -----------------------------------------------------
@@ -320,7 +345,7 @@ resource "aws_lb_listener" "prod_v2_internal_http" {
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend.arn
+    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
   }
 }
 
@@ -331,7 +356,7 @@ resource "aws_lb_listener_rule" "prod_v2_internal_api_ai" {
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend.arn
+    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
   }
 
   condition {
@@ -347,7 +372,7 @@ resource "aws_lb_listener_rule" "prod_v2_internal_ai" {
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend.arn
+    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
   }
 
   condition {
@@ -363,7 +388,7 @@ resource "aws_lb_listener_rule" "prod_v2_internal_swagger" {
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend.arn
+    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
   }
 
   condition {
@@ -379,7 +404,7 @@ resource "aws_lb_listener_rule" "prod_v2_internal_v3_docs" {
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend.arn
+    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
   }
 
   condition {
@@ -395,7 +420,7 @@ resource "aws_lb_listener_rule" "prod_v2_internal_actuator" {
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend.arn
+    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
   }
 
   condition {
@@ -411,7 +436,7 @@ resource "aws_lb_listener_rule" "prod_v2_internal_ws" {
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend.arn
+    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
   }
 
   condition {
@@ -427,7 +452,7 @@ resource "aws_lb_listener_rule" "prod_v2_internal_api_ws" {
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend.arn
+    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
   }
 
   condition {
@@ -443,7 +468,7 @@ resource "aws_lb_listener_rule" "prod_v2_internal_api" {
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend.arn
+    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
   }
 
   condition {
@@ -459,7 +484,7 @@ resource "aws_lb_listener_rule" "prod_v2_internal_dev" {
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend.arn
+    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
   }
 
   condition {

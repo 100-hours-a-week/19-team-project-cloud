@@ -32,6 +32,24 @@ variable "name_prefix" {
   default     = "refit-prod-v2"
 }
 
+variable "key_name" {
+  description = "EC2 키 페어 이름 (SSH 접속용)"
+  type        = string
+  default     = "refit"
+}
+
+variable "ec2_iam_role_name" {
+  description = "Backend/Frontend EC2 공통 IAM 역할 이름 (기존 RefitEC2SSMRole 사용)"
+  type        = string
+  default     = "RefitEC2SSMRole"
+}
+
+variable "ec2_iam_instance_profile_name" {
+  description = "Backend/Frontend EC2 Instance Profile 이름 (역할과 다를 수 있음, RefitEC2SSMProfile)"
+  type        = string
+  default     = "RefitEC2SSMProfile"
+}
+
 # -----------------------------------------------------
 # VPC (신규 생성 또는 기존 VPC 사용)
 # -----------------------------------------------------
@@ -347,26 +365,8 @@ variable "elasticache_num_cache_clusters" {
 }
 
 # -----------------------------------------------------
-# Kafka ASG (설계도: EC2 Kafka 2노드 이상)
+# Kafka EC2 (설계도: 별도 EC2 3대, A존 2 / C존 1, ASG 없음)
 # -----------------------------------------------------
-
-variable "kafka_asg_min_size" {
-  description = "Minimum number of Kafka EC2 instances"
-  type        = number
-  default     = 2
-}
-
-variable "kafka_asg_max_size" {
-  description = "Maximum number of Kafka EC2 instances"
-  type        = number
-  default     = 4
-}
-
-variable "kafka_asg_desired_capacity" {
-  description = "Desired number of Kafka EC2 instances"
-  type        = number
-  default     = 2
-}
 
 variable "kafka_instance_type" {
   description = "EC2 instance type for Kafka"
@@ -379,3 +379,4 @@ variable "kafka_root_volume_size" {
   type        = number
   default     = 30
 }
+

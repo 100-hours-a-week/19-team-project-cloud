@@ -36,7 +36,8 @@ resource "aws_db_instance" "prod_v2" {
       condition     = (var.ssm_parameter_db_username != "" && var.ssm_parameter_db_password != "") || (var.db_username != "" && var.db_password != "")
       error_message = "RDS 계정: ssm_parameter_db_username·ssm_parameter_db_password 또는 db_username·db_password를 설정해야 한다."
     }
-    ignore_changes = [username, password]
+    ignore_changes  = [username, password]
+    prevent_destroy = true # 실수로 RDS 삭제 방지 (삭제 시 이 블록 제거 필수)
   }
 
   identifier     = var.db_instance_identifier
@@ -61,8 +62,8 @@ resource "aws_db_instance" "prod_v2" {
   backup_window           = "03:00-04:00"
   maintenance_window      = "sun:04:00-sun:05:00"
 
-  deletion_protection = false
-  skip_final_snapshot = true
+  deletion_protection = true
+  skip_final_snapshot = false
 
   tags = {
     Name = var.db_instance_identifier

@@ -24,6 +24,11 @@ resource "aws_elasticache_replication_group" "prod_v2" {
   at_rest_encryption_enabled = true
   transit_encryption_enabled  = false
 
+  lifecycle {
+    # AUTH 수정은 transit_encryption 켜진 경우만 가능. 기존 클러스터 보호
+    ignore_changes = [auth_token]
+  }
+
   tags = {
     Name = "${local.name}-elasticache"
     tier = local.tier_elasticache
