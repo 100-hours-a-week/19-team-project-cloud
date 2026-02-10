@@ -1,0 +1,42 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'refit-dev'
+    environment: 'development'
+
+scrape_configs:
+  # Prometheus 자체 메트릭
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # 애플리케이션 서버 - Node Exporter (시스템 메트릭)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['10.1.1.193:9100']
+        labels:
+          instance: 'refit-dev-app'
+
+  # 애플리케이션 서버 - cAdvisor (Docker 컨테이너 메트릭)
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['10.1.1.193:8081']
+        labels:
+          instance: 'refit-dev-app'
+
+  # Spring Boot Actuator (백엔드 애플리케이션 메트릭)
+  - job_name: 'spring-boot'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['43.200.140.74:80']
+        labels:
+          application: 'refit-backend'
+          instance: 'refit-dev-app'
+
+  # Postgres Exporter
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['10.1.1.193:9187']
+        labels:
+          instance: 'refit-dev-db'
