@@ -17,8 +17,20 @@ const crypto = require('crypto');
 const fs     = require('fs');
 const path   = require('path');
 
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+  fs.readFileSync(envPath, 'utf8').split('\n').forEach(line => {
+    const match = line.match(/^([^#=]+)=(.*)$/);
+    if (match) process.env[match[1].trim()] = match[2].trim().replace(/^["']|["']$/g, '');
+  });
+}
+
 // ─── 백엔드와 동일한 설정값 ───
-const SECRET       = '***REDACTED***';
+const SECRET = process.env.JWT_SECRET;
+if (!SECRET) {
+  console.error('❌ JWT_SECRET이 없습니다. loadTest/.env에 JWT_SECRET=... 를 설정하세요.');
+  process.exit(1);
+}
 const ISSUER       = 're-fit';
 const ACCESS_EXP_MS = 600000; // 10분
 
