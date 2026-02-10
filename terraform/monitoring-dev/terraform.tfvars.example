@@ -1,0 +1,26 @@
+# -----------------------------------------------------
+# Example terraform.tfvars for Monitoring Environment
+# -----------------------------------------------------
+
+# AWS Configuration
+aws_region   = "ap-northeast-2"
+project_name = "refit"
+environment  = "monitoring"
+
+# Network Configuration
+dev_environment         = "dev"
+monitoring_subnet_cidr  = "10.1.2.0/24"
+availability_zone       = "ap-northeast-2a"
+
+# EC2 Configuration
+instance_type     = "t4g.medium"  # 2 vCPU, 4GB RAM
+key_name          = "your-key-name"  # REQUIRED: Replace with your key name
+root_volume_size  = 50  # GB for logs and metrics storage
+
+# Security Configuration
+allowed_ssh_cidr     = ["0.0.0.0/0"]  # Restrict to your IP: ["YOUR_IP/32"]
+allowed_grafana_cidr = ["0.0.0.0/0"]  # Restrict if needed
+
+# Optional: Public access to Prometheus and Loki (default: false)
+allow_public_prometheus = false
+allow_public_loki       = false

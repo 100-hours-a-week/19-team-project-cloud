@@ -58,6 +58,52 @@ resource "aws_vpc_security_group_ingress_rule" "https" {
 }
 
 # -----------------------------------------------------
+# Monitoring - Metrics Collection
+# -----------------------------------------------------
+
+# Node Exporter (9100) - System metrics
+resource "aws_vpc_security_group_ingress_rule" "node_exporter" {
+  security_group_id = aws_security_group.main.id
+  description       = "Node Exporter metrics from monitoring server"
+  ip_protocol       = "tcp"
+  from_port         = 9100
+  to_port           = 9100
+  cidr_ipv4         = "10.1.2.163/32" # Monitoring server private IP
+
+  tags = {
+    Name = "node-exporter"
+  }
+}
+
+# cAdvisor (8081) - Container metrics
+resource "aws_vpc_security_group_ingress_rule" "cadvisor" {
+  security_group_id = aws_security_group.main.id
+  description       = "cAdvisor metrics from monitoring server"
+  ip_protocol       = "tcp"
+  from_port         = 8081
+  to_port           = 8081
+  cidr_ipv4         = "10.1.2.163/32" # Monitoring server private IP
+
+  tags = {
+    Name = "cadvisor"
+  }
+}
+
+# Postgres Exporter (9187) - Database metrics
+resource "aws_vpc_security_group_ingress_rule" "postgres_exporter" {
+  security_group_id = aws_security_group.main.id
+  description       = "Postgres Exporter metrics from monitoring server"
+  ip_protocol       = "tcp"
+  from_port         = 9187
+  to_port           = 9187
+  cidr_ipv4         = "10.1.2.163/32" # Monitoring server private IP
+
+  tags = {
+    Name = "postgres-exporter"
+  }
+}
+
+# -----------------------------------------------------
 # Egress Rules
 # -----------------------------------------------------
 
