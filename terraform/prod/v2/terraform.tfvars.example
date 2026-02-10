@@ -35,6 +35,9 @@ ssm_parameter_db_password        = ""
 # existing_db_subnet_group_name   = "서브넷_그룹_이름"
 # existing_rds_security_group_id  = "sg-xxxxxxxxxxxxxxxxx"
 
+# RDS Proxy (Connection pooling, 기본 true)
+# rds_proxy_enabled = true
+
 # 선택 변수 (기본값 변경 시)
 # asg_min_size = 1
 # asg_max_size = 2

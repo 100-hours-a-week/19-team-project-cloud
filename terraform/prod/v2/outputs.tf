@@ -64,6 +64,12 @@ output "rds_replica_endpoint" {
   sensitive   = true
 }
 
+output "rds_proxy_endpoint" {
+  description = "RDS Proxy endpoint (Backend 연결용, rds_proxy_enabled=true일 때)"
+  value       = var.rds_proxy_enabled ? aws_db_proxy.prod_v2[0].endpoint : null
+  sensitive   = true
+}
+
 output "elasticache_primary_endpoint" {
   description = "ElastiCache primary endpoint"
   value       = aws_elasticache_replication_group.prod_v2.primary_endpoint_address
@@ -71,13 +77,33 @@ output "elasticache_primary_endpoint" {
 }
 
 output "codedeploy_app_name" {
-  description = "CodeDeploy application name"
+  description = "CodeDeploy Backend application name"
   value       = aws_codedeploy_app.prod_v2_backend.name
 }
 
 output "codedeploy_deployment_group_name" {
-  description = "CodeDeploy deployment group name"
+  description = "CodeDeploy Backend deployment group name"
   value       = aws_codedeploy_deployment_group.prod_v2_backend.deployment_group_name
+}
+
+output "codedeploy_backend_app_name" {
+  description = "CodeDeploy Backend application name"
+  value       = aws_codedeploy_app.prod_v2_backend.name
+}
+
+output "codedeploy_backend_deployment_group_name" {
+  description = "CodeDeploy Backend deployment group name"
+  value       = aws_codedeploy_deployment_group.prod_v2_backend.deployment_group_name
+}
+
+output "codedeploy_frontend_app_name" {
+  description = "CodeDeploy Frontend application name"
+  value       = aws_codedeploy_app.prod_v2_frontend.name
+}
+
+output "codedeploy_frontend_deployment_group_name" {
+  description = "CodeDeploy Frontend deployment group name"
+  value       = aws_codedeploy_deployment_group.prod_v2_frontend.deployment_group_name
 }
 
 output "deploy_s3_bucket" {

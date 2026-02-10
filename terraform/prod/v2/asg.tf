@@ -54,10 +54,11 @@ resource "aws_launch_template" "prod_v2_backend" {
   user_data = base64encode(<<-EOT
 #!/bin/bash
 set -e
-apt-get update && apt-get install -y docker.io docker-compose-v2
+apt-get update && apt-get install -y docker.io docker-compose-v2 ruby-full wget
 systemctl enable docker && systemctl start docker
-# CodeDeploy agent (Ubuntu): install from AWS docs if using CodeDeploy
-# https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent.html
+# CodeDeploy agent
+cd /tmp && wget https://aws-codedeploy-${var.aws_region}.s3.${var.aws_region}.amazonaws.com/latest/install
+chmod +x install && ./install auto
   EOT
   )
 
@@ -111,7 +112,7 @@ resource "aws_autoscaling_group" "prod_v2_backend" {
 }
 
 # -----------------------------------------------------
-# Frontend ASG (Next.js), Min 1 / Max 2 - 설계도 반영
+# Frontend ASG (Next.js), Min 1 / Max 2
 # -----------------------------------------------------
 
 resource "aws_launch_template" "prod_v2_frontend" {
@@ -145,9 +146,11 @@ resource "aws_launch_template" "prod_v2_frontend" {
   user_data = base64encode(<<-EOT
 #!/bin/bash
 set -e
-apt-get update && apt-get install -y docker.io
+apt-get update && apt-get install -y docker.io docker-compose-v2 ruby-full wget
 systemctl enable docker && systemctl start docker
-# Next.js is deployed via ECR image pull or custom deploy
+# CodeDeploy agent
+cd /tmp && wget https://aws-codedeploy-${var.aws_region}.s3.${var.aws_region}.amazonaws.com/latest/install
+chmod +x install && ./install auto
   EOT
   )
 
@@ -167,7 +170,7 @@ systemctl enable docker && systemctl start docker
 
 resource "aws_autoscaling_group" "prod_v2_frontend" {
   name                = "${local.name}-frontend-asg"
-  vpc_zone_identifier = local.private_backend_subnet_ids
+  vpc_zone_identifier = local.public_subnet_ids
   target_group_arns   = [aws_lb_target_group.prod_v2_frontend.arn]
   health_check_type   = "ELB"
   health_check_grace_period = 120

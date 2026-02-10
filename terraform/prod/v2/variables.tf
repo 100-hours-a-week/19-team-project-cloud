@@ -324,6 +324,12 @@ variable "db_password" {
   sensitive   = true
 }
 
+variable "rds_proxy_enabled" {
+  description = "RDS Proxy 사용 여부 (Connection pooling)"
+  type        = bool
+  default     = true
+}
+
 # -----------------------------------------------------
 # ElastiCache
 # -----------------------------------------------------
