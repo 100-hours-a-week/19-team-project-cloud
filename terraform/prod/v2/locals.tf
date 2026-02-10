@@ -7,6 +7,12 @@
 locals {
   name = var.name_prefix
 
+  # VPC·서브넷: 기존 사용 시 data/변수, 신규 시 생성 리소스
+  vpc_id                    = var.use_existing_vpc ? data.aws_vpc.existing[0].id : aws_vpc.prod_v2[0].id
+  public_subnet_ids         = var.use_existing_vpc ? var.existing_public_subnet_ids : aws_subnet.prod_v2_public[*].id
+  private_backend_subnet_ids = var.use_existing_vpc ? var.existing_private_backend_subnet_ids : aws_subnet.prod_v2_private_backend[*].id
+  private_data_subnet_ids   = var.use_existing_vpc ? var.existing_private_data_subnet_ids : aws_subnet.prod_v2_private_data[*].id
+
   tier_backend      = "backend"
   tier_frontend     = "frontend"
   tier_kafka        = "kafka"

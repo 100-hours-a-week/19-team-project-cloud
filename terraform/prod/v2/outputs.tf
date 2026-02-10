@@ -4,22 +4,22 @@
 
 output "vpc_id" {
   description = "VPC ID"
-  value       = aws_vpc.prod_v2.id
+  value       = local.vpc_id
 }
 
 output "public_subnet_ids" {
   description = "Public subnet IDs"
-  value       = aws_subnet.prod_v2_public[*].id
+  value       = local.public_subnet_ids
 }
 
 output "private_backend_subnet_ids" {
   description = "Private Backend subnet IDs"
-  value       = aws_subnet.prod_v2_private_backend[*].id
+  value       = local.private_backend_subnet_ids
 }
 
 output "private_data_subnet_ids" {
   description = "Private Data subnet IDs"
-  value       = aws_subnet.prod_v2_private_data[*].id
+  value       = local.private_data_subnet_ids
 }
 
 output "external_alb_dns_name" {

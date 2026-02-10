@@ -76,7 +76,7 @@ systemctl enable docker && systemctl start docker
 
 resource "aws_autoscaling_group" "prod_v2_kafka" {
   name                = "${local.name}-kafka-asg"
-  vpc_zone_identifier = aws_subnet.prod_v2_private_backend[*].id
+  vpc_zone_identifier = local.private_backend_subnet_ids
   health_check_type   = "EC2"
   health_check_grace_period = 180
 

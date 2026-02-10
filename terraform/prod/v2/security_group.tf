@@ -9,7 +9,7 @@
 resource "aws_security_group" "prod_v2_alb_external" {
   name        = "${local.name}-alb-external-sg"
   description = "Security group for External ALB (refit prod v2)"
-  vpc_id      = aws_vpc.prod_v2.id
+  vpc_id      = local.vpc_id
 
   tags = {
     Name = "${local.name}-alb-external-sg"
@@ -60,7 +60,7 @@ resource "aws_vpc_security_group_egress_rule" "prod_v2_alb_external_backend" {
 resource "aws_security_group" "prod_v2_frontend" {
   name        = "${local.name}-frontend-sg"
   description = "Security group for Frontend ASG Next.js (refit prod v2)"
-  vpc_id      = aws_vpc.prod_v2.id
+  vpc_id      = local.vpc_id
 
   tags = {
     Name = "${local.name}-frontend-sg"
@@ -91,7 +91,7 @@ resource "aws_vpc_security_group_egress_rule" "prod_v2_frontend_all" {
 resource "aws_security_group" "prod_v2_alb_internal" {
   name        = "${local.name}-alb-internal-sg"
   description = "Security group for Internal ALB (refit prod v2)"
-  vpc_id      = aws_vpc.prod_v2.id
+  vpc_id      = local.vpc_id
 
   tags = {
     Name = "${local.name}-alb-internal-sg"
@@ -133,7 +133,7 @@ resource "aws_vpc_security_group_ingress_rule" "prod_v2_alb_internal_frontend" {
 resource "aws_security_group" "prod_v2_backend" {
   name        = "${local.name}-backend-sg"
   description = "Security group for Backend ASG (refit prod v2)"
-  vpc_id      = aws_vpc.prod_v2.id
+  vpc_id      = local.vpc_id
 
   tags = {
     Name = "${local.name}-backend-sg"
@@ -173,7 +173,7 @@ resource "aws_vpc_security_group_egress_rule" "prod_v2_backend_all" {
 resource "aws_security_group" "prod_v2_rds" {
   name        = "${local.name}-rds-sg"
   description = "Security group for RDS (refit prod v2)"
-  vpc_id      = aws_vpc.prod_v2.id
+  vpc_id      = local.vpc_id
 
   tags = {
     Name = "${local.name}-rds-sg"
@@ -197,7 +197,7 @@ resource "aws_vpc_security_group_ingress_rule" "prod_v2_rds_5432" {
 resource "aws_security_group" "prod_v2_elasticache" {
   name        = "${local.name}-elasticache-sg"
   description = "Security group for ElastiCache Valkey (refit prod v2)"
-  vpc_id      = aws_vpc.prod_v2.id
+  vpc_id      = local.vpc_id
 
   tags = {
     Name = "${local.name}-elasticache-sg"
@@ -221,7 +221,7 @@ resource "aws_vpc_security_group_ingress_rule" "prod_v2_elasticache_6379" {
 resource "aws_security_group" "prod_v2_kafka" {
   name        = "${local.name}-kafka-sg"
   description = "Security group for Kafka (Docker on EC2, refit prod v2)"
-  vpc_id      = aws_vpc.prod_v2.id
+  vpc_id      = local.vpc_id
 
   tags = {
     Name = "${local.name}-kafka-sg"

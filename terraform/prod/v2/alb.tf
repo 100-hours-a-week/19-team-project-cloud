@@ -11,7 +11,7 @@ resource "aws_lb_target_group" "prod_v2_backend" {
   name     = "${local.name}-backend-tg"
   port     = 8080
   protocol = "HTTP"
-  vpc_id   = aws_vpc.prod_v2.id
+  vpc_id   = local.vpc_id
 
   health_check {
     enabled             = true
@@ -35,7 +35,7 @@ resource "aws_lb_target_group" "prod_v2_frontend" {
   name     = "${local.name}-frontend-tg"
   port     = 3000
   protocol = "HTTP"
-  vpc_id   = aws_vpc.prod_v2.id
+  vpc_id   = local.vpc_id
 
   health_check {
     enabled             = true
@@ -64,7 +64,7 @@ resource "aws_lb" "prod_v2_external" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.prod_v2_alb_external.id]
-  subnets            = aws_subnet.prod_v2_public[*].id
+  subnets            = local.public_subnet_ids
 
   tags = {
     Name = "${local.name}-external-alb"
@@ -305,7 +305,7 @@ resource "aws_lb" "prod_v2_internal" {
   internal           = true
   load_balancer_type = "application"
   security_groups    = [aws_security_group.prod_v2_alb_internal.id]
-  subnets            = aws_subnet.prod_v2_private_backend[*].id
+  subnets            = local.private_backend_subnet_ids
 
   tags = {
     Name = "${local.name}-internal-alb"

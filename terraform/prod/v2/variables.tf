@@ -33,35 +33,80 @@ variable "name_prefix" {
 }
 
 # -----------------------------------------------------
-# VPC (10.2.0.0/16, no overlap with dev)
+# VPC (신규 생성 또는 기존 VPC 사용)
 # -----------------------------------------------------
 
+variable "use_existing_vpc" {
+  description = "true면 existing_vpc_name·existing_*_subnet_ids 사용, false면 새 VPC·서브넷 생성"
+  type        = bool
+  default     = true
+}
+
+variable "existing_vpc_name" {
+  description = "기존 VPC 이름 (use_existing_vpc=true일 때). Name 태그로 조회"
+  type        = string
+  default     = "refit-prod-vpc"
+}
+
+variable "existing_public_subnet_ids" {
+  description = "기존 public 서브넷 ID 목록 (ALB 등). use_existing_vpc=true일 때 필수"
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = !var.use_existing_vpc || length(var.existing_public_subnet_ids) > 0
+    error_message = "use_existing_vpc=true일 때 existing_public_subnet_ids를 1개 이상 지정하세요."
+  }
+}
+
+variable "existing_private_backend_subnet_ids" {
+  description = "기존 private backend 서브넷 ID 목록 (ASG). use_existing_vpc=true일 때 필수"
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = !var.use_existing_vpc || length(var.existing_private_backend_subnet_ids) > 0
+    error_message = "use_existing_vpc=true일 때 existing_private_backend_subnet_ids를 1개 이상 지정하세요."
+  }
+}
+
+variable "existing_private_data_subnet_ids" {
+  description = "기존 private data 서브넷 ID 목록 (RDS, ElastiCache). use_existing_vpc=true일 때 필수"
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = !var.use_existing_vpc || length(var.existing_private_data_subnet_ids) > 0
+    error_message = "use_existing_vpc=true일 때 existing_private_data_subnet_ids를 1개 이상 지정하세요."
+  }
+}
+
 variable "vpc_cidr" {
-  description = "CIDR block for VPC"
+  description = "CIDR block for VPC (use_existing_vpc=false일 때만 사용)"
   type        = string
   default     = "10.2.0.0/16"
 }
 
 variable "availability_zones" {
-  description = "Availability zones for subnets"
+  description = "Availability zones for subnets (use_existing_vpc=false일 때만 사용)"
   type        = list(string)
   default     = ["ap-northeast-2a", "ap-northeast-2c"]
 }
 
 variable "public_subnet_cidrs" {
-  description = "CIDR blocks for public subnets (order: AZ1, AZ2)"
+  description = "CIDR blocks for public subnets (use_existing_vpc=false일 때만 사용)"
   type        = list(string)
   default     = ["10.2.1.0/24", "10.2.2.0/24"]
 }
 
 variable "private_backend_subnet_cidrs" {
-  description = "CIDR blocks for private backend subnets (ASG)"
+  description = "CIDR blocks for private backend subnets (use_existing_vpc=false일 때만 사용)"
   type        = list(string)
   default     = ["10.2.10.0/24", "10.2.11.0/24"]
 }
 
 variable "private_data_subnet_cidrs" {
-  description = "CIDR blocks for private data subnets (RDS, ElastiCache)"
+  description = "CIDR blocks for private data subnets (use_existing_vpc=false일 때만 사용)"
   type        = list(string)
   default     = ["10.2.20.0/24", "10.2.21.0/24"]
 }

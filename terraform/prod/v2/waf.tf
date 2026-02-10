@@ -30,6 +30,11 @@ resource "aws_wafv2_web_acl" "prod_v2" {
           name        = "AWSManagedRulesCommonRuleSet"
         }
       }
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "${replace(local.name, "-", "_")}_CommonRuleSet"
+        sampled_requests_enabled   = true
+      }
     }
   }
 
@@ -48,6 +53,11 @@ resource "aws_wafv2_web_acl" "prod_v2" {
           name        = "AWSManagedRulesKnownBadInputsRuleSet"
         }
       }
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "${replace(local.name, "-", "_")}_KnownBadInputs"
+        sampled_requests_enabled   = true
+      }
     }
   }
 
@@ -65,6 +75,11 @@ resource "aws_wafv2_web_acl" "prod_v2" {
           limit              = var.waf_rate_limit
           aggregate_key_type = "IP"
         }
+      }
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "${replace(local.name, "-", "_")}_RateLimit"
+        sampled_requests_enabled   = true
       }
     }
   }

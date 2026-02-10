@@ -77,7 +77,7 @@ systemctl enable docker && systemctl start docker
 
 resource "aws_autoscaling_group" "prod_v2_backend" {
   name                = "${local.name}-backend-asg"
-  vpc_zone_identifier = aws_subnet.prod_v2_private_backend[*].id
+  vpc_zone_identifier = local.private_backend_subnet_ids
   target_group_arns   = [aws_lb_target_group.prod_v2_backend.arn]
   health_check_type   = "ELB"
   health_check_grace_period = 120
@@ -167,7 +167,7 @@ systemctl enable docker && systemctl start docker
 
 resource "aws_autoscaling_group" "prod_v2_frontend" {
   name                = "${local.name}-frontend-asg"
-  vpc_zone_identifier = aws_subnet.prod_v2_private_backend[*].id
+  vpc_zone_identifier = local.private_backend_subnet_ids
   target_group_arns   = [aws_lb_target_group.prod_v2_frontend.arn]
   health_check_type   = "ELB"
   health_check_grace_period = 120

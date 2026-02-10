@@ -5,7 +5,7 @@
 resource "aws_elasticache_subnet_group" "prod_v2" {
   name        = "${local.name}-elasticache-subnet-group"
   description = "Subnet group for ElastiCache (refit prod v2)"
-  subnet_ids  = aws_subnet.prod_v2_private_data[*].id
+  subnet_ids  = local.private_data_subnet_ids
 }
 
 resource "aws_elasticache_replication_group" "prod_v2" {

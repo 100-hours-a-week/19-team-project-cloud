@@ -19,7 +19,7 @@ resource "aws_db_subnet_group" "prod_v2" {
   count       = var.use_existing_rds ? 0 : 1
   name        = "${local.name}-db-subnet-group"
   description = "DB subnet group for RDS (refit prod v2)"
-  subnet_ids  = aws_subnet.prod_v2_private_data[*].id
+  subnet_ids  = local.private_data_subnet_ids
 
   tags = {
     Name = "${local.name}-db-subnet-group"
