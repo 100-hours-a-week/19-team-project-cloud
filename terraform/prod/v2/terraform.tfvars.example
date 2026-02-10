@@ -1,0 +1,41 @@
+# -----------------------------------------------------------------------------
+# refit-prod-v2 변수 예시 (terraform.tfvars로 복사 후 수정)
+# -----------------------------------------------------------------------------
+
+aws_region  = ""
+aws_profile = ""
+
+# 시크릿: SSM Parameter Store (경로만 지정. 파라미터는 사전 생성)
+ssm_parameter_acm_certificate_arn = ""
+ssm_parameter_db_username        = ""
+ssm_parameter_db_password        = ""
+
+# CloudFront + WAF
+# cloudfront_enabled = true
+# cloudfront_aliases = ["api.example.com"]
+# cloudfront_origin_domain = ""   # 비우면 ALB DNS 사용(HTTP 오리진)
+# ssm_parameter_cloudfront_acm_certificate_arn = ""
+# waf_rate_limit = 2000
+
+# 시크릿: SSM 미사용 시 변수로 직접 지정
+# acm_certificate_arn = "arn:aws:acm:ap-northeast-2:ACCOUNT:certificate/..."
+# db_username = "마스터_사용자명"
+# db_password = "비밀번호"
+
+# 기존 RDS 사용 시
+# use_existing_rds                = true
+# db_instance_identifier          = "인스턴스_식별자"
+# existing_db_subnet_group_name   = "서브넷_그룹_이름"
+# existing_rds_security_group_id  = "sg-xxxxxxxxxxxxxxxxx"
+
+# 선택 변수 (기본값 변경 시)
+# asg_min_size = 1
+# asg_max_size = 2
+# instance_type = "t4g.medium"
+# frontend_asg_min_size = 1
+# frontend_asg_max_size = 2
+# frontend_instance_type = "t4g.small"
+# kafka_asg_min_size = 2
+# kafka_asg_max_size = 4
+# kafka_instance_type = "t4g.small"
+# elasticache_num_cache_clusters = 2
