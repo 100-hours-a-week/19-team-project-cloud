@@ -18,7 +18,7 @@ Re-Fit 프로젝트의 AWS 인프라를 Terraform으로 관리하기 위한 문�
 ### 인프라 구성 원칙
 
 - **Infrastructure as Code**: 모든 인프라를 코드로 관리
-- **환경 분리**: backend-setup, shared, dev 등 용도별로 독립된 Terraform state 관리
+- **환경 분리**: backend-setup, shared, dev, prod/v2 등 용도별로 독립된 Terraform state 관리
 - **원격 백엔드**: S3 + DynamoDB를 사용한 state 관리 및 동시 실행 방지
 - **보안 우선**: 암호화, IMDSv2, 최소 권한 원칙 적용
 
@@ -30,7 +30,8 @@ Terraform 코드는 역할에 따라 세 계층으로 나뉩니다:
 |------|----------|------|-----------|
 | 1. 부트스트랩 | `backend-setup/` | S3/DynamoDB 백엔드 리소스 생성 | **로컬** (순환 의존 방지) |
 | 2. 공유 리소스 | `shared/` | ECR 저장소 등 환경 공통 리소스 | S3 (`shared/terraform.tfstate`) |
-| 3. 환경별 인프라 | `dev/` | VPC, EC2, SG 등 환경 전용 리소스 | S3 (`dev/terraform.tfstate`) |
+| 3. 환경별 인프라 | `dev/` | VPC, EC2, SG 등 개발 환경 리소스 | S3 (`dev/terraform.tfstate`) |
+| 3. 환경별 인프라 | `prod/v2/` | ALB, ASG, RDS, ElastiCache, WAF, CloudFront 등 운영 환경 리소스 | S3 (`prod/v2/terraform.tfstate`) |
 
 ### 주요 컴포넌트
 
@@ -68,19 +69,18 @@ Terraform 코드는 역할에 따라 세 계층으로 나뉩니다:
 ### 리소스 간 관계
 
 ```
-backend-setup/               shared/                    dev/
-┌──────────────┐         ┌──────────────┐         ┌──────────────────┐
-│ S3 Bucket    │◄────────│ backend "s3" │         │ backend "s3"     │
-│ DynamoDB     │◄────────│              │         │                  │
-└──────────────┘         │ ECR repos    │────────►│ IAM Policy       │
-                         │  - ai        │ (pull)  │  (ECR read-only) │
-                         │  - frontend  │         │                  │
-                         │  - backend   │         │ EC2 Instance     │
-                         └──────────────┘         │  + Instance Prof │
-                                                  └──────────────────┘
+backend-setup/               shared/                    dev/                      prod/v2/
+┌──────────────┐         ┌──────────────┐         ┌──────────────────┐         ┌──────────────────┐
+│ S3 Bucket    │◄────────│ backend "s3" │         │ backend "s3"     │         │ backend "s3"     │
+│ DynamoDB     │◄────────│              │         │                  │         │                  │
+└──────────────┘         │ ECR repos    │────────►│ IAM Policy       │         │ (ALB, ASG, RDS,  │
+                         │  - ai        │ (pull)  │  (ECR read-only) │         │  ElastiCache,    │
+                         │  - frontend  │         │  EC2 Instance    │         │  WAF, CloudFront)│
+                         │  - backend   │         │  + Instance Prof │         │                  │
+                         └──────────────┘         └──────────────────┘         └──────────────────┘
 ```
 
-- `backend-setup`이 만든 S3/DynamoDB를 `shared`와 `dev`가 원격 백엔드로 사용
+- `backend-setup`이 만든 S3/DynamoDB를 `shared`, `dev`, `prod/v2`가 원격 백엔드로 사용
 - `shared`가 만든 ECR 저장소에서 `dev`의 EC2가 이미지를 pull (IAM 정책으로 권한 부여)
 
 ## 배포 순서
@@ -88,13 +88,13 @@ backend-setup/               shared/                    dev/
 반드시 아래 순서대로 배포해야 합니다:
 
 ```
-1. backend-setup/  ──►  2. shared/  ──►  3. dev/
-   (S3 + DynamoDB)       (ECR repos)       (VPC + EC2 + IAM)
+1. backend-setup/  ──►  2. shared/  ──►  3. dev/  또는  prod/v2/
+   (S3 + DynamoDB)       (ECR repos)       (VPC + EC2 + IAM)   (ALB + ASG + RDS 등)
 ```
 
 1. **backend-setup**: 다른 모든 Terraform 프로젝트의 state 저장소를 먼저 생성
 2. **shared**: 환경 간 공유 리소스(ECR) 생성
-3. **dev**: 개발 환경 인프라 배포
+3. **dev** 또는 **prod/v2**: 해당 환경 인프라 배포 (둘 다 backend-setup S3 원격 백엔드 사용)
 
 ## 디렉토리 구조
 
@@ -136,8 +136,12 @@ terraform/
 │   ├── outputs.tf                #   출력값 (IP, SSH 명령어 등)
 │   └── README.md                 #   개발 환경 가이드
 │
-└── prod/                          # 운영 환경 (참고용)
-    └── kobe/                     #   운영 서버
+└── prod/                          # [3단계] 운영 환경
+    └── v2/                        #   Prod v2 인프라 (ALB, ASG, RDS, WAF, CloudFront 등)
+        ├── provider.tf           #   Terraform 버전·required_providers + AWS provider (ap-northeast-2, us-east-1 alias)
+        ├── backend.tf            #   S3 원격 백엔드 (key: prod/v2/terraform.tfstate)
+        ├── variables.tf, *.tf    #   리소스 정의
+        └── README.md             #   Prod v2 가이드
 ```
 
 ## 환경별 상세
@@ -164,7 +168,7 @@ Terraform state 파일의 중앙 저장소를 생성하는 부트스트랩 프�
 s3://refit-terraform-state/
 ├── shared/terraform.tfstate    ← shared/ 프로젝트의 state
 ├── dev/terraform.tfstate       ← dev/ 프로젝트의 state
-└── prod/terraform.tfstate      ← (향후) prod/ 프로젝트의 state
+└── prod/v2/terraform.tfstate   ← prod/v2/ 프로젝트의 state
 ```
 
 ### 2. Shared Resources (`shared/`)

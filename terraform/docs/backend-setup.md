@@ -210,33 +210,24 @@ aws dynamodb list-tables --region ap-northeast-2 | grep terraform
 
 ```
 s3://refit-terraform-state/
+├── shared/
+│   └── terraform.tfstate       # 공유 리소스 (ECR 등)
 ├── dev/
 │   └── terraform.tfstate       # 개발 환경
 └── prod/
-    └── terraform.tfstate       # 운영 환경
+    └── v2/
+        └── terraform.tfstate   # 운영 환경 (Prod v2)
 ```
 
-### Dev 환경
+### Shared / Dev / Prod v2
 
-```hcl
-terraform {
-  backend "s3" {
-    key = "dev/terraform.tfstate"
-    # ...
-  }
-}
-```
+각 디렉터리의 `backend.tf`에서 동일한 bucket·region·dynamodb_table을 쓰고, `key`만 다릅니다.
 
-### Prod 환경
-
-```hcl
-terraform {
-  backend "s3" {
-    key = "prod/terraform.tfstate"
-    # ...
-  }
-}
-```
+| 디렉토리 | key |
+|----------|-----|
+| shared | `shared/terraform.tfstate` |
+| dev | `dev/terraform.tfstate` |
+| prod/v2 | `prod/v2/terraform.tfstate` |
 
 ## 비용
 
