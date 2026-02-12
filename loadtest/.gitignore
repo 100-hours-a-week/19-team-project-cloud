@@ -1,0 +1,53 @@
+# ════════════════════════════════════════════════════════════════════
+# Re-Fit 부하테스트 .gitignore
+# ════════════════════════════════════════════════════════════════════
+
+# ─── 민감정보 (절대 커밋 금지!) ───
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# ─── 테스트 데이터 ───
+data/test-users.json          # JWT 토큰 포함
+data/*.json                   # 기타 생성된 JSON
+
+# ─── 테스트 결과 ───
+results/
+*.json
+!package.json
+!package-lock.json
+!.env.example
+
+# ─── Node.js ───
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─── k6 ───
+k6-*
+*.har
+
+# ─── OS ───
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# ─── IDE ───
+.vscode/
+.idea/
+*.iml
+
+# ─── 임시 파일 ───
+tmp/
+temp/
+*.tmp
+*.bak
+
+# ─── 로그 ───
+*.log
+logs/

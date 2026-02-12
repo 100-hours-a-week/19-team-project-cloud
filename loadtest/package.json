@@ -1,0 +1,28 @@
+{
+  "name": "re-fit-load-tests",
+  "version": "1.0.0",
+  "description": "Re-Fit 서비스 부하/스트레스/스파이크 테스트",
+  "author": "Re-Fit Team",
+  "license": "MIT",
+  "scripts": {
+    "pretest": "node generate-tokens.js",
+    "generate-tokens": "node generate-tokens.js",
+    "test:baseline": "k6 run scripts/1-baseline.js",
+    "test:load": "k6 run scripts/2-load-test.js",
+    "test:stress": "k6 run scripts/3-stress-test.js",
+    "test:spike": "k6 run scripts/4-spike-test.js",
+    "test:all": "bash run-all-tests.sh",
+    "cleanup": "k6 run scripts/9-cleanup.js",
+    "test:baseline:grafana": "k6 run --out influxdb=http://localhost:8086/k6db scripts/1-baseline.js",
+    "test:load:grafana": "k6 run --out influxdb=http://localhost:8086/k6db scripts/2-load-test.js",
+    "test:stress:grafana": "k6 run --out influxdb=http://localhost:8086/k6db scripts/3-stress-test.js",
+    "test:spike:grafana": "k6 run --out influxdb=http://localhost:8086/k6db scripts/4-spike-test.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
