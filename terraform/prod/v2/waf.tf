@@ -61,6 +61,98 @@ resource "aws_wafv2_web_acl" "prod_v2" {
     }
   }
 
+  # AWS 관리 규칙: IP 평판 (악성 IP)
+  dynamic "rule" {
+    for_each = var.waf_enable_managed_rules ? [1] : []
+    content {
+      name     = "AWS-AWSManagedRulesAmazonIpReputationList"
+      priority = 3
+      override_action {
+        none {}
+      }
+      statement {
+        managed_rule_group_statement {
+          vendor_name = "AWS"
+          name        = "AWSManagedRulesAmazonIpReputationList"
+        }
+      }
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "${replace(local.name, "-", "_")}_AmazonIpReputation"
+        sampled_requests_enabled   = true
+      }
+    }
+  }
+
+  # AWS 관리 규칙: 익명 IP (TOR, VPN, 호스팅)
+  dynamic "rule" {
+    for_each = var.waf_enable_managed_rules ? [1] : []
+    content {
+      name     = "AWS-AWSManagedRulesAnonymousIpList"
+      priority = 4
+      override_action {
+        none {}
+      }
+      statement {
+        managed_rule_group_statement {
+          vendor_name = "AWS"
+          name        = "AWSManagedRulesAnonymousIpList"
+        }
+      }
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "${replace(local.name, "-", "_")}_AnonymousIp"
+        sampled_requests_enabled   = true
+      }
+    }
+  }
+
+  # AWS 관리 규칙: SQL Injection
+  dynamic "rule" {
+    for_each = var.waf_enable_managed_rules ? [1] : []
+    content {
+      name     = "AWS-AWSManagedRulesSQLiRuleSet"
+      priority = 5
+      override_action {
+        none {}
+      }
+      statement {
+        managed_rule_group_statement {
+          vendor_name = "AWS"
+          name        = "AWSManagedRulesSQLiRuleSet"
+        }
+      }
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "${replace(local.name, "-", "_")}_SQLi"
+        sampled_requests_enabled   = true
+      }
+    }
+  }
+
+  # AWS 관리 규칙: Admin 경로 보호
+  dynamic "rule" {
+    for_each = var.waf_enable_managed_rules ? [1] : []
+    content {
+      name     = "AWS-AWSManagedRulesAdminProtectionRuleSet"
+      priority = 6
+      override_action {
+        none {}
+      }
+      statement {
+        managed_rule_group_statement {
+          vendor_name = "AWS"
+          name        = "AWSManagedRulesAdminProtectionRuleSet"
+        }
+      }
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "${replace(local.name, "-", "_")}_AdminProtection"
+        sampled_requests_enabled   = true
+      }
+    }
+  }
+
   # IP 기반 rate limiting (분당 요청 수 제한)
   dynamic "rule" {
     for_each = var.waf_rate_limit > 0 ? [1] : []

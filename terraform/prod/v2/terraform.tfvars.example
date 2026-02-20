@@ -11,6 +11,7 @@ aws_profile = ""
 # existing_public_subnet_ids         = ["subnet-xxx", "subnet-yyy"]   # public 2개
 # existing_private_backend_subnet_ids = ["subnet-xxx", "subnet-yyy"]  # private backend 2개
 # existing_private_data_subnet_ids   = ["subnet-xxx", "subnet-yyy"]  # private data 2개 (RDS·ElastiCache)
+# existing_bastion_security_group_id = "sg-xxx"                      # refit-ec2-sg (jump host). 지정 시 Frontend/Backend에 SSH 허용
 
 # 시크릿: SSM Parameter Store (경로만 지정. 파라미터는 사전 생성)
 ssm_parameter_acm_certificate_arn = ""

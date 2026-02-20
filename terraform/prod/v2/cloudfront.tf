@@ -9,14 +9,20 @@ locals {
 }
 
 resource "aws_cloudfront_distribution" "prod_v2" {
-  count   = var.cloudfront_enabled ? 1 : 0
-  enabled = true
-  comment = "${local.name} - WAF + ALB origin"
-  aliases = var.cloudfront_aliases
+  count        = var.cloudfront_enabled ? 1 : 0
+  enabled      = true
+  comment      = "${local.name} - WAF + ALB origin"
+  aliases      = var.cloudfront_aliases
+  price_class  = "PriceClass_100" # North America, Europe만 (최저 비용)
 
   origin {
     domain_name = local.cloudfront_origin_domain
     origin_id   = "alb-${local.name}"
+
+    custom_header {
+      name  = "X-Forwarded-Proto"
+      value = "https"
+    }
 
     custom_origin_config {
       http_port              = 80

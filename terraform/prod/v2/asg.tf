@@ -187,7 +187,7 @@ chmod +x install && ./install auto
 
 resource "aws_autoscaling_group" "prod_v2_frontend" {
   name                = "${local.name}-frontend-asg"
-  vpc_zone_identifier = local.public_subnet_ids
+  vpc_zone_identifier = local.private_backend_subnet_ids
   target_group_arns   = [aws_lb_target_group.prod_v2_frontend.arn]
   health_check_type   = "EC2" # 앱 배포 전까지는 EC2 사용 (ELB→3000/ 실패 시 인스턴스 교체 반복)
   health_check_grace_period = 120

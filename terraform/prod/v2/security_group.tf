@@ -77,6 +77,26 @@ resource "aws_vpc_security_group_ingress_rule" "prod_v2_frontend_3000_external_a
   referenced_security_group_id = aws_security_group.prod_v2_alb_external.id
 }
 
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_frontend_ssh_self" {
+  security_group_id            = aws_security_group.prod_v2_frontend.id
+  description                  = "SSH from Frontend (same SG)"
+  ip_protocol                  = "tcp"
+  from_port                    = 22
+  to_port                      = 22
+  referenced_security_group_id = aws_security_group.prod_v2_frontend.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_frontend_ssh_bastion" {
+  count = var.existing_bastion_security_group_id != "" ? 1 : 0
+
+  security_group_id            = aws_security_group.prod_v2_frontend.id
+  description                  = "SSH from Bastion (refit jump host)"
+  ip_protocol                  = "tcp"
+  from_port                    = 22
+  to_port                      = 22
+  referenced_security_group_id = var.existing_bastion_security_group_id
+}
+
 resource "aws_vpc_security_group_egress_rule" "prod_v2_frontend_all" {
   security_group_id = aws_security_group.prod_v2_frontend.id
   description       = "All outbound (Internal ALB, internet for npm etc)"
@@ -157,6 +177,17 @@ resource "aws_vpc_security_group_ingress_rule" "prod_v2_backend_8080_internal_al
   from_port                    = 8080
   to_port                      = 8080
   referenced_security_group_id = aws_security_group.prod_v2_alb_internal.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_backend_ssh_bastion" {
+  count = var.existing_bastion_security_group_id != "" ? 1 : 0
+
+  security_group_id            = aws_security_group.prod_v2_backend.id
+  description                  = "SSH from Bastion (refit jump host)"
+  ip_protocol                  = "tcp"
+  from_port                    = 22
+  to_port                      = 22
+  referenced_security_group_id = var.existing_bastion_security_group_id
 }
 
 resource "aws_vpc_security_group_egress_rule" "prod_v2_backend_all" {
@@ -245,6 +276,24 @@ resource "aws_vpc_security_group_ingress_rule" "prod_v2_kafka_9092_self" {
   from_port                    = 9092
   to_port                      = 9092
   referenced_security_group_id = aws_security_group.prod_v2_kafka.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_kafka_9093_self" {
+  security_group_id            = aws_security_group.prod_v2_kafka.id
+  description                  = "Kafka KRaft controller (node 간 통신)"
+  ip_protocol                  = "tcp"
+  from_port                    = 9093
+  to_port                      = 9093
+  referenced_security_group_id = aws_security_group.prod_v2_kafka.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_kafka_9999_monitoring" {
+  security_group_id = aws_security_group.prod_v2_kafka.id
+  description       = "JMX (모니터링 EC2 → Kafka)"
+  ip_protocol       = "tcp"
+  from_port         = 9999
+  to_port           = 9999
+  cidr_ipv4         = local.vpc_cidr
 }
 
 resource "aws_vpc_security_group_egress_rule" "prod_v2_kafka_all" {

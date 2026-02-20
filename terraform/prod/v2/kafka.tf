@@ -29,8 +29,9 @@ resource "aws_instance" "prod_v2_kafka" {
   instance_type = var.kafka_instance_type
   key_name      = var.key_name
   subnet_id     = count.index < 2 ? local.private_backend_subnet_ids[0] : local.private_backend_subnet_ids[1]
+  private_ip    = var.kafka_broker_private_ips[count.index]
 
-  iam_instance_profile = aws_iam_instance_profile.prod_v2_kafka.name
+  iam_instance_profile   = aws_iam_instance_profile.prod_v2_kafka.name
   vpc_security_group_ids = [aws_security_group.prod_v2_kafka.id]
 
   root_block_device {

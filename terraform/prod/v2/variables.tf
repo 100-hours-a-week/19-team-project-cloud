@@ -99,6 +99,12 @@ variable "existing_private_data_subnet_ids" {
   }
 }
 
+variable "existing_bastion_security_group_id" {
+  description = "Jump host(배스천) 보안 그룹 ID. 지정 시 Frontend/Backend SG에 SSH(22) inbound 규칙 추가. 예: refit-v1의 refit-ec2-sg"
+  type        = string
+  default     = ""
+}
+
 variable "vpc_cidr" {
   description = "CIDR block for VPC (use_existing_vpc=false일 때만 사용)"
   type        = string
@@ -164,7 +170,7 @@ variable "ssm_parameter_cloudfront_acm_certificate_arn" {
 }
 
 variable "waf_enable_managed_rules" {
-  description = "WAF AWS 관리 규칙(CommonRuleSet, KnownBadInputs) 사용 여부"
+  description = "WAF AWS 관리 규칙(CommonRuleSet, KnownBadInputs, IpReputation, AnonymousIp, SQLi, AdminProtection) 사용 여부"
   type        = bool
   default     = true
 }
@@ -172,7 +178,7 @@ variable "waf_enable_managed_rules" {
 variable "waf_rate_limit" {
   description = "WAF IP당 분당 요청 수 제한. 0이면 비활성화."
   type        = number
-  default     = 2000
+  default     = 5000
 }
 
 # -----------------------------------------------------
@@ -378,5 +384,11 @@ variable "kafka_root_volume_size" {
   description = "Root EBS volume size in GB for Kafka"
   type        = number
   default     = 30
+}
+
+variable "kafka_broker_private_ips" {
+  description = "Kafka broker 고정 Private IP (KRaft CONTROLLER_QUORUM_VOTERS·ADVERTISED_LISTENERS용). private-subnet-a-01 2개, private-subnet-c-01 1개 순서"
+  type        = list(string)
+  default     = ["10.0.2.20", "10.0.2.21", "10.0.5.20"]
 }
 
