@@ -4,25 +4,26 @@ import { Trend } from 'k6/metrics';
 import { vu } from 'k6/execution';
 
 // ─── 테스트 데이터 로드 ───
-const users = JSON.parse(open('./data/test-users.json'));
+const users = JSON.parse(open(import.meta.resolve('./data/test-users.json')));
 
 // ─── 테스트용 더미 PDF ───
-const resumePDF      = open('./data/sample_resume_3mb.pdf', 'b');
+const resumePDF      = open(import.meta.resolve('./data/sample_resume_3mb.pdf'), 'b');
 const resumePDFSize  = resumePDF.byteLength || resumePDF.length || 3145728;
 
 // ─── 환경 변수 ───
-const BACKEND_URL = __ENV.BACKEND_URL || 'https://re-fit.kr';
+const BACKEND_URL = __ENV.BACKEND_URL || 'https://dev.re-fit.kr';
 
 
 // ─── custom 메트릭 ───
 const llmReqDuration = new Trend('llm_req_duration');
 const apiReqDuration = new Trend('api_req_duration');
 
-// ─── DB 실제 값 (조회완료) ───
+// ─── 현직자 검색 파라미터 (API: /api/v1/experts) ───
+// job_id=jobs.id, skill_id=skills.id, career_level=career_levels.id
 const SEARCH_PARAMS = {
-  groupA: { job_id: 1 },                    // 백엔드 개발자
-  groupB: { skill_id: 1 },                  // Java
-  groupC: { keyword: '개발' },
+  groupA: { job_id: 1 },        // 백엔드 개발자
+  groupB: { skill_id: 1 },      // Java
+  groupC: { skill_id: 1 },           // Java (keyword=개발은 400 발생)
 };
 
 // ─── 시나리오 & KPI ───
@@ -372,7 +373,7 @@ export function lightUser() {
     sleep(1);
     group('회원정보 수정', () => {
       const res = http.patch(`${BACKEND_URL}/api/v1/users/me`, JSON.stringify({
-        nickname: `nick${Date.now()}_${vuIndex}`,  // 타임스탬프로 중복 방지
+        nickname: `n${vuIndex}t${String(Date.now()).slice(-4)}`,  // users.nickname max 10자
       }), {
         headers: authHeaders(token),
         tags: { name: 'mypage_update' },
