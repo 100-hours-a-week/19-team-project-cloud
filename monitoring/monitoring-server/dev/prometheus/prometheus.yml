@@ -40,12 +40,3 @@ scrape_configs:
       - targets: ['10.1.1.193:9187']
         labels:
           instance: 'refit-dev-db'
-
-  # AI 서비스 (FastAPI Prometheus)
-  - job_name: 'ai-service'
-    metrics_path: '/api/ai/metrics'
-    static_configs:
-      - targets: ['10.1.1.193:8000']
-        labels:
-          application: 'refit-ai'
-          instance: 'refit-dev-ai'
