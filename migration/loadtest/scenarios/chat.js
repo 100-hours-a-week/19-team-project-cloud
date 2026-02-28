@@ -29,9 +29,9 @@ export function chatRestScenario() {
   sleep(1);
 
   // 2. 첫 번째 채팅방의 메시지 조회
-  const chatRooms = listData?.content || listData?.data || [];
+  const chatRooms = listData?.data?.chats || [];
   if (chatRooms.length > 0) {
-    const chatId = chatRooms[0].chat_id || chatRooms[0].id;
+    const chatId = chatRooms[0].chat_id;
     const msgRes = http.get(
       `${BASE_URL}/api/v1/chats/${chatId}/messages?size=20`,
       params,
@@ -52,10 +52,10 @@ export function chatWebSocketScenario() {
   // 먼저 REST로 채팅방 목록 조회해서 채팅방 ID 획득
   const listRes = http.get(`${BASE_URL}/api/v1/chats`, params);
   const listData = checkJsonResponse(listRes, 'GET /chats (for WS)');
-  const chatRooms = listData?.content || listData?.data || [];
+  const chatRooms = listData?.data?.chats || [];
   if (chatRooms.length === 0) return;
 
-  const chatId = chatRooms[0].chat_id || chatRooms[0].id;
+  const chatId = chatRooms[0].chat_id;
 
   // WebSocket STOMP 연결
   const wsUrl = `${WS_BASE_URL}?token=${token.access_token}`;

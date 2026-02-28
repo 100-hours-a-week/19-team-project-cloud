@@ -23,16 +23,16 @@ export function expertScenario() {
   sleep(1);
 
   // 2. 현직자 상세 조회 (목록에서 첫 번째 ID 사용)
-  const experts = listData?.content || listData?.data || [];
+  const experts = listData?.data?.experts || [];
   if (experts.length > 0) {
-    const expertId = experts[0].user_id || experts[0].id;
+    const expertId = experts[0].user_id;
     const detailRes = http.get(`${BASE_URL}/api/v1/experts/${expertId}`, params);
     checkResponse(detailRes, 'GET /experts/{id}');
     sleep(1);
   }
 
   // 3. 커서 기반 페이지네이션
-  const cursor = listData?.next_cursor || listData?.cursor;
+  const cursor = listData?.data?.next_cursor;
   if (cursor) {
     const pageRes = http.get(
       `${BASE_URL}/api/v1/experts?cursor=${cursor}&size=10`,

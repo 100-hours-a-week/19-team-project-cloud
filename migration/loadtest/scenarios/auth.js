@@ -23,3 +23,31 @@ export function authMeOnly() {
   checkResponse(res, 'GET /users/me');
   sleep(1);
 }
+
+/**
+ * 내 정보 조회 + 수정 시나리오
+ * 1. GET /api/v1/users/me — 내 정보 조회
+ * 2. PATCH /api/v1/users/me — 내 정보 수정
+ */
+export function authMeUpdateScenario() {
+  const token = getTokenForVU();
+  const params = authHeaders(token.access_token);
+
+  // 1. 내 정보 조회
+  const meRes = http.get(`${BASE_URL}/api/v1/users/me`, params);
+  const meData = checkJsonResponse(meRes, 'GET /users/me');
+  sleep(1);
+
+  // 2. 내 정보 수정 (nickname만 변경)
+  if (meData) {
+    const updateRes = http.patch(
+      `${BASE_URL}/api/v1/users/me`,
+      JSON.stringify({
+        nickname: `k6${token.user_id}`,
+      }),
+      params,
+    );
+    checkResponse(updateRes, 'PATCH /users/me');
+    sleep(1);
+  }
+}

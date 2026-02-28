@@ -3,7 +3,7 @@ set -euo pipefail
 
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-INSTANCE_ID="i-00fc6ef034cf67de7"
+INSTANCE_ID="<YOUR_INSTANCE_ID>"
 REGION="ap-northeast-2"
 NAMESPACE="ReFit/Infrastructure"
 

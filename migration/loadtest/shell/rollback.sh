@@ -16,8 +16,8 @@ V1_SET_ID="v1-weighted"
 V2_SET_ID="v2-weighted"
 
 V1_VALUE="${V1_RECORD_VALUE:?Set V1_RECORD_VALUE env var}"
-V2_ALB_DNS="${V2_ALB_DNS:-refit-prod-v2-external-alb-1785900646.ap-northeast-2.elb.amazonaws.com}"
-V2_ALB_HOSTED_ZONE="${V2_ALB_HOSTED_ZONE:-Z3BJ6K6RIION7M}"
+V2_ALB_DNS="${V2_ALB_DNS:-<YOUR_ALB_DNS_NAME>}"
+V2_ALB_HOSTED_ZONE="${V2_ALB_HOSTED_ZONE:-<YOUR_ALB_HOSTED_ZONE_ID>}"
 
 echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 echo "  긴급 롤백: v1=100%, v2=0%"

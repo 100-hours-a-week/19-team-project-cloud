@@ -47,6 +47,7 @@ export function checkResponse(res, name, expectedStatus = 200) {
   });
 
   if (!passed) {
+    console.warn(`FAIL ${name} status=${res.status} url=${res.url} body=${res.body?.substring(0, 200)}`);
     errorCounter.add(1, { endpoint: name, status: res.status });
   }
 

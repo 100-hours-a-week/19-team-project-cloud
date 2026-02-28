@@ -12,16 +12,16 @@ V1_WEIGHT=${1:?"Usage: $0 <v1_weight> <v2_weight>"}
 V2_WEIGHT=${2:?"Usage: $0 <v1_weight> <v2_weight>"}
 
 # === 설정 ===
-HOSTED_ZONE_ID="${HOSTED_ZONE_ID:?Set HOSTED_ZONE_ID env var}"
+HOSTED_ZONE_ID="<YOUR_HOSTED_ZONE_ID>"
 RECORD_NAME="api.re-fit.kr"
 V1_SET_ID="v1-weighted"
 V2_SET_ID="v2-weighted"
 
 # v1 레코드: EC2 IP (A 레코드)
-V1_VALUE="${V1_RECORD_VALUE:?Set V1_RECORD_VALUE env var}"
+V1_VALUE="<YOUR_V1_EC2_IP>"
 # v2 레코드: ALB DNS (ALIAS 또는 CNAME)
-V2_ALB_DNS="${V2_ALB_DNS:-refit-prod-v2-external-alb-1785900646.ap-northeast-2.elb.amazonaws.com}"
-V2_ALB_HOSTED_ZONE="${V2_ALB_HOSTED_ZONE:-Z3BJ6K6RIION7M}"
+V2_ALB_DNS="${V2_ALB_DNS:-<YOUR_ALB_DNS_NAME>}"
+V2_ALB_HOSTED_ZONE="${V2_ALB_HOSTED_ZONE:-<YOUR_ALB_HOSTED_ZONE_ID>}"
 
 echo "================================================"
 echo "  Route 53 가중치 전환"

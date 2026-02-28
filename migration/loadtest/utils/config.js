@@ -21,9 +21,9 @@ const ENVIRONMENTS = {
     ws: "wss://api.re-fit.kr/ws",
   },
   alb: {
-    api: "https://refit-prod-v2-external-alb-1785900646.ap-northeast-2.elb.amazonaws.com",
+    api: "https://<YOUR_ALB_DNS_NAME>",
     fe: "https://re-fit.kr",
-    ws: "wss://api.re-fit.kr/ws",
+    ws: "wss://<YOUR_ALB_DNS_NAME>/ws",
   },
 
   // === Dev (리허설용) ===
