@@ -15,20 +15,20 @@ import { chatRestScenario } from '../scenarios/chat.js';
 
 export const options = {
   stages: [
-    // 계단식 증가 — 각 단계에서 충분히 유지하여 안정적 측정
-    { duration: '2m', target: 10 },    // Step 1: 워밍업
-    { duration: '3m', target: 10 },    // 유지
-    { duration: '1m', target: 30 },    // Step 2: 중간 부하
-    { duration: '3m', target: 30 },    // 유지
-    { duration: '1m', target: 60 },    // Step 3: 고부하
-    { duration: '3m', target: 60 },    // 유지
-    { duration: '1m', target: 100 },   // Step 4: 매우 높은 부하
-    { duration: '3m', target: 100 },   // 유지
-    { duration: '1m', target: 150 },   // Step 5: 극한 부하
-    { duration: '3m', target: 150 },   // 유지
-    { duration: '1m', target: 200 },   // Step 6: Breaking Point 탐색
-    { duration: '3m', target: 200 },   // 유지
-    { duration: '2m', target: 0 },     // Ramp-down
+    // 계단식 증가 — 공격적으로 부하를 올려 Breaking Point 탐색 (총 ~20분)
+    { duration: '1m', target: 100 },    // Step 1: 워밍업
+    { duration: '2m', target: 100 },    // 유지
+    { duration: '30s', target: 300 },   // Step 2: 중간 부하
+    { duration: '2m', target: 300 },    // 유지
+    { duration: '30s', target: 600 },   // Step 3: 고부하
+    { duration: '2m', target: 600 },    // 유지
+    { duration: '30s', target: 1000 },  // Step 4: 극한 부하
+    { duration: '2m', target: 1000 },   // 유지
+    { duration: '30s', target: 1500 },  // Step 5: Breaking Point 탐색
+    { duration: '2m', target: 1500 },   // 유지
+    { duration: '30s', target: 2000 },  // Step 6: 최대 부하
+    { duration: '2m', target: 2000 },   // 유지
+    { duration: '1m', target: 0 },      // Ramp-down
   ],
   thresholds: SPIKE_THRESHOLDS,
 };

@@ -51,26 +51,52 @@ v2 아키텍처 전환을 통해 다음 세 가지 핵심 효과 달성을 목�
 
 면접관/리뷰어에게 v1과 v2의 성능 차이를 "그래프 형태의 극적인 대비(극명한 Before/After)"를 통해 직관적으로 증명하는 전략입니다. v1과 v2 대시보드는 동일한 화면 분할(패널) 구성을 갖추고 테스트 결과를 나란히 보여줍니다.
 
-### 4.1. 상단: 전체 시스템 Health (안정성 한 눈에 비교)
+### 4.0. 대시보드 구현 파일
 
-| 패널 구성 | v1 대시보드 (Before) 예상 뷰 | v2 대시보드 (After) 예상 뷰 | 입증 목표 |
+*   **v1 대시보드**: `monitoring/monitoring-server/dev/grafana/provisioning/dashboards/architecture-comparison.json`
+    *   Grafana UID: `arch-comparison-v1`
+    *   접속: `grafana.dev.re-fit.kr`
+*   **v2 대시보드**: `monitoring/monitoring-server/prod/grafana/provisioning/dashboards/architecture-comparison.json`
+    *   Grafana UID: `arch-comparison-v2`
+    *   접속: `monitoring-v2.re-fit.kr`
+
+### 4.1. Row 1: System Health Overview (안정성 한눈에 비교)
+
+| 패널 구성 | v1 메트릭 | v2 메트릭 | 입증 목표 |
 | :--- | :--- | :--- | :--- |
-| **현재 인입 트래픽(RPS)** | (동일한 수치) 300 RPS 수준 | (동일한 수치) 300 RPS 수준 | 동일한 부하 조건 증명 |
-| **가동 중인 인스턴스 수** | `1` (단일 서버) | `2` 이상 (트래픽에 따른 스케일 아웃 확인) | 아키텍처 스케일링 상태 시각화 |
-| **5xx Server Error Rate** | **[빨간색 게이지]** 트래픽 쇄도로 인한 에러 증가(예: 15% 이상) | **[초록색/0%]** 모든 요청 정상 처리 | 가장 직관적인 장애 방어 입증 |
+| **Current RPS** (Stat) | `rate(http_server_requests_seconds_count[1m])` | `rate(refit_http_server_requests_milliseconds_count[1m])` | 동일한 부하 조건 증명 |
+| **Active Instances** (Stat) | `count(up{job="spring-boot"})` → 항상 `1` | `count(refit_up{exported_job="refit-backend"})` → `2`+ | 아키텍처 스케일링 시각화 |
+| **5xx Error Rate** (Gauge) | 에러율 15%+ 예상 (빨간 게이지) | 에러율 0% 목표 (초록 게이지) | 장애 방어 직관적 입증 |
 
-### 4.2. 중단: 사용자 경험(UX) 관점 (응답 지연 비교)
+### 4.2. Row 2: Response Latency (사용자 경험 비교)
 
-| 패널 구성 | v1 대시보드 (Before) 예상 뷰 | v2 대시보드 (After) 예상 뷰 | 입증 목표 |
+| 패널 구성 | v1 예상 뷰 | v2 예상 뷰 | 입증 목표 |
 | :--- | :--- | :--- | :--- |
-| **p95 응답 지연 시간 (Time series)** | 스파이크 발생 시점부터 **산맥처럼 거대하게 솟아오른 붉은 선그래프** (예: 5,000ms 병목) | 거센 트래픽에도 큰 흔들림 없이 **평행하게 유지되는 잔물결 형태의 그래프** (예: p95 500ms 방어) | 계절성 트래픽에도 쾌적한 UX(응답)를 보장함의 증빙 |
+| **p50/p95/p99 응답 시간** (Time series) | 스파이크 시 p95 5000ms+ 병목 (빨간 산맥) | p95 500ms 이하 안정 유지 (잔물결) | 쾌적한 UX 보장 |
+| **API별 p95 응답 시간** (Time series) | 전 구간 동시 병목 | 엔드포인트별 균등한 낮은 지연 | 시나리오별 성능 분석 |
 
-### 4.3. 하단: 시스템 자원 관점 (병목 현상 해소 입증)
+> **주의**: v1은 응답 시간이 **초(seconds)** 단위이므로 `* 1000` 변환하여 ms로 표시. v2는 **밀리초(milliseconds)** 단위이므로 변환 불필요.
 
-| 패널 구성 | v1 대시보드 (Before) 예상 뷰 | v2 대시보드 (After) 예상 뷰 | 입증 목표 |
+### 4.3. Row 3: System Resources (병목 해소 입증)
+
+| 패널 구성 | v1 메트릭 | v2 메트릭 | 입증 목표 |
 | :--- | :--- | :--- | :--- |
-| **노드별 트래픽 분배 현황 (Stacked Bar)** | 단일 색상(1대)의 촘촘한 막대 기둥 | 2개 이상의 노드 색상이 **정확히 반반(50:50) 포개져 쌓인 예쁜 스택 막대** | 로드밸런서가 무용지물이 아님(실질적인 분산 제어)을 증명 |
-| **인스턴스별 CPU/Memory 사용률 (Line)** | 천장(100%)을 치고 일직선으로 그려진 CPU 선 | 여러 대의 선이 **위험 구간 아래(예: 60%)에서 서로 교차하며 낮게 유지**됨 | 단일 서버 하드웨어 자원 고갈 현상(Resource Exhaustion) 해결 |
+| **Host CPU** (Line) | `node_cpu_seconds_total` + `system_cpu_usage` — 천장(100%) | `refit_system_cpu_usage` — 60% 미만 유지 | CPU 고갈 해결 |
+| **Host Memory** (Line) | `node_memory_MemAvailable_bytes` — 고갈 위험 | `refit_jvm_memory_used_bytes` — 안정적 | 메모리 안정화 |
+
+### 4.4. Row 4: DB Connection Pool — HikariCP (+RDS Proxy 효과)
+
+| 패널 구성 | v1 (Direct DB) | v2 (RDS Proxy) | 입증 목표 |
+| :--- | :--- | :--- | :--- |
+| **Connection Pool** (Line) | Active가 Max에 도달 → Pending 급증 | Active 여유 유지, Pending 0 | 커넥션 고갈 방지 |
+| **Acquire/Usage Time** (Line) | Acquire p95 1000ms+ (타임아웃 발생) | Acquire p95 10ms 이하 안정 | RDS Proxy 효과 입증 |
+
+### 4.5. Row 5: Throughput & Traffic Distribution
+
+| 패널 구성 | v1 예상 뷰 | v2 예상 뷰 | 입증 목표 |
+| :--- | :--- | :--- | :--- |
+| **Total RPS** (Line) | Total과 Successful 괴리 (5xx로 인한 실패) | Total ≈ Successful (에러 0) | 실질 처리량 비교 |
+| **Traffic Distribution** (Stacked Bar) | 단일 색상 1대 | 50:50 분산 스택 | ALB 분산 증명 |
 
 ---
 

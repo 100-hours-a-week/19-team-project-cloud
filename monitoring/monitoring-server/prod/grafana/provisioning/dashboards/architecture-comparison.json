@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "v1(단일 인스턴스) 아키텍처 부하테스트 성능 대시보드",
+  "description": "v2(다중 인스턴스 + RDS Proxy) 아키텍처 부하테스트 성능 대시보드",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -99,19 +99,19 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(rate(http_server_requests_seconds_count{application=\"refit-backend\"}[1m]))",
+          "expr": "sum(rate(refit_http_server_requests_milliseconds_count{application=\"refit-backend\"}[1m]))",
           "legendFormat": "Total RPS",
           "refId": "A"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(rate(http_server_requests_seconds_count{application=\"refit-backend\", status!~\"5..\"}[1m]))",
+          "expr": "sum(rate(refit_http_server_requests_milliseconds_count{application=\"refit-backend\", status!~\"5..\"}[1m]))",
           "legendFormat": "Successful RPS",
           "refId": "B"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(rate(http_server_requests_seconds_count{application=\"refit-backend\", status=~\"5..\"}[1m]))",
+          "expr": "sum(rate(refit_http_server_requests_milliseconds_count{application=\"refit-backend\", status=~\"5..\"}[1m]))",
           "legendFormat": "5xx RPS",
           "refId": "C"
         }
@@ -186,24 +186,24 @@
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "title": "Response Latency Distribution (p50 / p95 / p99)",
-      "description": "v1: p95 will spike to 5000ms+ under load",
+      "description": "v2: p95 should stay below 500ms even under load thanks to load balancing",
       "type": "timeseries",
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_seconds_bucket{application=\"refit-backend\"}[1m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.50, sum(rate(refit_http_server_requests_milliseconds_bucket{application=\"refit-backend\"}[1m])) by (le))",
           "legendFormat": "p50 (median)",
           "refId": "A"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"refit-backend\"}[1m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.95, sum(rate(refit_http_server_requests_milliseconds_bucket{application=\"refit-backend\"}[1m])) by (le))",
           "legendFormat": "p95",
           "refId": "B"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{application=\"refit-backend\"}[1m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.99, sum(rate(refit_http_server_requests_milliseconds_bucket{application=\"refit-backend\"}[1m])) by (le))",
           "legendFormat": "p99",
           "refId": "C"
         }
@@ -259,19 +259,19 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"refit-backend\", uri=~\"/api/v1/experts.*\"}[1m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.95, sum(rate(refit_http_server_requests_milliseconds_bucket{application=\"refit-backend\", uri=~\"/api/v1/experts.*\"}[1m])) by (le))",
           "legendFormat": "Expert Search (40%)",
           "refId": "A"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"refit-backend\", uri=~\"/api/v1/users/me\"}[1m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.95, sum(rate(refit_http_server_requests_milliseconds_bucket{application=\"refit-backend\", uri=~\"/api/v1/users/me\"}[1m])) by (le))",
           "legendFormat": "My Info (20%)",
           "refId": "B"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"refit-backend\", uri=~\"/api/v1/chats.*\"}[1m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.95, sum(rate(refit_http_server_requests_milliseconds_bucket{application=\"refit-backend\", uri=~\"/api/v1/chats.*\"}[1m])) by (le))",
           "legendFormat": "Chat (25%)",
           "refId": "C"
         }
@@ -285,7 +285,7 @@
       "type": "row"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -315,12 +315,29 @@
             "mode": "absolute",
             "steps": [
               { "color": "transparent", "value": null },
-              { "color": "red", "value": 80 }
+              { "color": "orange", "value": 60 }
             ]
           },
           "unit": "percent"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "EC2 CPUUtilization (ASG avg)" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } },
+              { "id": "custom.lineWidth", "value": 3 },
+              { "id": "custom.fillOpacity", "value": 20 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "EC2 CPUUtilization (ASG max)" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } },
+              { "id": "custom.lineWidth", "value": 2 },
+              { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [10, 10] } }
+            ]
+          }
+        ]
       },
       "gridPos": { "h": 9, "w": 12, "x": 0, "y": 26 },
       "id": 7,
@@ -333,27 +350,43 @@
         },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
-      "title": "Host CPU Usage",
-      "description": "v1: single instance CPU - will hit ceiling under load",
+      "title": "CPU Utilization (CloudWatch)",
+      "description": "CloudWatch CPUUtilization for ASG instances. Average = overall load, Maximum = hottest instance. Dashed line = ASG scale-out threshold (60%).",
       "type": "timeseries",
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "(1 - avg(rate(node_cpu_seconds_total{mode=\"idle\", instance=\"refit-dev-app\"}[1m]))) * 100",
-          "legendFormat": "Host CPU %",
-          "refId": "A"
+          "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
+          "dimensions": { "AutoScalingGroupName": ["refit-prod-v2-backend-asg"] },
+          "expression": "",
+          "id": "",
+          "label": "EC2 CPUUtilization (ASG avg)",
+          "matchExact": true,
+          "metricEditorMode": 0,
+          "metricName": "CPUUtilization",
+          "metricQueryType": 0,
+          "namespace": "AWS/EC2",
+          "period": "60",
+          "queryMode": "Metrics",
+          "refId": "A",
+          "region": "default",
+          "statistic": "Average"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "system_cpu_usage{application=\"refit-backend\"} * 100",
-          "legendFormat": "System CPU (Actuator)",
-          "refId": "B"
-        },
-        {
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "process_cpu_usage{application=\"refit-backend\"} * 100",
-          "legendFormat": "Process CPU (JVM)",
-          "refId": "C"
+          "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
+          "dimensions": { "AutoScalingGroupName": ["refit-prod-v2-backend-asg"] },
+          "expression": "",
+          "id": "",
+          "label": "EC2 CPUUtilization (ASG max)",
+          "matchExact": true,
+          "metricEditorMode": 0,
+          "metricName": "CPUUtilization",
+          "metricQueryType": 0,
+          "namespace": "AWS/EC2",
+          "period": "60",
+          "queryMode": "Metrics",
+          "refId": "B",
+          "region": "default",
+          "statistic": "Maximum"
         }
       ]
     },
@@ -365,7 +398,7 @@
           "custom": {
             "axisCenteredZero": false,
             "axisColorMode": "text",
-            "axisLabel": "Usage %",
+            "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
@@ -379,20 +412,14 @@
             "showPoints": "never",
             "spanNulls": false,
             "stacking": { "group": "A", "mode": "none" },
-            "thresholdsStyle": { "mode": "line+area" }
+            "thresholdsStyle": { "mode": "off" }
           },
           "mappings": [],
-          "max": 100,
-          "min": 0,
           "thresholds": {
             "mode": "absolute",
-            "steps": [
-              { "color": "transparent", "value": null },
-              { "color": "orange", "value": 70 },
-              { "color": "red", "value": 90 }
-            ]
+            "steps": [{ "color": "green", "value": null }]
           },
-          "unit": "percent"
+          "unit": "bytes"
         },
         "overrides": []
       },
@@ -407,15 +434,21 @@
         },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
-      "title": "Host Memory Usage",
-      "description": "v1: memory exhaustion risk under load",
+      "title": "JVM Memory Usage",
+      "description": "v2: Each instance JVM memory - distributed load keeps memory stable",
       "type": "timeseries",
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "(1 - (node_memory_MemAvailable_bytes{instance=\"refit-dev-app\"} / node_memory_MemTotal_bytes{instance=\"refit-dev-app\"})) * 100",
-          "legendFormat": "Host Memory %",
+          "expr": "refit_jvm_memory_used_bytes{application=\"refit-backend\", area=\"heap\"}",
+          "legendFormat": "Heap Used {{instance}}",
           "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "refit_jvm_memory_max_bytes{application=\"refit-backend\", area=\"heap\"}",
+          "legendFormat": "Heap Max {{instance}}",
+          "refId": "B"
         }
       ]
     },
@@ -423,7 +456,7 @@
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 35 },
       "id": 103,
-      "title": "DB Connection Pool (HikariCP)",
+      "title": "DB Connection Pool (HikariCP + RDS Proxy)",
       "type": "row"
     },
     {
@@ -459,7 +492,7 @@
         },
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "Max Pool Size" },
+            "matcher": { "id": "byRegexp", "options": "Max Pool.*" },
             "properties": [
               { "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } },
               { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [10, 10] } },
@@ -467,10 +500,17 @@
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "Active" },
+            "matcher": { "id": "byRegexp", "options": "Active.*" },
             "properties": [
               { "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } },
               { "id": "custom.lineWidth", "value": 3 }
+            ]
+          },
+          {
+            "matcher": { "id": "byRegexp", "options": "Pending.*" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "purple", "mode": "fixed" } },
+              { "id": "custom.lineWidth", "value": 2 }
             ]
           }
         ]
@@ -487,31 +527,31 @@
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "title": "HikariCP Connection Pool",
-      "description": "v1: Direct DB connection - pool exhaustion under load. Active approaching Max = bottleneck",
+      "description": "v2: RDS Proxy manages connections - pool stays healthy. Each instance has its own pool, RDS Proxy multiplexes to DB",
       "type": "timeseries",
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "hikaricp_connections_active{application=\"refit-backend\"}",
-          "legendFormat": "Active",
+          "expr": "refit_hikaricp_connections_active{application=\"refit-backend\"}",
+          "legendFormat": "Active {{instance}}",
           "refId": "A"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "hikaricp_connections_idle{application=\"refit-backend\"}",
-          "legendFormat": "Idle",
+          "expr": "refit_hikaricp_connections_idle{application=\"refit-backend\"}",
+          "legendFormat": "Idle {{instance}}",
           "refId": "B"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "hikaricp_connections_max{application=\"refit-backend\"}",
-          "legendFormat": "Max Pool Size",
+          "expr": "refit_hikaricp_connections{application=\"refit-backend\"}",
+          "legendFormat": "Max Pool {{instance}}",
           "refId": "C"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "hikaricp_connections_pending{application=\"refit-backend\"}",
-          "legendFormat": "Pending (waiting)",
+          "expr": "refit_hikaricp_connections_pending{application=\"refit-backend\"}",
+          "legendFormat": "Pending {{instance}}",
           "refId": "D"
         }
       ]
@@ -538,9 +578,7 @@
             "showPoints": "never",
             "spanNulls": false,
             "stacking": { "group": "A", "mode": "none" },
-            "thresholdsStyle": {
-              "mode": "line+area"
-            }
+            "thresholdsStyle": { "mode": "line+area" }
           },
           "mappings": [],
           "thresholds": {
@@ -566,25 +604,25 @@
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "title": "HikariCP Connection Acquire / Usage Time",
-      "description": "Connection acquire time spike = pool exhaustion. v1: no RDS Proxy protection",
+      "description": "v2: RDS Proxy absorbs connection spikes. Acquire time should stay low",
       "type": "timeseries",
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.95, sum(rate(hikaricp_connections_acquire_milliseconds_bucket{application=\"refit-backend\"}[1m])) by (le))",
-          "legendFormat": "Acquire p95",
+          "expr": "histogram_quantile(0.95, sum(rate(refit_hikaricp_connections_acquire_milliseconds_bucket{application=\"refit-backend\"}[1m])) by (le, instance))",
+          "legendFormat": "Acquire p95 {{instance}}",
           "refId": "A"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.95, sum(rate(hikaricp_connections_usage_milliseconds_bucket{application=\"refit-backend\"}[1m])) by (le))",
-          "legendFormat": "Usage p95",
+          "expr": "histogram_quantile(0.95, sum(rate(refit_hikaricp_connections_usage_milliseconds_bucket{application=\"refit-backend\"}[1m])) by (le, instance))",
+          "legendFormat": "Usage p95 {{instance}}",
           "refId": "B"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "rate(hikaricp_connections_timeout_total{application=\"refit-backend\"}[1m])",
-          "legendFormat": "Timeout Rate (/sec)",
+          "expr": "rate(refit_hikaricp_connections_timeout_total{application=\"refit-backend\"}[1m])",
+          "legendFormat": "Timeout Rate {{instance}}",
           "refId": "C"
         }
       ]
@@ -593,7 +631,7 @@
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 45 },
       "id": 104,
-      "title": "Throughput & JVM",
+      "title": "Throughput & Traffic Distribution",
       "type": "row"
     },
     {
@@ -641,45 +679,45 @@
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "title": "Total Throughput (RPS)",
-      "description": "Total vs successful RPS over time",
+      "description": "Total vs successful RPS - v2 should handle much higher max throughput",
       "type": "timeseries",
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(rate(http_server_requests_seconds_count{application=\"refit-backend\"}[1m]))",
+          "expr": "sum(rate(refit_http_server_requests_milliseconds_count{application=\"refit-backend\"}[1m]))",
           "legendFormat": "Total RPS",
           "refId": "A"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(rate(http_server_requests_seconds_count{application=\"refit-backend\", status!~\"5..\"}[1m]))",
+          "expr": "sum(rate(refit_http_server_requests_milliseconds_count{application=\"refit-backend\", status!~\"5..\"}[1m]))",
           "legendFormat": "Successful RPS",
           "refId": "B"
         }
       ]
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
           "custom": {
             "axisCenteredZero": false,
             "axisColorMode": "text",
-            "axisLabel": "",
+            "axisLabel": "Requests",
             "axisPlacement": "auto",
             "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
+            "drawStyle": "bars",
+            "fillOpacity": 80,
             "gradientMode": "none",
             "hideFrom": { "legend": false, "tooltip": false, "viz": false },
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": { "type": "linear" },
             "showPoints": "never",
             "spanNulls": false,
-            "stacking": { "group": "A", "mode": "none" },
+            "stacking": { "group": "A", "mode": "normal" },
             "thresholdsStyle": { "mode": "off" }
           },
           "mappings": [],
@@ -687,36 +725,66 @@
             "mode": "absolute",
             "steps": [{ "color": "green", "value": null }]
           },
-          "unit": "bytes"
+          "unit": "short"
         },
         "overrides": []
       },
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 46 },
-      "id": 12,
+      "id": 6,
       "options": {
         "legend": {
-          "calcs": ["mean", "max"],
+          "calcs": ["mean", "sum"],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
-      "title": "JVM Heap Memory",
-      "description": "JVM heap memory usage",
+      "title": "ALB Traffic Distribution by AZ (CloudWatch)",
+      "description": "v2: ALB distributes traffic across AZs. Stacked bars show balanced distribution proving load balancing works",
       "type": "timeseries",
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "jvm_memory_used_bytes{application=\"refit-backend\", area=\"heap\"}",
-          "legendFormat": "Heap Used",
-          "refId": "A"
+          "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
+          "dimensions": {
+            "TargetGroup": ["targetgroup/refit-prod-v2-backend-tg/99c46035783eb73d"],
+            "LoadBalancer": ["app/refit-prod-v2-external-alb/8a9495a7ef63fbd1"],
+            "AvailabilityZone": ["ap-northeast-2a"]
+          },
+          "expression": "",
+          "id": "",
+          "label": "AZ-2a",
+          "matchExact": true,
+          "metricEditorMode": 0,
+          "metricName": "RequestCountPerTarget",
+          "metricQueryType": 0,
+          "namespace": "AWS/ApplicationELB",
+          "period": "60",
+          "queryMode": "Metrics",
+          "refId": "A",
+          "region": "default",
+          "statistic": "Sum"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "jvm_memory_max_bytes{application=\"refit-backend\", area=\"heap\"}",
-          "legendFormat": "Heap Max",
-          "refId": "B"
+          "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
+          "dimensions": {
+            "TargetGroup": ["targetgroup/refit-prod-v2-backend-tg/99c46035783eb73d"],
+            "LoadBalancer": ["app/refit-prod-v2-external-alb/8a9495a7ef63fbd1"],
+            "AvailabilityZone": ["ap-northeast-2c"]
+          },
+          "expression": "",
+          "id": "",
+          "label": "AZ-2c",
+          "matchExact": true,
+          "metricEditorMode": 0,
+          "metricName": "RequestCountPerTarget",
+          "metricQueryType": 0,
+          "namespace": "AWS/ApplicationELB",
+          "period": "60",
+          "queryMode": "Metrics",
+          "refId": "B",
+          "region": "default",
+          "statistic": "Sum"
         }
       ]
     },
@@ -754,21 +822,320 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(rate(http_server_requests_seconds_count{application=\"refit-backend\", status=~\"2..\"}[5m]))",
+          "expr": "sum(rate(refit_http_server_requests_milliseconds_count{application=\"refit-backend\", status=~\"2..\"}[5m]))",
           "legendFormat": "2xx (Success)",
           "refId": "A"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(rate(http_server_requests_seconds_count{application=\"refit-backend\", status=~\"4..\"}[5m]))",
+          "expr": "sum(rate(refit_http_server_requests_milliseconds_count{application=\"refit-backend\", status=~\"4..\"}[5m]))",
           "legendFormat": "4xx (Client Error)",
           "refId": "B"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(rate(http_server_requests_seconds_count{application=\"refit-backend\", status=~\"5..\"}[5m]))",
+          "expr": "sum(rate(refit_http_server_requests_milliseconds_count{application=\"refit-backend\", status=~\"5..\"}[5m]))",
           "legendFormat": "5xx (Server Error)",
           "refId": "C"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 62 },
+      "id": 105,
+      "title": "AWS Infrastructure (CloudWatch)",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Instances",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "scheme",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "stepAfter",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          },
+          "unit": "short",
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Desired" },
+            "properties": [
+              { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [10, 10] } },
+              { "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 63 },
+      "id": 20,
+      "options": {
+        "legend": {
+          "calcs": ["min", "max", "lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "title": "ASG Instance Count (Scaling Timeline)",
+      "description": "Shows ASG scaling events over time. InService count increases = scale-out triggered by load",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
+          "dimensions": { "AutoScalingGroupName": ["refit-prod-v2-backend-asg"] },
+          "expression": "",
+          "id": "",
+          "label": "InService",
+          "matchExact": true,
+          "metricEditorMode": 0,
+          "metricName": "GroupInServiceInstances",
+          "metricQueryType": 0,
+          "namespace": "AWS/AutoScaling",
+          "period": "60",
+          "queryMode": "Metrics",
+          "refId": "A",
+          "region": "default",
+          "statistic": "Average"
+        },
+        {
+          "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
+          "dimensions": { "AutoScalingGroupName": ["refit-prod-v2-backend-asg"] },
+          "expression": "",
+          "id": "",
+          "label": "Desired",
+          "matchExact": true,
+          "metricEditorMode": 0,
+          "metricName": "GroupDesiredCapacity",
+          "metricQueryType": 0,
+          "namespace": "AWS/AutoScaling",
+          "period": "60",
+          "queryMode": "Metrics",
+          "refId": "B",
+          "region": "default",
+          "statistic": "Average"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          },
+          "unit": "short",
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Healthy Hosts" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } },
+              { "id": "custom.lineWidth", "value": 3 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Unhealthy Hosts" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } },
+              { "id": "custom.lineWidth", "value": 3 }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 63 },
+      "id": 21,
+      "options": {
+        "legend": {
+          "calcs": ["min", "max", "lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "title": "ALB Healthy / Unhealthy Hosts",
+      "description": "ALB health check status. Healthy should match InService count. Unhealthy = 0 proves no instance failures",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
+          "dimensions": {
+            "TargetGroup": ["targetgroup/refit-prod-v2-backend-tg/99c46035783eb73d"],
+            "LoadBalancer": ["app/refit-prod-v2-external-alb/8a9495a7ef63fbd1"]
+          },
+          "expression": "",
+          "id": "",
+          "label": "Healthy Hosts",
+          "matchExact": true,
+          "metricEditorMode": 0,
+          "metricName": "HealthyHostCount",
+          "metricQueryType": 0,
+          "namespace": "AWS/ApplicationELB",
+          "period": "60",
+          "queryMode": "Metrics",
+          "refId": "A",
+          "region": "default",
+          "statistic": "Average"
+        },
+        {
+          "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
+          "dimensions": {
+            "TargetGroup": ["targetgroup/refit-prod-v2-backend-tg/99c46035783eb73d"],
+            "LoadBalancer": ["app/refit-prod-v2-external-alb/8a9495a7ef63fbd1"]
+          },
+          "expression": "",
+          "id": "",
+          "label": "Unhealthy Hosts",
+          "matchExact": true,
+          "metricEditorMode": 0,
+          "metricName": "UnHealthyHostCount",
+          "metricQueryType": 0,
+          "namespace": "AWS/ApplicationELB",
+          "period": "60",
+          "queryMode": "Metrics",
+          "refId": "B",
+          "region": "default",
+          "statistic": "Average"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Seconds",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "gradientMode": "scheme",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "line+area" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "transparent", "value": null },
+              { "color": "red", "value": 3 }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 63 },
+      "id": 22,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max", "lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "title": "ALB Target Response Time",
+      "description": "End-to-end response time measured by ALB. Proves that v2 handles load without latency degradation",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
+          "dimensions": {
+            "TargetGroup": ["targetgroup/refit-prod-v2-backend-tg/99c46035783eb73d"],
+            "LoadBalancer": ["app/refit-prod-v2-external-alb/8a9495a7ef63fbd1"]
+          },
+          "expression": "",
+          "id": "",
+          "label": "Avg Response Time",
+          "matchExact": true,
+          "metricEditorMode": 0,
+          "metricName": "TargetResponseTime",
+          "metricQueryType": 0,
+          "namespace": "AWS/ApplicationELB",
+          "period": "60",
+          "queryMode": "Metrics",
+          "refId": "A",
+          "region": "default",
+          "statistic": "Average"
+        },
+        {
+          "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
+          "dimensions": {
+            "TargetGroup": ["targetgroup/refit-prod-v2-backend-tg/99c46035783eb73d"],
+            "LoadBalancer": ["app/refit-prod-v2-external-alb/8a9495a7ef63fbd1"]
+          },
+          "expression": "",
+          "id": "",
+          "label": "p99 Response Time",
+          "matchExact": true,
+          "metricEditorMode": 0,
+          "metricName": "TargetResponseTime",
+          "metricQueryType": 0,
+          "namespace": "AWS/ApplicationELB",
+          "period": "60",
+          "queryMode": "Metrics",
+          "refId": "B",
+          "region": "default",
+          "statistic": "p99"
         }
       ]
     }
@@ -776,14 +1143,14 @@
   "refresh": "10s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["architecture", "comparison", "v1", "loadtest"],
+  "tags": ["architecture", "comparison", "v2", "loadtest"],
   "templating": {
     "list": [
       {
         "current": {
           "selected": false,
           "text": "Prometheus",
-          "value": "PBFA97CFB590B2093"
+          "value": "prometheus"
         },
         "hide": 0,
         "includeAll": false,
@@ -806,8 +1173,8 @@
   },
   "timepicker": {},
   "timezone": "Asia/Seoul",
-  "title": "Architecture Comparison: v1 Load Test",
-  "uid": "arch-comparison-v1",
+  "title": "Architecture Comparison: v2 Load Test",
+  "uid": "arch-comparison-v2",
   "version": 1,
   "weekStart": ""
 }
