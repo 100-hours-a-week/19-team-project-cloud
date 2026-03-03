@@ -1,0 +1,808 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "v1(단일 인스턴스) vs v2(다중 인스턴스) 아키텍처 성능 비교 대시보드",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "title": "📊 상단: 전체 시스템 Health (안정성 한눈에 비교)",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 100 },
+              { "color": "red", "value": 500 }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 8, "x": 0, "y": 1 },
+      "id": 1,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "title": "현재 인입 트래픽 (RPS)",
+      "description": "현재 초당 요청 수 - v1/v2 동일 부하 조건 증명",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum(rate(http_server_requests_seconds_count{application=\"refit-backend\"}[1m]))",
+          "legendFormat": "Total RPS",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "green", "value": 2 },
+              { "color": "yellow", "value": 4 }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 8, "x": 8, "y": 1 },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "title": "가동 중인 인스턴스 수",
+      "description": "v1: 1대(단일) / v2: 2대 이상(스케일 아웃)",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "count(up{job=\"spring-boot\"} == 1)",
+          "legendFormat": "Active Instances",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "orange", "value": 5 },
+              { "color": "red", "value": 10 }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 8, "x": 16, "y": 1 },
+      "id": 3,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "title": "5xx Server Error Rate",
+      "description": "v1: 트래픽 쇄도 시 15% 이상 / v2: 0% 목표",
+      "type": "gauge",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum(rate(http_server_requests_seconds_count{application=\"refit-backend\", status=~\"5..\"}[1m])) / sum(rate(http_server_requests_seconds_count{application=\"refit-backend\"}[1m])) * 100",
+          "legendFormat": "5xx Error Rate %",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 },
+      "id": 101,
+      "title": "⏱ 중단: 사용자 경험(UX) 관점 - 응답 지연 비교",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Response Time",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "gradientMode": "scheme",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": {
+              "mode": "line+area"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "transparent", "value": null },
+              { "color": "red", "value": 3000 }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "p95" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } },
+              { "id": "custom.lineWidth", "value": 3 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "p50 (median)" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 7 },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max", "lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "title": "응답 지연 시간 분포 (p50 / p95 / p99)",
+      "description": "v1: 스파이크 시 p95 5000ms+ 병목 / v2: p95 500ms 이하 방어 목표",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_seconds_bucket{application=\"refit-backend\"}[1m])) by (le)) * 1000",
+          "legendFormat": "p50 (median)",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"refit-backend\"}[1m])) by (le)) * 1000",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{application=\"refit-backend\"}[1m])) by (le)) * 1000",
+          "legendFormat": "p99",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Response Time (ms)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 17 },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "title": "API 엔드포인트별 p95 응답 시간",
+      "description": "트래픽 믹스별(검색, 이력서, 내 정보, 채팅, AI 파싱) 응답 시간 추이",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"refit-backend\", uri=~\"/api/.*search.*|/api/.*expert.*\"}[1m])) by (le)) * 1000",
+          "legendFormat": "현직자 검색/조회",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"refit-backend\", uri=~\"/api/.*resume.*\"}[1m])) by (le)) * 1000",
+          "legendFormat": "이력서 목록 조회",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"refit-backend\", uri=~\"/api/.*member.*|/api/.*user.*|/api/.*profile.*\"}[1m])) by (le)) * 1000",
+          "legendFormat": "내 정보 조회",
+          "refId": "C"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"refit-backend\", uri=~\"/api/.*chat.*\"}[1m])) by (le)) * 1000",
+          "legendFormat": "채팅",
+          "refId": "D"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 25 },
+      "id": 102,
+      "title": "🖥 하단: 시스템 자원 관점 - 병목 현상 해소 입증",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Requests/sec",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "normal" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 26 },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "title": "노드별 트래픽 분배 현황 (Stacked Bar)",
+      "description": "v1: 단일 색상(1대) / v2: 2개 이상 노드 색상이 50:50 포개진 스택 막대",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum(rate(http_server_requests_seconds_count{application=\"refit-backend\"}[1m])) by (instance)",
+          "legendFormat": "{{instance}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Usage %",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "scheme",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": {
+              "mode": "line+area"
+            }
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "transparent", "value": null },
+              { "color": "red", "value": 80 }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 26 },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max", "lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "title": "인스턴스별 CPU 사용률",
+      "description": "v1: 100% 천장 / v2: 60% 미만에서 여러 인스턴스가 교차하며 유지",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "(1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[1m])) by (instance)) * 100",
+          "legendFormat": "CPU - {{instance}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Usage %",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "scheme",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": {
+              "mode": "line+area"
+            }
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "transparent", "value": null },
+              { "color": "orange", "value": 70 },
+              { "color": "red", "value": 90 }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 35 },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max", "lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "title": "인스턴스별 Memory 사용률",
+      "description": "v1: 메모리 고갈 위험 / v2: 분산으로 안정적 유지",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+          "legendFormat": "Memory - {{instance}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "red", "value": 100 }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 35 },
+      "id": 9,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "title": "HTTP 상태 코드 분포",
+      "description": "2xx/4xx/5xx 상태 코드별 요청 수 현황",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum(rate(http_server_requests_seconds_count{application=\"refit-backend\", status=~\"2..\"}[5m]))",
+          "legendFormat": "2xx (Success)",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum(rate(http_server_requests_seconds_count{application=\"refit-backend\", status=~\"4..\"}[5m]))",
+          "legendFormat": "4xx (Client Error)",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum(rate(http_server_requests_seconds_count{application=\"refit-backend\", status=~\"5..\"}[5m]))",
+          "legendFormat": "5xx (Server Error)",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 44 },
+      "id": 103,
+      "title": "📈 처리량 (Throughput) 상세",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "RPS",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "scheme",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 45 },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max", "lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "title": "총 처리량 (Total Throughput) 추이",
+      "description": "시간대별 총 RPS 변화 추이 - v1 최대 처리량 vs v2 최대 처리량 비교",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum(rate(http_server_requests_seconds_count{application=\"refit-backend\"}[1m]))",
+          "legendFormat": "Total RPS",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum(rate(http_server_requests_seconds_count{application=\"refit-backend\", status!~\"5..\"}[1m]))",
+          "legendFormat": "Successful RPS",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Active Connections",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 53 },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "title": "활성 커넥션 수",
+      "description": "Tomcat 활성 커넥션/스레드 상태",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "tomcat_threads_current_threads{application=\"refit-backend\"}",
+          "legendFormat": "Current Threads - {{instance}}",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "tomcat_threads_busy_threads{application=\"refit-backend\"}",
+          "legendFormat": "Busy Threads - {{instance}}",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 53 },
+      "id": 12,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "title": "JVM Heap Memory 사용량",
+      "description": "인스턴스별 JVM 힙 메모리 사용량 추이",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "jvm_memory_used_bytes{application=\"refit-backend\", area=\"heap\"}",
+          "legendFormat": "Heap Used - {{instance}}",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "jvm_memory_max_bytes{application=\"refit-backend\", area=\"heap\"}",
+          "legendFormat": "Heap Max - {{instance}}",
+          "refId": "B"
+        }
+      ]
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["architecture", "comparison", "v1-vs-v2", "performance"],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "Prometheus",
+          "value": "prometheus"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Datasource",
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "queryValue": "",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "Asia/Seoul",
+  "title": "아키텍처 비교: v1 vs v2 성능 대시보드",
+  "uid": "arch-comparison-v1-v2",
+  "version": 1,
+  "weekStart": ""
+}

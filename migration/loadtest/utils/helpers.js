@@ -5,8 +5,10 @@ import { Counter, Trend } from 'k6/metrics';
 export const errorCounter = new Counter('custom_errors');
 export const resumeParseDuration = new Trend('resume_parse_duration', true);
 
-// 테스트 토큰 로드 및 타입별 분류
-const tokenData = JSON.parse(open('../data/test-tokens.json'));
+// TARGET에 따라 토큰 파일 자동 선택 (v1 → dev, v2 → prod)
+const TARGET = __ENV.TARGET || 'v2';
+const tokenFile = TARGET === 'v1' ? '../data/test-tokens-dev.json' : '../data/test-tokens-prod.json';
+const tokenData = JSON.parse(open(tokenFile));
 const seekerTokens = tokenData.filter((t) => t.user_type === 'JOB_SEEKER');
 const expertTokens = tokenData.filter((t) => t.user_type === 'EXPERT');
 

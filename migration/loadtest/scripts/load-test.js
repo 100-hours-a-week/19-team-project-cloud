@@ -1,12 +1,12 @@
 /**
  * Load Test — 실제 트래픽 패턴 시뮬레이션
  *
- * 용도: v2 전환 완료 후 전체 트래픽 처리 성능 확인
- * 실행: k6 run --dns-ttl=0s -e TARGET=v2 scripts/load-test.js
+ * 용도: v1/v2 환경에서 동일 시나리오로 전체 트래픽 처리 성능 비교
+ * 실행: k6 run --dns-ttl=0s -e TARGET=v1 scripts/load-test.js
+ *       k6 run --dns-ttl=0s -e TARGET=v2 scripts/load-test.js
  */
 import { THRESHOLDS, SCENARIO_WEIGHTS } from '../utils/config.js';
-import { authMeOnly } from '../scenarios/auth.js';
-import { resumeFullScenario, resumeListOnly } from '../scenarios/resume.js';
+import { authMeOnly, authMeUpdateScenario } from '../scenarios/auth.js';
 import { expertScenario } from '../scenarios/expert.js';
 import { chatRestScenario } from '../scenarios/chat.js';
 
@@ -23,21 +23,19 @@ export const options = {
 
 export default function () {
   const rand = Math.random();
+  const { expert, auth, auth_update } = SCENARIO_WEIGHTS;
 
-  if (rand < SCENARIO_WEIGHTS.expert) {
+  if (rand < expert) {
     // 40% — 현직자 검색/조회
     expertScenario();
-  } else if (rand < SCENARIO_WEIGHTS.expert + SCENARIO_WEIGHTS.resume_list) {
-    // 25% — 이력서 목록 조회
-    resumeListOnly();
-  } else if (rand < SCENARIO_WEIGHTS.expert + SCENARIO_WEIGHTS.resume_list + SCENARIO_WEIGHTS.auth) {
+  } else if (rand < expert + auth) {
     // 20% — 내 정보 조회
     authMeOnly();
-  } else if (rand < SCENARIO_WEIGHTS.expert + SCENARIO_WEIGHTS.resume_list + SCENARIO_WEIGHTS.auth + SCENARIO_WEIGHTS.chat) {
-    // 10% — 채팅방 목록/메시지 조회
-    chatRestScenario();
+  } else if (rand < expert + auth + auth_update) {
+    // 15% — 내 정보 수정
+    authMeUpdateScenario();
   } else {
-    // 5% — 이력서 파싱 (AI 호출 비용 고려)
-    resumeFullScenario();
+    // 25% — 채팅방 목록/메시지 조회
+    chatRestScenario();
   }
 }

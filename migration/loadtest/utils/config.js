@@ -11,13 +11,13 @@
 const ENVIRONMENTS = {
   // === Production ===
   v1: {
-    api: "https://re-fit.kr",
-    fe: "https://re-fit.kr",
-    ws: "wss://re-fit.kr/ws",
+    api: "https://dev.re-fit.kr",
+    fe: "https://dev.re-fit.kr",
+    ws: "wss://dev.re-fit.kr/ws",
   },
   v2: {
     api: "https://api.re-fit.kr",
-    fe: "https://prod-v2.re-fit.kr",
+    fe: "https://re-fit.kr",
     ws: "wss://api.re-fit.kr/ws",
   },
   alb: {
@@ -64,12 +64,12 @@ export const FE_THRESHOLDS = {
 };
 
 // 시나리오 비율 (Load/Soak Test용)
+// 현직자 검색, 내 정보 조회, 내 정보 수정, 채팅
 export const SCENARIO_WEIGHTS = {
   expert: 0.4,
-  resume_list: 0.25,
   auth: 0.2,
-  chat: 0.1,
-  resume_parse: 0.05,
+  auth_update: 0.15,
+  chat: 0.25,
 };
 
 // 검색 키워드 풀
