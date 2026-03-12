@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: refit-backend
+  namespace: refit-app
+spec:
+  replicas: 2 # 기본 파드 수 (부하 없을 때)
+  selector:
+    matchLabels:
+      app: refit-backend
+  template:
+    metadata:
+      labels:
+        app: refit-backend
+    spec:
+      containers:
+      - name: backend
+        # ⚠️ 실제 ECR 등에 푸시된 Spring Boot 이미지 주소로 교체해야 함
+        image: nginx:alpine # 임시 깡통 이미지
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "300Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi" # 설계대로 최대 512MB까지만 팽창 허용 (OOM 방지 핵심)
+        # Spring Boot JVM 메모리 제어 등 환경변수 설정
+        env:
+        - name: JAVA_TOOL_OPTIONS
+          value: "-XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=70.0"
+        - name: SPRING_REDIS_HOST
+          value: "refit-redis-svc.refit-app.svc.cluster.local" # 동일 K8s 내부의 Redis Service 이름
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: refit-backend-svc
+  namespace: refit-app
+spec:
+  selector:
+    app: refit-backend
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+---
+# 외부(대문)에서 이 백엔드로 들어올 수 있게 길을 터주는 표지판
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: backend-route
+  namespace: refit-app
+spec:
+  parentRefs:
+  - name: refit-gateway # 2단계에서 만든 Gateway(대문) 지정
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /api # /api 어쩌구 로 시작하는 모든 요청은
+    backendRefs:
+    - name: refit-backend-svc # 위에서 만든 Spring Boot Service(내선번호)로 토스해라!
+      port: 8080

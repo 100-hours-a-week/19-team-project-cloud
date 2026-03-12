@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: refit-redis
+  namespace: refit-app
+spec:
+  serviceName: refit-redis-svc
+  replicas: 1
+  selector:
+    matchLabels:
+      app: refit-redis
+  template:
+    metadata:
+      labels:
+        app: refit-redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7.2-alpine
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+  # EBS 등 실제 볼륨과 엮일 때는 주석 해제하여 사용
+  # volumeClaimTemplates:
+  # - metadata:
+  #     name: redis-data
+  #   spec:
+  #     accessModes: [ "ReadWriteOnce" ]
+  #     resources:
+  #       requests:
+  #         storage: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: refit-redis-svc
+  namespace: refit-app
+spec:
+  selector:
+    app: refit-redis
+  ports:
+  - protocol: TCP
+    port: 6379
+    targetPort: 6379
