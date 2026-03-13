@@ -29,7 +29,10 @@ spec:
         volumeMounts:
         - name: redis-data
           mountPath: /data
-  # EBS 등 실제 볼륨과 엮일 때는 주석 해제하여 사용
+      volumes:
+      - name: redis-data
+        emptyDir: {}
+  # EBS 등 실제 볼륨과 엮일 때는 주석 해제하고 위 volumes 블록을 제거
   # volumeClaimTemplates:
   # - metadata:
   #     name: redis-data

@@ -4,7 +4,7 @@ metadata:
   name: refit-backend
   namespace: refit-app
 spec:
-  replicas: 2 # 기본 파드 수 (부하 없을 때)
+  replicas: 1 # 단일 워커 검증 단계 (정상 확인 후 2로 복원)
   selector:
     matchLabels:
       app: refit-backend
@@ -13,10 +13,11 @@ spec:
       labels:
         app: refit-backend
     spec:
+      imagePullSecrets:
+      - name: ecr-secret
       containers:
       - name: backend
-        # ⚠️ 실제 ECR 등에 푸시된 Spring Boot 이미지 주소로 교체해야 함
-        image: nginx:alpine # 임시 깡통 이미지
+        image: 807210685804.dkr.ecr.ap-northeast-2.amazonaws.com/refit-backend:develop-latest
         ports:
         - containerPort: 8080
         resources:
@@ -25,13 +26,22 @@ spec:
             memory: "300Mi"
           limits:
             cpu: "500m"
-            memory: "512Mi" # 설계대로 최대 512MB까지만 팽창 허용 (OOM 방지 핵심)
-        # Spring Boot JVM 메모리 제어 등 환경변수 설정
+            memory: "768Mi" # 512Mi에서 OOMKilled 발생하여 상향 (non-heap 메모리 고려)
         env:
         - name: JAVA_TOOL_OPTIONS
-          value: "-XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=70.0"
-        - name: SPRING_REDIS_HOST
-          value: "refit-redis-svc.refit-app.svc.cluster.local" # 동일 K8s 내부의 Redis Service 이름
+          value: "-XX:MaxRAMPercentage=60.0 -XX:InitialRAMPercentage=50.0"
+        - name: SPRING_CONFIG_IMPORT
+          value: "optional:file:/config/secret/application-secret.yml"
+        - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+          value: "refit-kafka-svc.refit-app.svc.cluster.local:9092"
+        volumeMounts:
+        - name: secret-config
+          mountPath: /config/secret
+          readOnly: true
+      volumes:
+      - name: secret-config
+        secret:
+          secretName: refit-backend-secret
 ---
 apiVersion: v1
 kind: Service
