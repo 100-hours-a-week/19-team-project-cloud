@@ -3,26 +3,12 @@ kind: Gateway
 metadata:
   name: refit-gateway
   namespace: refit-app
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod # 위에서 만든 ClusterIssuer와 연결
 spec:
-  gatewayClassName: cilium # 점검에서 확인한 GatewayClass 이름
+  gatewayClassName: cilium
   listeners:
   - name: http
     protocol: HTTP
     port: 80
-    allowedRoutes:
-      namespaces:
-        from: Same
-  - name: https
-    protocol: HTTPS
-    port: 443
-    # ⚠️ 수정 필요: 프론트엔드와 통신할 진짜 백엔드 API 도메인 (예: api.refit.com)
-    hostname: api.example.com
-    tls:
-      mode: Terminate
-      certificateRefs:
-      - name: refit-tls-cert # 인증서가 발급되면 저장될 Secret의 이름 (자동 생성됨)
     allowedRoutes:
       namespaces:
         from: Same

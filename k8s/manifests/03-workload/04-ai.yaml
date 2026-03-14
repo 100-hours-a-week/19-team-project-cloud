@@ -1,0 +1,149 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "{AI_APP_NAME}"
+  namespace: "{K8S_NAMESPACE}"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{AI_APP_NAME}"
+  namespace: "{K8S_NAMESPACE}"
+spec:
+  replicas: 1 # 기본 replica 수
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      # 롤링 업데이트 시 추가 Pod 생성을 제한한다.
+      maxSurge: 0
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "{AI_APP_NAME}"
+      app.kubernetes.io/instance: "{AI_APP_NAME}"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: "{AI_APP_NAME}"
+        app.kubernetes.io/instance: "{AI_APP_NAME}"
+    spec:
+      serviceAccountName: "{AI_APP_NAME}"
+      imagePullSecrets:
+      - name: "{IMAGE_PULL_SECRET_NAME}" # 이미지 풀링용 Secret
+      containers:
+      - name: "{AI_APP_NAME}"
+        image: "{ECR_REGISTRY}/{AI_IMAGE_REPOSITORY}:{AI_IMAGE_TAG}"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          name: http
+        envFrom:
+        - secretRef:
+            name: "{AI_SECRET_NAME}" # 런타임 설정 Secret 참조
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        startupProbe:
+          # 초기 기동 완료 전 상태 확인용 Probe
+          httpGet:
+            path: /health
+            port: 8000
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 24
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "2"
+            memory: "3Gi"
+        volumeMounts:
+        - name: upload-volume
+          mountPath: /tmp/refit-ai/uploads
+      volumes:
+      - name: upload-volume # 임시 업로드 저장 볼륨
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{AI_APP_NAME}"
+  namespace: "{K8S_NAMESPACE}"
+spec:
+  selector:
+    app.kubernetes.io/name: "{AI_APP_NAME}"
+    app.kubernetes.io/instance: "{AI_APP_NAME}"
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: http
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: "{AI_APP_NAME}"
+  namespace: "{K8S_NAMESPACE}"
+spec:
+  parentRefs:
+  - name: "{GATEWAY_NAME}" # Gateway 연동
+    namespace: "{K8S_NAMESPACE}"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: "{AI_ROUTE_PATH_PREFIX}"
+    backendRefs:
+    - name: "{AI_APP_NAME}" # AI 서비스 라우팅 대상
+      port: 8000
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: "{AI_HEALTHCHECK_ROUTE_NAME}"
+  namespace: "{K8S_NAMESPACE}"
+spec:
+  parentRefs:
+  - name: "{GATEWAY_NAME}"
+    namespace: "{K8S_NAMESPACE}"
+  rules:
+  - matches:
+    - path:
+        type: Exact
+        value: "{AI_HEALTHCHECK_PATH}"
+    backendRefs:
+    - name: "{AI_APP_NAME}" # 헬스체크 라우팅 대상
+      port: 8000
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: "{AI_APP_NAME}"
+  namespace: "{K8S_NAMESPACE}"
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: "{AI_APP_NAME}"
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resource # CPU 사용률 기준 확장
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
