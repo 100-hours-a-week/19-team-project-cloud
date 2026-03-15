@@ -6,6 +6,7 @@ metadata:
   labels:
     {{- include "refit-ai.labels" . | nindent 4 }}
 spec:
+  revisionHistoryLimit: 3
   strategy:
     {{- toYaml .Values.deploymentStrategy | nindent 4 }}
   {{- if not .Values.autoscaling.enabled }}
