@@ -13,8 +13,8 @@ spec:
       cpu: 100m
       memory: 128Mi
     max:
-      cpu: 1000m
-      memory: 2048Mi
+      cpu: "2"
+      memory: 4Gi
 ---
 apiVersion: v1
 kind: LimitRange
