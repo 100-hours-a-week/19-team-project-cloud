@@ -20,6 +20,7 @@ spec:
         {{- include "refit-ai.selectorLabels" . | nindent 8 }}
     spec:
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      serviceAccountName: {{ include "refit-ai.fullname" . }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -34,7 +35,7 @@ spec:
               protocol: TCP
           envFrom:
             - secretRef:
-                name: {{ include "refit-ai.fullname" . }}-secret
+                name: {{ .Values.envSecretName }}
           lifecycle:
             preStop:
               exec:

@@ -11,6 +11,9 @@ image:
 imagePullSecrets:
   - name: ecr-secret
 
+# K8s Secret 이름 (kubectl로 직접 관리)
+envSecretName: refit-ai-env-prod
+
 service:
   type: ClusterIP
   port: 8000
@@ -42,7 +45,7 @@ resources:
     cpu: "500m"
     memory: "1Gi"
   limits:
-    cpu: "2000m"
+    cpu: "2"
     memory: "3Gi"
 
 terminationGracePeriodSeconds: 30
