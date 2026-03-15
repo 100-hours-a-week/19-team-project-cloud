@@ -5,7 +5,7 @@ fullnameOverride: ""
 
 image:
   repository: 807210685804.dkr.ecr.ap-northeast-2.amazonaws.com/refit-ai
-  tag: "main-latest"
+  tag: "develop-latest"
   pullPolicy: Always
 
 imagePullSecrets:
