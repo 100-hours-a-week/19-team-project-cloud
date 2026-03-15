@@ -1,0 +1,87 @@
+replicaCount: 1
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: 807210685804.dkr.ecr.ap-northeast-2.amazonaws.com/refit-ai
+  tag: "main-latest"
+  pullPolicy: Always
+
+imagePullSecrets:
+  - name: ecr-secret
+
+service:
+  type: ClusterIP
+  port: 8000
+
+httproute:
+  parentRefs:
+    - name: refit-gateway
+      namespace: refit-app
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/ai
+      backendRefs:
+        - name: refit-ai
+          port: 8000
+
+healthCheckRoute:
+  path: /api/ai/health
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "2000m"
+    memory: "3Gi"
+
+terminationGracePeriodSeconds: 30
+
+podDisruptionBudget:
+  enabled: true
+  maxUnavailable: 1
+
+deploymentStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 0
+    maxUnavailable: 1
+
+uploadVolume:
+  mountPath: /tmp/refit-ai/uploads
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 20
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+startupProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 24
