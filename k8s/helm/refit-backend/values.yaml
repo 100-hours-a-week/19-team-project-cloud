@@ -1,0 +1,30 @@
+image:
+  repository: 807210685804.dkr.ecr.ap-northeast-2.amazonaws.com/refit-backend
+  tag: "develop-latest"
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+
+resources:
+  requests:
+    cpu: "250m"
+    memory: "300Mi"
+  limits:
+    cpu: "500m"
+    memory: "768Mi"
+
+env:
+  javaToolOptions: "-XX:MaxRAMPercentage=60.0 -XX:InitialRAMPercentage=50.0"
+  kafkaBootstrapServers: "refit-kafka-svc.refit-app.svc.cluster.local:9092"
+
+# Secret 이름 (Sealed Secrets 또는 External Secrets로 별도 관리)
+secretName: refit-backend-secret
+
+service:
+  port: 8080
+
+gateway:
+  name: refit-gateway
+  pathPrefixes:
+    - /api
+    - /actuator

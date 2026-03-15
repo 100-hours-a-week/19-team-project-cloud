@@ -1,0 +1,6 @@
+apiVersion: v2
+name: refit-backend
+description: ReFit Backend Spring Boot Application
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

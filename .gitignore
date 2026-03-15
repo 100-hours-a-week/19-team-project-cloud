@@ -66,3 +66,7 @@ override.tf.json
 # CLI configuration files
 .terraformrc
 terraform.rc
+
+# Kubernetes secrets (실제 시크릿 값 포함 파일 - Git에 올리면 안 됨)
+k8s/manifests/03-workload/03-backend-secret.yaml
+k8s/manifests/03-workload/04-ai-secret.yaml

@@ -36,10 +36,11 @@ spec:
       prune: true
       selfHeal: true
 ---
+# Redis, Kafka 등 인프라성 워크로드 (raw manifests)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: refit-workload
+  name: refit-infra
   namespace: argocd
 spec:
   project: default
@@ -47,6 +48,28 @@ spec:
     repoURL: https://github.com/100-hours-a-week/19-team-project-cloud.git
     targetRevision: main
     path: k8s/manifests/03-workload
+    directory:
+      include: "{01-redis.yaml,02-kafka.yaml}"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: refit-app
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+# Backend (Helm chart)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: refit-backend
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/100-hours-a-week/19-team-project-cloud.git
+    targetRevision: main
+    path: k8s/helm/refit-backend
   destination:
     server: https://kubernetes.default.svc
     namespace: refit-app
