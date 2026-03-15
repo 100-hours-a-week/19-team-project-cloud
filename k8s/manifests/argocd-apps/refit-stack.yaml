@@ -49,7 +49,7 @@ spec:
     targetRevision: main
     path: k8s/manifests/03-workload
     directory:
-      include: "{01-redis.yaml,02-kafka.yaml}"
+      include: "{00-ecr-secret-refresh.yaml,01-redis.yaml,02-kafka.yaml}"
   destination:
     server: https://kubernetes.default.svc
     namespace: refit-app

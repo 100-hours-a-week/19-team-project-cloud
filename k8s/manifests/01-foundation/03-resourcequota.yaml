@@ -27,6 +27,6 @@ metadata:
   namespace: argocd
 spec:
   hard:
-    requests.memory: "2Gi"
-    limits.memory: "4Gi"
+    requests.memory: "3Gi"
+    limits.memory: "6Gi"
     pods: "15"
