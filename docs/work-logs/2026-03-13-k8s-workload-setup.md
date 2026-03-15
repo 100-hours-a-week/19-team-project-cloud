@@ -37,13 +37,22 @@
 - 조치: memory limit `512Mi → 768Mi`, JVM `MaxRAMPercentage 70→60%`, `InitialRAMPercentage 70→50%`
 - 결과: 재시작 0회, actuator health `{"status":"UP"}` 정상 응답 확인
 
+### 6. Worker Node 확장 (worker-2 추가)
+- EC2 인스턴스 생성: `i-02acbe1aceaba3918` (t4g.large, AZ-c `10.2.2.139`)
+- `init_worker.sh` 실행으로 containerd + kubeadm 설치 및 클러스터 조인
+- Cilium DaemonSet 자동 배포 후 Ready 상태 전환 확인
+- 노드 라벨 `node-role.kubernetes.io/worker-2` 추가
+- Backend replicas 1→2 복원, 2개 AZ에 걸쳐 분산 배치 확인
+  - worker-1 (AZ-a): backend-1, redis, kafka, ai
+  - worker-2 (AZ-c): backend-2
+
 ### 경미한 이슈 (앱 기동에는 영향 없음)
 - FCM: `firebase/refit-fcm.json` 파일이 이미지에 없음 → 푸시 알림 기능만 비활성
 - OTel: `otel-agent` 호스트 미존재 → 모니터링 스택 배포 전이라 정상
 
 ## 현재 클러스터 상태
 
-- master 1대 + worker 1대 (t4g.large, ARM/Graviton)
-- refit-app 네임스페이스: Redis, Kafka, Backend 모두 Running
+- master 1대 + worker 2대 (t4g.large, ARM/Graviton, 2 AZ 분산)
+- refit-app 네임스페이스: Redis, Kafka, Backend×2, AI 모두 Running
 - ECR imagePullSecret 만료: 12시간 (갱신 자동화 필요)
-- 다음 작업: 모니터링 스택 배포 또는 워커노드 확장
+- 다음 작업: 모니터링 스택 배포 또는 마스터 HA 구성

@@ -4,7 +4,7 @@ metadata:
   name: refit-backend
   namespace: refit-app
 spec:
-  replicas: 1 # 단일 워커 검증 단계 (정상 확인 후 2로 복원)
+  replicas: 2
   selector:
     matchLabels:
       app: refit-backend
@@ -70,6 +70,9 @@ spec:
     - path:
         type: PathPrefix
         value: /api # /api 어쩌구 로 시작하는 모든 요청은
+    - path:
+        type: PathPrefix
+        value: /actuator # 스프링부트 헬스체크용 경로 추가
     backendRefs:
     - name: refit-backend-svc # 위에서 만든 Spring Boot Service(내선번호)로 토스해라!
       port: 8080
