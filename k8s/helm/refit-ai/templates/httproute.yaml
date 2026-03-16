@@ -23,8 +23,11 @@ spec:
         {{- end }}
       backendRefs:
         {{- range .backendRefs }}
-        - name: {{ .name | default (include "refit-ai.fullname" $) }}
+        - group: ""
+          kind: Service
+          name: {{ .name | default (include "refit-ai.fullname" $) }}
           port: {{ .port }}
+          weight: 1
         {{- end }}
     {{- end }}
 ---
@@ -44,5 +47,8 @@ spec:
             type: Exact
             value: {{ .Values.healthCheckRoute.path }}
       backendRefs:
-        - name: {{ include "refit-ai.fullname" . }}
+        - group: ""
+          kind: Service
+          name: {{ include "refit-ai.fullname" . }}
           port: {{ .Values.service.port }}
+          weight: 1
