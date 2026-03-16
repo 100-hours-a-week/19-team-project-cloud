@@ -5,7 +5,12 @@ metadata:
   namespace: refit-app
 spec:
   revisionHistoryLimit: 3
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  minReadySeconds: {{ .Values.minReadySeconds }}
+  strategy:
+    {{- toYaml .Values.deploymentStrategy | nindent 4 }}
   selector:
     matchLabels:
       app: refit-backend
@@ -14,6 +19,11 @@ spec:
       labels:
         app: refit-backend
     spec:
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       imagePullSecrets:
       - name: ecr-secret
       containers:
@@ -22,6 +32,23 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.service.port }}
+        lifecycle:
+          preStop:
+            exec:
+              # readiness 실패 전파 + 기존 WebSocket 연결 드레이닝 대기
+              command: ["/bin/sh", "-c", "sleep 15"]
+        {{- with .Values.startupProbe }}
+        startupProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.readinessProbe }}
+        readinessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.livenessProbe }}
+        livenessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
         resources:
           requests:
             cpu: {{ .Values.resources.requests.cpu }}

@@ -5,6 +5,21 @@ image:
 
 replicaCount: 2
 
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+deploymentStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0
+
+minReadySeconds: 30
+terminationGracePeriodSeconds: 60
+
 resources:
   requests:
     cpu: "250m"
@@ -17,7 +32,7 @@ env:
   javaToolOptions: "-XX:MaxRAMPercentage=60.0 -XX:InitialRAMPercentage=50.0"
   kafkaBootstrapServers: "refit-kafka-svc.refit-app.svc.cluster.local:9092"
 
-# Secret 이름 (Sealed Secrets 또는 External Secrets로 별도 관리)
+# Secret 이름 (External Secrets로 별도 관리)
 secretName: refit-backend-secret
 
 service:
@@ -28,3 +43,35 @@ gateway:
   pathPrefixes:
     - /api
     - /actuator
+
+startupProbe:
+  httpGet:
+    path: /actuator/health
+    port: 8080
+  initialDelaySeconds: 20
+  periodSeconds: 5
+  failureThreshold: 24
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8080
+  periodSeconds: 10
+  failureThreshold: 3
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8080
+  periodSeconds: 20
+  failureThreshold: 3
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchLabels:
+            app: refit-backend
+        topologyKey: kubernetes.io/hostname
