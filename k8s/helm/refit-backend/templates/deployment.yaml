@@ -61,8 +61,6 @@ spec:
           value: {{ .Values.env.javaToolOptions | quote }}
         - name: SPRING_CONFIG_IMPORT
           value: "optional:file:/config/secret/application-secret.yml"
-        - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
-          value: {{ .Values.env.kafkaBootstrapServers | quote }}
         volumeMounts:
         - name: secret-config
           mountPath: /config/secret

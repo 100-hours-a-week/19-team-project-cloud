@@ -30,7 +30,6 @@ resources:
 
 env:
   javaToolOptions: "-XX:MaxRAMPercentage=60.0 -XX:InitialRAMPercentage=50.0"
-  kafkaBootstrapServers: "refit-kafka-svc.refit-app.svc.cluster.local:9092"
 
 # Secret 이름 (External Secrets로 별도 관리)
 secretName: refit-backend-secret
