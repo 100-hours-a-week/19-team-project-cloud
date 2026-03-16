@@ -105,6 +105,15 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: refit-app
+  ignoreDifferences:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      jsonPointers:
+        - /status
+    - group: autoscaling
+      kind: HorizontalPodAutoscaler
+      jsonPointers:
+        - /status
   syncPolicy:
     automated:
       prune: true
