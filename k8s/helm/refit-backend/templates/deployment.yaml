@@ -4,6 +4,7 @@ metadata:
   name: refit-backend
   namespace: refit-app
 spec:
+  revisionHistoryLimit: 3
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:

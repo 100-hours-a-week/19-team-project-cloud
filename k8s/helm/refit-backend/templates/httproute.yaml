@@ -5,7 +5,9 @@ metadata:
   namespace: refit-app
 spec:
   parentRefs:
-  - name: {{ .Values.gateway.name }}
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    name: {{ .Values.gateway.name }}
   rules:
   - matches:
     {{- range .Values.gateway.pathPrefixes }}
@@ -14,5 +16,8 @@ spec:
         value: {{ . }}
     {{- end }}
     backendRefs:
-    - name: refit-backend-svc
+    - group: ""
+      kind: Service
+      name: refit-backend-svc
       port: {{ .Values.service.port }}
+      weight: 1
