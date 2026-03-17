@@ -1,0 +1,252 @@
+# Grafana Alloy
+# OTel Collector 대체 — DaemonSet (CP + Worker 전체 노드)
+# 파이프라인:
+#   Apps OTLP → memory_limiter → k8sattributes → resource → batch
+#     metrics → Prometheus remote_write
+#     logs    → Loki OTLP HTTP
+#     traces  → Tempo OTLP gRPC
+#   kubelet / cadvisor scrape → Prometheus remote_write
+#   filelog + k8s_events → Loki write
+
+alloy:
+  stabilityLevel: experimental  # loki.source.kubernetes_events 사용
+
+  configMap:
+    content: |
+      // ─── OTLP Receiver (Apps → Alloy) ───────────────────────────────────────
+      otelcol.receiver.otlp "default" {
+        grpc { endpoint = "0.0.0.0:4317" }
+        http { endpoint = "0.0.0.0:4318" }
+        output {
+          metrics = [otelcol.processor.memory_limiter.default.input]
+          logs    = [otelcol.processor.memory_limiter.default.input]
+          traces  = [otelcol.processor.memory_limiter.default.input]
+        }
+      }
+
+      // ─── Memory Limiter ──────────────────────────────────────────────────────
+      otelcol.processor.memory_limiter "default" {
+        check_interval  = "5s"
+        limit_mib       = 150
+        spike_limit_mib = 30
+        output {
+          metrics = [otelcol.processor.k8sattributes.default.input]
+          logs    = [otelcol.processor.k8sattributes.default.input]
+          traces  = [otelcol.processor.k8sattributes.default.input]
+        }
+      }
+
+      // ─── K8s Attributes (HPA 멀티 Pod 자동 태깅) ─────────────────────────────
+      otelcol.processor.k8sattributes "default" {
+        auth_type   = "serviceAccount"
+        passthrough = false
+        extract {
+          metadata = [
+            "k8s.pod.name",
+            "k8s.pod.uid",
+            "k8s.namespace.name",
+            "k8s.deployment.name",
+            "k8s.node.name",
+          ]
+        }
+        pod_association {
+          source { from = "resource_attribute"  name = "k8s.pod.ip" }
+        }
+        pod_association {
+          source { from = "connection" }
+        }
+        output {
+          metrics = [otelcol.processor.resource.default.input]
+          logs    = [otelcol.processor.resource.default.input]
+          traces  = [otelcol.processor.resource.default.input]
+        }
+      }
+
+      // ─── Resource Attributes ─────────────────────────────────────────────────
+      otelcol.processor.resource "default" {
+        attributes {
+          action = "insert"
+          key    = "deployment.environment"
+          value  = "prod"
+        }
+        attributes {
+          action = "insert"
+          key    = "cluster.name"
+          value  = "refit-k8s"
+        }
+        output {
+          metrics = [otelcol.processor.batch.default.input]
+          logs    = [otelcol.processor.batch.default.input]
+          traces  = [otelcol.processor.batch.default.input]
+        }
+      }
+
+      // ─── Batch ───────────────────────────────────────────────────────────────
+      otelcol.processor.batch "default" {
+        send_batch_size = 1000
+        timeout         = "5s"
+        output {
+          metrics = [otelcol.exporter.prometheusremotewrite.default.input]
+          logs    = [otelcol.exporter.otlphttp.loki.input]
+          traces  = [otelcol.exporter.otlp.tempo.input]
+        }
+      }
+
+      // ─── OTel Exporters ──────────────────────────────────────────────────────
+      otelcol.exporter.prometheusremotewrite "default" {
+        endpoint {
+          url = "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+          tls { insecure = true }
+        }
+      }
+
+      otelcol.exporter.otlphttp "loki" {
+        client {
+          endpoint = "http://loki-gateway.monitoring.svc.cluster.local/otlp"
+          tls { insecure = true }
+        }
+      }
+
+      otelcol.exporter.otlp "tempo" {
+        client {
+          endpoint = "tempo.monitoring.svc.cluster.local:4317"
+          tls { insecure = true }
+        }
+      }
+
+      // ─── Kubelet 메트릭 (node-exporter 대체) ─────────────────────────────────
+      prometheus.scrape "kubelet" {
+        targets = [{
+          __address__ = env("NODE_IP") + ":10250",
+          job         = "kubelet",
+          node        = env("NODE_NAME"),
+        }]
+        scheme            = "https"
+        scrape_interval   = "30s"
+        bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+        tls_config { insecure_skip_verify = true }
+        forward_to = [prometheus.remote_write.default.receiver]
+      }
+
+      // cAdvisor (컨테이너 CPU/메모리)
+      prometheus.scrape "cadvisor" {
+        targets = [{
+          __address__ = env("NODE_IP") + ":10250",
+          job         = "cadvisor",
+          node        = env("NODE_NAME"),
+        }]
+        metrics_path      = "/metrics/cadvisor"
+        scheme            = "https"
+        scrape_interval   = "30s"
+        bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+        tls_config { insecure_skip_verify = true }
+        forward_to = [prometheus.remote_write.default.receiver]
+      }
+
+      prometheus.remote_write "default" {
+        endpoint {
+          url = "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+        }
+      }
+
+      // ─── Container Logs ──────────────────────────────────────────────────────
+      local.file_match "pods" {
+        path_targets = [{"__path__" = "/var/log/pods/*/*/*.log"}]
+        sync_period  = "10s"
+      }
+
+      loki.source.file "pods" {
+        targets    = local.file_match.pods.targets
+        forward_to = [loki.process.pods.receiver]
+      }
+
+      loki.process "pods" {
+        stage.cri {}
+        stage.static_labels {
+          values = {
+            cluster     = "refit-k8s",
+            environment = "prod",
+          }
+        }
+        forward_to = [loki.write.default.receiver]
+      }
+
+      // ─── K8s Events ──────────────────────────────────────────────────────────
+      loki.source.kubernetes_events "events" {
+        namespaces = ["refit-app", "monitoring", "argocd", "kube-system"]
+        forward_to = [loki.write.default.receiver]
+      }
+
+      // ─── Loki Write ──────────────────────────────────────────────────────────
+      loki.write "default" {
+        endpoint {
+          url = "http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push"
+        }
+      }
+
+  extraEnv:
+    - name: NODE_IP
+      valueFrom:
+        fieldRef:
+          fieldPath: status.hostIP
+    - name: NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+
+  extraVolumeMounts:
+    - name: varlogpods
+      mountPath: /var/log/pods
+      readOnly: true
+    - name: varlibdockercontainers
+      mountPath: /var/lib/docker/containers
+      readOnly: true
+
+  extraPorts:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+      protocol: TCP
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+      protocol: TCP
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 300m
+      memory: 200Mi
+
+controller:
+  type: daemonset
+  tolerations:
+    - effect: NoSchedule
+      operator: Exists
+    - effect: NoExecute
+      operator: Exists
+  extraVolumes:
+    - name: varlogpods
+      hostPath:
+        path: /var/log/pods
+    - name: varlibdockercontainers
+      hostPath:
+        path: /var/lib/docker/containers
+
+rbac:
+  create: true
+
+serviceAccount:
+  create: true
+
+clusterRole:
+  create: true
+  rules:
+    - apiGroups: [""]
+      resources: ["pods", "namespaces", "nodes", "events"]
+      verbs: ["get", "list", "watch"]
+    - apiGroups: ["apps"]
+      resources: ["replicasets"]
+      verbs: ["get", "list", "watch"]

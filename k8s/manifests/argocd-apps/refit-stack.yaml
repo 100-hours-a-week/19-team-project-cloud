@@ -1,3 +1,119 @@
+# ---------------------------------------------------------------
+# Monitoring Stack (ArgoCD 2.6+ multi-source)
+# Helm repo chart + Git values 분리 방식
+# ---------------------------------------------------------------
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring-prometheus
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: "67.*"
+      helm:
+        valueFiles:
+          - $values/k8s/helm/monitoring/kube-prometheus-stack/values.yaml
+    - repoURL: https://github.com/100-hours-a-week/19-team-project-cloud.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring-loki
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: loki
+      targetRevision: "6.*"
+      helm:
+        valueFiles:
+          - $values/k8s/helm/monitoring/loki/values.yaml
+    - repoURL: https://github.com/100-hours-a-week/19-team-project-cloud.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring-tempo
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: tempo
+      targetRevision: "1.*"
+      helm:
+        valueFiles:
+          - $values/k8s/helm/monitoring/tempo/values.yaml
+    - repoURL: https://github.com/100-hours-a-week/19-team-project-cloud.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring-alloy
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: alloy
+      targetRevision: "0.*"
+      helm:
+        valueFiles:
+          - $values/k8s/helm/monitoring/alloy/values.yaml
+    - repoURL: https://github.com/100-hours-a-week/19-team-project-cloud.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+# ---------------------------------------------------------------
+# Foundation & Workload
+# ---------------------------------------------------------------
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -36,7 +152,6 @@ spec:
       prune: true
       selfHeal: true
 ---
-# ECR secret 갱신 CronJob (Redis/Kafka는 관리형 서비스로 이전)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -58,7 +173,6 @@ spec:
       prune: true
       selfHeal: true
 ---
-# Backend (Helm chart)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

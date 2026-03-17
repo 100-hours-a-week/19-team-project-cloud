@@ -37,6 +37,24 @@ spec:
           envFrom:
             - secretRef:
                 name: {{ .Values.envSecretName }}
+          env:
+            # OTel — 같은 노드의 DaemonSet Collector로 전송
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://$(NODE_IP):4317"
+            - name: OTEL_SERVICE_NAME
+              value: "refit-ai"
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: "deployment.environment=prod,k8s.namespace.name=refit-app"
+            - name: OTEL_TRACES_EXPORTER
+              value: "otlp"
+            - name: OTEL_METRICS_EXPORTER
+              value: "otlp"
+            - name: OTEL_LOGS_EXPORTER
+              value: "otlp"
           lifecycle:
             preStop:
               exec:

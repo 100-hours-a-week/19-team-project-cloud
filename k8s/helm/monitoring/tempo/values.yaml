@@ -1,0 +1,37 @@
+# Tempo
+# 수신: Grafana Alloy → OTLP gRPC (:4317)
+# 모드: SingleBinary
+
+tempo:
+  reportingEnabled: false
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
+  storage:
+    trace:
+      backend: local
+      local:
+        path: /var/tempo/traces
+  retention: 48h
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: "0.0.0.0:4317"
+        http:
+          endpoint: "0.0.0.0:4318"
+  # Span metrics / Service graph → Prometheus
+  metricsGenerator:
+    enabled: true
+    remoteWriteUrl: "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+
+persistence:
+  enabled: true
+  size: 10Gi
+
+nodeSelector:
+  node-role.kubernetes.io/worker: ""

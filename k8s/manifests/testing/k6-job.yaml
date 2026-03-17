@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: k6-load-test
+  namespace: refit-app
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+        - name: k6
+          image: grafana/k6:latest
+          # SCRIPT 환경변수로 시나리오 선택 (1-baseline / 2-load-test / 3-stress-test / 4-spike-test)
+          command: ["k6", "run", "-o", "experimental-prometheus-rw", "/scripts/$(SCRIPT)"]
+          env:
+            - name: SCRIPT
+              value: "2-load-test.js"
+            - name: K6_PROMETHEUS_RW_SERVER_URL
+              value: "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+            - name: K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM
+              value: "true"
+            - name: K6_PROMETHEUS_RW_STALE_MARKERS
+              value: "true"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          volumeMounts:
+            - name: k6-scripts
+              mountPath: /scripts
+      volumes:
+        - name: k6-scripts
+          configMap:
+            name: k6-scripts

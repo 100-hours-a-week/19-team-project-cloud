@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k6-scripts
+  namespace: refit-app
+data:
+  config.js: |
+    export const BASE_URL = 'http://refit-backend.refit-app.svc.cluster.local:8080';
+    export const thresholds = {
+      http_req_duration: ['p(95)<500', 'p(99)<1000'],
+      http_req_failed:   ['rate<0.01'],
+    };
+
+  1-baseline.js: |
+    import http from 'k6/http';
+    import { check, sleep } from 'k6';
+    import { BASE_URL, thresholds } from './config.js';
+    export const options = { vus: 5, duration: '3m', thresholds };
+    export default function () {
+      const res = http.get(`${BASE_URL}/actuator/health`);
+      check(res, { 'status 200': (r) => r.status === 200 });
+      sleep(1);
+    }
+
+  2-load-test.js: |
+    import http from 'k6/http';
+    import { check, sleep } from 'k6';
+    import { BASE_URL, thresholds } from './config.js';
+    export const options = {
+      stages: [
+        { duration: '2m', target: 10 },
+        { duration: '5m', target: 10 },
+        { duration: '2m', target: 0 },
+      ],
+      thresholds,
+    };
+    export default function () {
+      const res = http.get(`${BASE_URL}/actuator/health`);
+      check(res, { 'status 200': (r) => r.status === 200 });
+      sleep(1);
+    }
+
+  3-stress-test.js: |
+    import http from 'k6/http';
+    import { check, sleep } from 'k6';
+    import { BASE_URL, thresholds } from './config.js';
+    export const options = {
+      stages: [
+        { duration: '2m', target: 10 },
+        { duration: '2m', target: 20 },
+        { duration: '2m', target: 30 },
+        { duration: '2m', target: 40 },
+        { duration: '2m', target: 0 },
+      ],
+      thresholds,
+    };
+    export default function () {
+      const res = http.get(`${BASE_URL}/actuator/health`);
+      check(res, { 'status 200': (r) => r.status === 200 });
+      sleep(1);
+    }
+
+  4-spike-test.js: |
+    import http from 'k6/http';
+    import { check, sleep } from 'k6';
+    import { BASE_URL, thresholds } from './config.js';
+    export const options = {
+      stages: [
+        { duration: '1m', target: 5 },
+        { duration: '30s', target: 50 },
+        { duration: '1m', target: 5 },
+        { duration: '30s', target: 0 },
+      ],
+      thresholds,
+    };
+    export default function () {
+      const res = http.get(`${BASE_URL}/actuator/health`);
+      check(res, { 'status 200': (r) => r.status === 200 });
+      sleep(1);
+    }
