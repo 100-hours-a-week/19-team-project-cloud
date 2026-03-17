@@ -42,6 +42,14 @@ autoscaling:
   maxReplicas: 3
   targetCPUUtilizationPercentage: 70
 
+vpa:
+  enabled: true
+  updateMode: "Off"   # Off: 추천값만 수집, Auto로 변경하면 자동 적용
+  minAllowed:
+    memory: "512Mi"
+  maxAllowed:
+    memory: "4Gi"
+
 resources:
   requests:
     cpu: "500m"

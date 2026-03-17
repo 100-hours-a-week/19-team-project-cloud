@@ -1,0 +1,42 @@
+# VPA (Vertical Pod Autoscaler) Helm values
+# chart: fairwinds-stable/vpa
+
+# VPA Admission Controller: webhook으로 파드 생성 시 리소스를 자동 조정
+# updateMode: "Off" 로 운영 중이므로 실제 파드 변경은 없음
+# recommender와 admission-controller만 필요
+admissionController:
+  enabled: true
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+recommender:
+  enabled: true
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+updater:
+  enabled: true
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+# CRD 자동 설치
+crds:
+  create: true

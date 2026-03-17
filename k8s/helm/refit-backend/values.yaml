@@ -11,6 +11,14 @@ autoscaling:
   maxReplicas: 5
   targetCPUUtilizationPercentage: 70
 
+vpa:
+  enabled: true
+  updateMode: "Off"   # Off: 추천값만 수집, Auto로 변경하면 자동 적용
+  minAllowed:
+    memory: "256Mi"
+  maxAllowed:
+    memory: "1Gi"
+
 deploymentStrategy:
   type: RollingUpdate
   rollingUpdate:
