@@ -83,8 +83,9 @@ grafana:
   sidecar:
     dashboards:
       folder: /var/lib/grafana/dashboards
-      defaultFolderName: Kubernetes
       folderAnnotation: grafana_folder
+      provider:
+        foldersFromFilesStructure: true
     resources:
       requests:
         cpu: 10m
