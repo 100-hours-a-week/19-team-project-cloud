@@ -4,6 +4,19 @@
 # - 모든 컴포넌트: worker 노드 전용
 
 # ---------------------------------------------------------------
+# 불필요한 내부 컴포넌트 대시보드/스크레이프 비활성화
+# (Cilium이 kube-proxy 대체, etcd/scheduler/controller-manager 모니터링 불필요)
+# ---------------------------------------------------------------
+kubeEtcd:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+
+# ---------------------------------------------------------------
 # node-exporter 비활성화
 # ---------------------------------------------------------------
 nodeExporter:
@@ -56,6 +69,7 @@ prometheus:
 # Grafana
 # ---------------------------------------------------------------
 grafana:
+  defaultDashboardsFolder: Kubernetes
   admin:
     existingSecret: grafana-admin-secret
     userKey: admin-user
@@ -111,6 +125,14 @@ grafana:
     dashboardproviders.yaml:
       apiVersion: 1
       providers:
+        - name: loki
+          orgId: 1
+          folder: Loki
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/loki
         - name: cilium
           orgId: 1
           folder: Cilium / Hubble
@@ -120,6 +142,19 @@ grafana:
           options:
             path: /var/lib/grafana/dashboards/cilium
   dashboards:
+    loki:
+      loki-logs:
+        gnetId: 13639
+        revision: 2
+        datasource:
+          - name: DS_LOKI
+            value: Loki
+      loki-kubernetes-events:
+        gnetId: 15141
+        revision: 1
+        datasource:
+          - name: DS_LOKI
+            value: Loki
     cilium:
       cilium-agent:
         gnetId: 16611
@@ -128,10 +163,6 @@ grafana:
       cilium-operator:
         gnetId: 16612
         revision: 2
-        datasource: Prometheus
-      hubble-dns:
-        gnetId: 20940
-        revision: 1
         datasource: Prometheus
   nodeSelector:
     node-role.kubernetes.io/worker: ""
