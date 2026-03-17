@@ -68,7 +68,27 @@ kubectl create secret generic refit-eso-credentials \
   -n external-secrets
 ```
 
-### 6단계: ArgoCD Application 배포
+### 6단계: ArgoCD Gateway 커스텀 헬스체크 설정
+
+Cilium Gateway 서비스는 AWS LBC가 없으면 외부 IP가 `<pending>` 상태를 유지합니다.
+ArgoCD가 이를 Progressing으로 계속 판단하지 않도록 커스텀 헬스체크를 적용합니다.
+
+```bash
+kubectl -n argocd patch configmap argocd-cm --type merge -p "$(cat <<'EOF'
+{
+  "data": {
+    "resource.customizations.health.gateway.networking.k8s.io_Gateway": "hs = {}\nfor i, condition in ipairs(obj.status.conditions or {}) do\n  if condition.type == \"Accepted\" and condition.status == \"True\" then\n    hs.status = \"Healthy\"\n    hs.message = condition.message\n    return hs\n  end\nend\nhs.status = \"Progressing\"\nhs.message = \"Waiting for Gateway to be accepted\"\nreturn hs\n"
+  }
+}
+EOF
+)"
+
+# ArgoCD 재시작 (ConfigMap 반영)
+kubectl -n argocd rollout restart deployment argocd-server
+kubectl -n argocd rollout restart statefulset argocd-application-controller
+```
+
+### 7단계: ArgoCD Application 배포
 
 ```bash
 # ArgoCD가 GitHub 레포에 접근할 수 있도록 repo 등록 (private repo인 경우)

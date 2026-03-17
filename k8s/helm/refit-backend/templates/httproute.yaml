@@ -9,15 +9,20 @@ spec:
     kind: Gateway
     name: {{ .Values.gateway.name }}
   rules:
+  {{- range .Values.gateway.routes }}
   - matches:
-    {{- range .Values.gateway.pathPrefixes }}
+    {{- range .paths }}
     - path:
         type: PathPrefix
         value: {{ . }}
     {{- end }}
+    timeouts:
+      request: {{ .timeouts.request }}
+      backendRequest: {{ .timeouts.backendRequest }}
     backendRefs:
     - group: ""
       kind: Service
       name: refit-backend-svc
-      port: {{ .Values.service.port }}
+      port: {{ $.Values.service.port }}
       weight: 1
+  {{- end }}

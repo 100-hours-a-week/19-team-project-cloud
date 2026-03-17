@@ -39,9 +39,18 @@ service:
 
 gateway:
   name: refit-gateway
-  pathPrefixes:
-    - /api
-    - /actuator
+  routes:
+    - paths:
+        - /api/ws
+      timeouts:
+        request: "3600s"
+        backendRequest: "3600s"
+    - paths:
+        - /api
+        - /actuator
+      timeouts:
+        request: "60s"
+        backendRequest: "60s"
 
 startupProbe:
   httpGet:
