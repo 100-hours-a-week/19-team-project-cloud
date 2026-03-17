@@ -69,7 +69,6 @@ prometheus:
 # Grafana
 # ---------------------------------------------------------------
 grafana:
-  defaultDashboardsFolder: Kubernetes
   admin:
     existingSecret: grafana-admin-secret
     userKey: admin-user
@@ -82,6 +81,11 @@ grafana:
       cpu: 200m
       memory: 300Mi
   sidecar:
+    dashboards:
+      folder: /var/lib/grafana/dashboards
+      folderAnnotation: grafana_folder
+      provider:
+        foldersFromFilesStructure: true
     resources:
       requests:
         cpu: 10m
