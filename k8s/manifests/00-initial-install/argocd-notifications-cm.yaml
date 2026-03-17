@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-notifications-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-notifications-controller
+    app.kubernetes.io/part-of: argocd
+data:
+  # Discord webhook URL은 argocd-notifications-secret에서 주입
+  # kubectl create secret generic argocd-notifications-secret \
+  #   --from-literal=discord-ai-webhook-url=<WEBHOOK_URL> \
+  #   -n argocd
+  service.webhook.discord-ai: |
+    url: $discord-ai-webhook-url
+    headers:
+    - name: Content-Type
+      value: application/json
+
+  template.app-deployed: |
+    webhook:
+      discord-ai:
+        method: POST
+        body: |
+          {
+            "embeds": [{
+              "title": "✅ AI 배포 완료",
+              "description": "**{{.app.metadata.name}}** 이미지 배포가 완료되었습니다.",
+              "color": 3066993,
+              "fields": [
+                {"name": "서비스", "value": "Re-Fit AI (Prod)", "inline": true},
+                {"name": "상태", "value": "Synced & Healthy", "inline": true},
+                {"name": "ArgoCD", "value": "[앱 보기](https://argocd.refit.kr/applications/{{.app.metadata.name}})", "inline": false}
+              ],
+              "footer": {"text": "Re-Fit Prod · ArgoCD Notifications"},
+              "timestamp": "{{.app.status.operationState.finishedAt}}"
+            }]
+          }
+
+  template.app-sync-failed: |
+    webhook:
+      discord-ai:
+        method: POST
+        body: |
+          {
+            "embeds": [{
+              "title": "❌ AI 배포 실패",
+              "description": "**{{.app.metadata.name}}** 배포가 실패했습니다.",
+              "color": 15158332,
+              "fields": [
+                {"name": "서비스", "value": "Re-Fit AI (Prod)", "inline": true},
+                {"name": "오류", "value": "{{.app.status.operationState.message}}", "inline": false},
+                {"name": "워크플로우", "value": "[상세 보기](https://argocd.refit.kr/applications/{{.app.metadata.name}})", "inline": false}
+              ],
+              "footer": {"text": "Re-Fit Prod · ArgoCD Notifications"},
+              "timestamp": "{{.app.status.operationState.finishedAt}}"
+            }]
+          }
+
+  trigger.on-sync-succeeded: |
+    - when: app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy'
+      oncePer: app.status.operationState.syncResult.revision
+      send: [app-deployed]
+
+  trigger.on-sync-failed: |
+    - when: app.status.operationState.phase in ['Error', 'Failed']
+      oncePer: app.status.operationState.syncResult.revision
+      send: [app-sync-failed]

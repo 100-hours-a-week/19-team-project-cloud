@@ -1,0 +1,33 @@
+# Cilium v1.19.1 (argo-cd chart: cilium-1.19.1)
+# helm repo add cilium https://helm.cilium.io
+# helm install cilium cilium/cilium --version 1.19.1 -n kube-system -f cilium-values.yaml
+#
+# NOTE: k8sServiceHost는 클러스터 재구성 시 NLB DNS로 교체 필요
+#   단일 마스터: 마스터 노드 IP
+#   HA 구성:    NLB DNS (e.g. k8s-cp-nlb-xxxx.elb.ap-northeast-2.amazonaws.com)
+
+envoy:
+  enabled: true
+
+gatewayAPI:
+  enabled: true
+  serviceType: NodePort
+
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+
+ipam:
+  mode: kubernetes
+
+# HA 구성 (3 master) - NLB DNS
+k8sServiceHost: refit-k8s-cp-nlb-d4b7b4ab87ff588f.elb.ap-northeast-2.amazonaws.com
+k8sServicePort: 6443
+
+kubeProxyReplacement: true
+
+routingMode: tunnel
+tunnelProtocol: vxlan

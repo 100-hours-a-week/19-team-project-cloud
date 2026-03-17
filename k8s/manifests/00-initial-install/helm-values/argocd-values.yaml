@@ -1,0 +1,16 @@
+# ArgoCD v3.3.3 (chart: argo-cd-9.4.10)
+# helm repo add argo https://argoproj.github.io/argo-helm
+# helm install argocd argo/argo-cd --version 9.4.10 -n argocd --create-namespace -f argocd-values.yaml
+
+applicationSet:
+  enabled: false
+
+dex:
+  enabled: false
+
+notifications:
+  enabled: false
+
+server:
+  service:
+    type: ClusterIP
