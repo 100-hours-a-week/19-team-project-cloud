@@ -125,6 +125,14 @@ grafana:
     dashboardproviders.yaml:
       apiVersion: 1
       providers:
+        - name: kubernetes
+          orgId: 1
+          folder: Kubernetes
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/kubernetes
         - name: loki
           orgId: 1
           folder: Loki
@@ -142,6 +150,13 @@ grafana:
           options:
             path: /var/lib/grafana/dashboards/cilium
   dashboards:
+    kubernetes:
+      kubernetes-all-in-one-kr:
+        gnetId: 23000
+        revision: 1
+        datasource:
+          - name: DS_PROMETHEUS
+            value: Prometheus
     loki:
       loki-logs:
         gnetId: 13639

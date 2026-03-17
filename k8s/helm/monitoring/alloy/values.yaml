@@ -142,6 +142,19 @@ alloy:
         forward_to = [prometheus.remote_write.default.receiver]
       }
 
+      // node-exporter 대체 — node_* 메트릭 수집 (dashboard 23000 등에서 사용)
+      prometheus.exporter.unix "node" {
+        rootfs_path = "/host/root"
+        proc_path   = "/host/proc"
+        sys_path    = "/host/sys"
+      }
+
+      prometheus.scrape "unix_node" {
+        targets         = prometheus.exporter.unix.node.targets
+        scrape_interval = "30s"
+        forward_to      = [prometheus.remote_write.default.receiver]
+      }
+
       prometheus.scrape "hubble" {
         targets = [{
           __address__ = env("NODE_IP") + ":9965",
@@ -207,6 +220,16 @@ alloy:
     - name: varlibdockercontainers
       mountPath: /var/lib/docker/containers
       readOnly: true
+    - name: hostproc
+      mountPath: /host/proc
+      readOnly: true
+    - name: hostsys
+      mountPath: /host/sys
+      readOnly: true
+    - name: hostroot
+      mountPath: /host/root
+      readOnly: true
+      mountPropagation: HostToContainer
 
   extraPorts:
     - name: otlp-grpc
@@ -242,6 +265,15 @@ controller:
     - name: varlibdockercontainers
       hostPath:
         path: /var/lib/docker/containers
+    - name: hostproc
+      hostPath:
+        path: /proc
+    - name: hostsys
+      hostPath:
+        path: /sys
+    - name: hostroot
+      hostPath:
+        path: /
 
 rbac:
   create: true
