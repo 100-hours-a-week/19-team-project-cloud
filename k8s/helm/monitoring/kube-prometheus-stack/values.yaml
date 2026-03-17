@@ -1,0 +1,138 @@
+# kube-prometheus-stack
+# - node-exporter 미사용: Alloy kubelet scrape로 대체
+# - admissionWebhooks 비활성화: kubeadm 소규모 클러스터
+# - 모든 컴포넌트: worker 노드 전용
+
+# ---------------------------------------------------------------
+# node-exporter 비활성화
+# ---------------------------------------------------------------
+nodeExporter:
+  enabled: false
+prometheus-node-exporter:
+  enabled: false
+
+# ---------------------------------------------------------------
+# PrometheusOperator
+# ---------------------------------------------------------------
+prometheusOperator:
+  admissionWebhooks:
+    enabled: false
+  tls:
+    enabled: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 100Mi
+    limits:
+      cpu: 200m
+      memory: 200Mi
+  nodeSelector:
+    node-role.kubernetes.io/worker: ""
+
+# ---------------------------------------------------------------
+# Prometheus
+# ---------------------------------------------------------------
+prometheus:
+  prometheusSpec:
+    retention: 3d
+    retentionSize: "8GB"
+    enableRemoteWriteReceiver: true        # Alloy remote_write 수신
+    ruleSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    resources:
+      requests:
+        cpu: 100m
+        memory: 400Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+    nodeSelector:
+      node-role.kubernetes.io/worker: ""
+
+# ---------------------------------------------------------------
+# Grafana
+# ---------------------------------------------------------------
+grafana:
+  admin:
+    existingSecret: grafana-admin-secret
+    userKey: admin-user
+    passwordKey: admin-password
+  resources:
+    requests:
+      cpu: 50m
+      memory: 150Mi
+    limits:
+      cpu: 200m
+      memory: 300Mi
+  sidecar:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 50Mi
+      limits:
+        cpu: 100m
+        memory: 100Mi
+  persistence:
+    enabled: false
+  service:
+    type: NodePort
+    nodePort: 32000
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      uid: loki
+      url: http://loki-gateway.monitoring.svc.cluster.local
+      access: proxy
+      jsonData:
+        derivedFields:
+          - name: TraceID
+            matcherRegex: '"traceId":"(\w+)"'
+            url: "${__value.raw}"
+            datasourceUid: tempo
+    - name: Tempo
+      type: tempo
+      uid: tempo
+      url: http://tempo.monitoring.svc.cluster.local:3100
+      access: proxy
+      jsonData:
+        tracesToLogsV2:
+          datasourceUid: loki
+          filterByTraceID: true
+        tracesToMetrics:
+          datasourceUid: prometheus
+        serviceMap:
+          datasourceUid: prometheus
+        nodeGraph:
+          enabled: true
+  nodeSelector:
+    node-role.kubernetes.io/worker: ""
+
+# ---------------------------------------------------------------
+# AlertManager
+# ---------------------------------------------------------------
+alertmanager:
+  alertmanagerSpec:
+    resources:
+      requests:
+        cpu: 20m
+        memory: 50Mi
+      limits:
+        cpu: 100m
+        memory: 100Mi
+    nodeSelector:
+      node-role.kubernetes.io/worker: ""
+
+# ---------------------------------------------------------------
+# kube-state-metrics
+# ---------------------------------------------------------------
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+  nodeSelector:
+    node-role.kubernetes.io/worker: ""
