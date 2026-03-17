@@ -29,5 +29,9 @@ k8sServicePort: 6443
 
 kubeProxyReplacement: true
 
+# hostNetwork 파드(Alloy DaemonSet)에서 ClusterIP 서비스 접근 허용
+# bpf-lb-sock=false 시 hostNetwork 파드 → ClusterIP 연결 불가 (EPERM)
+bpfLBSock: true
+
 routingMode: tunnel
 tunnelProtocol: vxlan
