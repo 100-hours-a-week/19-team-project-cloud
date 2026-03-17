@@ -1,0 +1,15 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: argocd-route
+  namespace: argocd
+spec:
+  parentRefs:
+  - name: refit-gateway
+    namespace: refit-app
+  hostnames:
+  - "argocd.re-fit.kr"
+  rules:
+  - backendRefs:
+    - name: argocd-server
+      port: 80

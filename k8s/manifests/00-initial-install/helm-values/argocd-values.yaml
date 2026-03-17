@@ -11,6 +11,10 @@ dex:
 notifications:
   enabled: false
 
+configs:
+  params:
+    server.insecure: true
+
 server:
   service:
     type: ClusterIP
