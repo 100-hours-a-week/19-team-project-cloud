@@ -17,7 +17,7 @@ metadata:
 spec:
   hard:
     requests.memory: "4Gi"
-    limits.memory: "8Gi"
+    limits.memory: "10Gi"
     pods: "25"
 ---
 apiVersion: v1
