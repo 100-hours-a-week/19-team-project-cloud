@@ -17,6 +17,8 @@ prometheus-node-exporter:
 prometheusOperator:
   admissionWebhooks:
     enabled: false
+    patch:
+      enabled: false      # cert-patch Job 비활성화 → kube-prometheus-stack-admission secret 미생성
   tls:
     enabled: false
   resources:
@@ -105,6 +107,32 @@ grafana:
           datasourceUid: prometheus
         nodeGraph:
           enabled: true
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: cilium
+          orgId: 1
+          folder: Cilium / Hubble
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/cilium
+  dashboards:
+    cilium:
+      cilium-agent:
+        gnetId: 16611
+        revision: 2
+        datasource: Prometheus
+      cilium-operator:
+        gnetId: 16612
+        revision: 2
+        datasource: Prometheus
+      hubble-dns:
+        gnetId: 20940
+        revision: 1
+        datasource: Prometheus
   nodeSelector:
     node-role.kubernetes.io/worker: ""
 

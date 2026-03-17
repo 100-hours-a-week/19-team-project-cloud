@@ -51,3 +51,10 @@ test:
   enabled: false
 lokiCanary:
   enabled: false
+
+# SingleBinary + filesystem 모드에서 memcached 캐시 불필요
+# 기본값 enabled=true이면 9Gi+ 메모리 낭비
+chunksCache:
+  enabled: false
+resultsCache:
+  enabled: false
