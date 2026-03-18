@@ -102,7 +102,7 @@ grafana:
     - name: Loki
       type: loki
       uid: loki
-      url: http://loki-gateway.monitoring.svc.cluster.local
+      url: http://monitoring-loki-gateway.monitoring.svc.cluster.local
       access: proxy
       jsonData:
         derivedFields:
@@ -113,7 +113,7 @@ grafana:
     - name: Tempo
       type: tempo
       uid: tempo
-      url: http://tempo.monitoring.svc.cluster.local:3100
+      url: http://monitoring-tempo.monitoring.svc.cluster.local:3200
       access: proxy
       jsonData:
         tracesToLogsV2:

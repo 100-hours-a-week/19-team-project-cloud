@@ -99,7 +99,7 @@ alloy:
 
       otelcol.exporter.otlphttp "loki" {
         client {
-          endpoint = "http://loki-gateway.monitoring.svc.cluster.local/otlp"
+          endpoint = "http://monitoring-loki-gateway.monitoring.svc.cluster.local/otlp"
           tls {
             insecure = true
           }
@@ -108,7 +108,7 @@ alloy:
 
       otelcol.exporter.otlp "tempo" {
         client {
-          endpoint = "tempo.monitoring.svc.cluster.local:4317"
+          endpoint = "monitoring-tempo.monitoring.svc.cluster.local:4317"
           tls {
             insecure = true
           }
@@ -145,8 +145,8 @@ alloy:
       // node-exporter 대체 — node_* 메트릭 수집 (dashboard 23000 등에서 사용)
       prometheus.exporter.unix "node" {
         rootfs_path = "/host/root"
-        proc_path   = "/host/proc"
-        sys_path    = "/host/sys"
+        procfs_path = "/host/proc"
+        sysfs_path  = "/host/sys"
       }
 
       prometheus.scrape "unix_node" {
@@ -167,7 +167,7 @@ alloy:
 
       prometheus.remote_write "default" {
         endpoint {
-          url = "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+          url = "http://monitoring-prometheus-kube-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
         }
       }
 
@@ -199,7 +199,7 @@ alloy:
 
       loki.write "default" {
         endpoint {
-          url = "http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push"
+          url = "http://monitoring-loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push"
         }
       }
 
@@ -212,24 +212,6 @@ alloy:
       valueFrom:
         fieldRef:
           fieldPath: spec.nodeName
-
-  extraVolumeMounts:
-    - name: varlogpods
-      mountPath: /var/log/pods
-      readOnly: true
-    - name: varlibdockercontainers
-      mountPath: /var/lib/docker/containers
-      readOnly: true
-    - name: hostproc
-      mountPath: /host/proc
-      readOnly: true
-    - name: hostsys
-      mountPath: /host/sys
-      readOnly: true
-    - name: hostroot
-      mountPath: /host/root
-      readOnly: true
-      mountPropagation: HostToContainer
 
   extraPorts:
     - name: otlp-grpc
@@ -258,6 +240,23 @@ controller:
       operator: Exists
     - effect: NoExecute
       operator: Exists
+  extraVolumeMounts:
+    - name: varlogpods
+      mountPath: /var/log/pods
+      readOnly: true
+    - name: varlibdockercontainers
+      mountPath: /var/lib/docker/containers
+      readOnly: true
+    - name: hostproc
+      mountPath: /host/proc
+      readOnly: true
+    - name: hostsys
+      mountPath: /host/sys
+      readOnly: true
+    - name: hostroot
+      mountPath: /host/root
+      readOnly: true
+      mountPropagation: HostToContainer
   extraVolumes:
     - name: varlogpods
       hostPath:
