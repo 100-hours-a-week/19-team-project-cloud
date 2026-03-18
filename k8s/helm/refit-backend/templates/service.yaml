@@ -6,6 +6,10 @@ metadata:
 spec:
   selector:
     app: refit-backend
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 3600
   ports:
   - protocol: TCP
     port: {{ .Values.service.port }}
