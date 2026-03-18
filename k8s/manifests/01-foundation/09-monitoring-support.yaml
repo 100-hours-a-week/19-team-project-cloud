@@ -1,3 +1,26 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: monitoring-tempo
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: tempo
+    app.kubernetes.io/instance: monitoring-tempo
+spec:
+  namespaceSelector:
+    matchNames:
+      - monitoring
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tempo
+      app.kubernetes.io/instance: monitoring-tempo
+  endpoints:
+    - port: tempo-prom-metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      honorLabels: true
+
+---
 apiVersion: v1
 kind: Service
 metadata:

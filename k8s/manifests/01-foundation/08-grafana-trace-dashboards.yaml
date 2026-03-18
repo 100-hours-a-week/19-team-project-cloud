@@ -6,7 +6,6 @@ metadata:
   labels:
     grafana_dashboard: "1"
   annotations:
-    grafana_folder: Observability
     refit.dev/dashboard-source: https://grafana.com/grafana/dashboards/21202-service-performance-monitoring/
 data:
   span-metric-service-performance-monitoring.json: |

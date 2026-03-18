@@ -6,7 +6,6 @@ metadata:
   labels:
     grafana_dashboard: "1"
   annotations:
-    grafana_folder: Observability
     refit.dev/dashboard-source: https://grafana.com/grafana/dashboards/19665-k6-prometheus/
 data:
   k6-prometheus-official.json: |
@@ -2098,7 +2097,6 @@ metadata:
   labels:
     grafana_dashboard: "1"
   annotations:
-    grafana_folder: Kubernetes
     refit.dev/dashboard-source: https://grafana.com/grafana/dashboards/22251-kubernetes-autoscaling-horizontal-pod-autoscaler/
 data:
   kubernetes-autoscaling-horizontal-pod-autoscaler.json: |
