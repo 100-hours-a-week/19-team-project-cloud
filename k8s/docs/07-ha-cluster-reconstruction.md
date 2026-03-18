@@ -361,12 +361,14 @@ kubectl create secret generic refit-ai-secret \
   --from-literal=GOOGLE_API_KEYS=<API_KEYS> \
   --from-literal=INTERNAL_API_KEY=<KEY> \
   --from-literal=INTERNAL_API_KEY_HEADER=<HEADER> \
-  --from-literal=OTEL_EXPORTER_OTLP_ENDPOINT=<OTLP_URL> \
   --from-literal=LANGFUSE_SECRET_KEY=<LANGFUSE_SK> \
   --from-literal=LANGFUSE_PUBLIC_KEY=<LANGFUSE_PK> \
   --from-literal=LANGFUSE_HOST=<LANGFUSE_HOST> \
   -n refit-app
 ```
+
+> OTLP endpoint는 Secret에 넣지 않습니다.
+> K8s 배포에서 AI/Backend 모두 `http://$(NODE_IP):4318`로 노드 로컬 Alloy에 전송합니다.
 
 ### ⑫⑬ ArgoCD 알림 및 앱 배포
 

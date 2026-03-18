@@ -108,7 +108,10 @@ kubectl apply -f argocd-apps/refit-stack.yaml
 | `refit-eso-credentials` | external-secrets | AWS IAM 자격증명 (Secrets Manager 접근용) |
 | `refit-ai-secret` | refit-app | AI 서비스 런타임 환경변수 (AI 팀 관리) |
 
-> `refit-ai-secret`에 필요한 키 목록: `DATABASE_URL`, `BACKEND_API_URL`, `GOOGLE_APPLICATION_CREDENTIALS`, `GCP_PROJECT_ID`, `GCP_LOCATION`, `GOOGLE_API_KEYS`, `INTERNAL_API_KEY`, `INTERNAL_API_KEY_HEADER`, `OTEL_EXPORTER_OTLP_ENDPOINT`
+> `refit-ai-secret`에 필요한 키 목록: `DATABASE_URL`, `BACKEND_API_URL`, `GOOGLE_APPLICATION_CREDENTIALS`, `GCP_PROJECT_ID`, `GCP_LOCATION`, `GOOGLE_API_KEYS`, `INTERNAL_API_KEY`, `INTERNAL_API_KEY_HEADER`
+
+> AI 서비스의 OTLP 엔드포인트는 Secret이 아니라 Deployment에서 노드 로컬 Alloy로 주입합니다.
+> 현재 기준 값은 `http://$(NODE_IP):4318` + `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf` 입니다.
 
 > `ecr-secret`은 ECR CronJob이 6시간마다 자동 생성하므로 수동 생성 불필요.
 > 단, 초기 배포 직후 CronJob 첫 실행 전까지는 수동으로 한 번 생성 필요.

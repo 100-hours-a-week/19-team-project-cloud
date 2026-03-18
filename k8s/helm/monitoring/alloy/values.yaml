@@ -94,6 +94,19 @@ alloy:
 
       // OTel 메트릭 → Prometheus 포맷 변환 후 remote_write
       otelcol.exporter.prometheus "otel" {
+        resource_to_telemetry_conversion = true
+        forward_to = [prometheus.relabel.otel.receiver]
+      }
+
+      prometheus.relabel "otel" {
+        rule {
+          target_label = "cluster"
+          replacement  = "refit-k8s"
+        }
+        rule {
+          target_label = "environment"
+          replacement  = "prod"
+        }
         forward_to = [prometheus.remote_write.default.receiver]
       }
 
@@ -120,12 +133,14 @@ alloy:
           __address__ = env("NODE_IP") + ":10250",
           job         = "kubelet",
           node        = env("NODE_NAME"),
+          cluster     = "refit-k8s",
+          environment = "prod",
         }]
         scheme            = "https"
         scrape_interval   = "30s"
         bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
         tls_config { insecure_skip_verify = true }
-        forward_to = [prometheus.remote_write.default.receiver]
+        forward_to = [prometheus.relabel.infra.receiver]
       }
 
       prometheus.scrape "cadvisor" {
@@ -133,13 +148,15 @@ alloy:
           __address__ = env("NODE_IP") + ":10250",
           job         = "cadvisor",
           node        = env("NODE_NAME"),
+          cluster     = "refit-k8s",
+          environment = "prod",
         }]
         metrics_path      = "/metrics/cadvisor"
         scheme            = "https"
         scrape_interval   = "30s"
         bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
         tls_config { insecure_skip_verify = true }
-        forward_to = [prometheus.remote_write.default.receiver]
+        forward_to = [prometheus.relabel.infra.receiver]
       }
 
       // node-exporter 대체 — node_* 메트릭 수집 (dashboard 23000 등에서 사용)
@@ -156,12 +173,22 @@ alloy:
           target_label = "job"
           replacement  = "node-exporter"
         }
+
+        rule {
+          target_label = "cluster"
+          replacement  = "refit-k8s"
+        }
+
+        rule {
+          target_label = "environment"
+          replacement  = "prod"
+        }
       }
 
       prometheus.scrape "unix_node" {
         targets         = discovery.relabel.unix_node_compat.output
         scrape_interval = "30s"
-        forward_to      = [prometheus.remote_write.default.receiver]
+        forward_to      = [prometheus.relabel.infra.receiver]
       }
 
       prometheus.scrape "hubble" {
@@ -169,9 +196,23 @@ alloy:
           __address__ = env("NODE_IP") + ":9965",
           job         = "hubble",
           node        = env("NODE_NAME"),
+          cluster     = "refit-k8s",
+          environment = "prod",
         }]
         scrape_interval = "30s"
-        forward_to      = [prometheus.remote_write.default.receiver]
+        forward_to      = [prometheus.relabel.infra.receiver]
+      }
+
+      prometheus.relabel "infra" {
+        rule {
+          target_label = "cluster"
+          replacement  = "refit-k8s"
+        }
+        rule {
+          target_label = "environment"
+          replacement  = "prod"
+        }
+        forward_to = [prometheus.remote_write.default.receiver]
       }
 
       prometheus.remote_write "default" {
