@@ -292,8 +292,8 @@ spec:
         - /status
     - group: external-secrets.io
       kind: ExternalSecret
-      jsonPointers:
-        - /metadata/annotations
+      jqPathExpressions:
+        - .metadata.annotations
   syncPolicy:
     automated:
       prune: true
