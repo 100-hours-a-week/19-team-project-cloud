@@ -96,8 +96,7 @@ grafana:
   persistence:
     enabled: false
   service:
-    type: NodePort
-    nodePort: 32000
+    type: ClusterIP
   additionalDataSources:
     - name: Loki
       type: loki
