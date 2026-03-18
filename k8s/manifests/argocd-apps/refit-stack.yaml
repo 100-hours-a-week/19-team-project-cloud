@@ -12,7 +12,7 @@ spec:
   sources:
     - repoURL: https://prometheus-community.github.io/helm-charts
       chart: kube-prometheus-stack
-      targetRevision: "67.*"
+      targetRevision: "67.9.0"
       helm:
         valueFiles:
           - $values/k8s/helm/monitoring/kube-prometheus-stack/values.yaml
@@ -290,6 +290,10 @@ spec:
       kind: HorizontalPodAutoscaler
       jsonPointers:
         - /status
+    - group: external-secrets.io
+      kind: ExternalSecret
+      jsonPointers:
+        - /metadata/annotations
   syncPolicy:
     automated:
       prune: true
