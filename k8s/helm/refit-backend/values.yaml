@@ -1,6 +1,6 @@
 image:
   repository: 807210685804.dkr.ecr.ap-northeast-2.amazonaws.com/refit-backend
-  tag: "develop-cafe0a7"
+  tag: "develop-2f71423"
   pullPolicy: IfNotPresent
 
 replicaCount: 2
