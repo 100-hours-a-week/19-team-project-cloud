@@ -27,7 +27,15 @@ tempo:
   # Span metrics / Service graph → Prometheus
   metricsGenerator:
     enabled: true
-    remoteWriteUrl: "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+    remoteWriteUrl: "http://monitoring-prometheus-kube-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+  overrides:
+    defaults:
+      metrics_generator:
+        processors:
+          - service-graphs
+          - span-metrics
+          - local-blocks
+    per_tenant_override_config: ""
 
 persistence:
   enabled: true

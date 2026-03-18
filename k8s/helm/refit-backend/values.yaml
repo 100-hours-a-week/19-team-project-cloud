@@ -62,7 +62,7 @@ gateway:
 
 startupProbe:
   httpGet:
-    path: /actuator/health
+    path: /actuator/health/readiness
     port: 8080
   initialDelaySeconds: 20
   periodSeconds: 10

@@ -4,12 +4,12 @@
 # - 모든 컴포넌트: worker 노드 전용
 
 # ---------------------------------------------------------------
-# 불필요한 내부 컴포넌트 대시보드/스크레이프 비활성화
-# (Cilium이 kube-proxy 대체, etcd/scheduler/controller-manager 모니터링 불필요)
+# kubeadm HA control plane은 별도 Service/ServiceMonitor 매니페스트로 관리
+# (Cilium이 kube-proxy 대체이므로 kube-proxy는 제외)
 # ---------------------------------------------------------------
-kubeEtcd:
-  enabled: false
 kubeControllerManager:
+  enabled: false
+kubeEtcd:
   enabled: false
 kubeScheduler:
   enabled: false

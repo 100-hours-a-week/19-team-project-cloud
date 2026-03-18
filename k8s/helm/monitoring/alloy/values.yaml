@@ -203,6 +203,153 @@ alloy:
         forward_to      = [prometheus.relabel.infra.receiver]
       }
 
+      discovery.kubernetes "nodes" {
+        role = "node"
+      }
+
+      discovery.relabel "self_control_plane" {
+        targets = discovery.kubernetes.nodes.targets
+
+        rule {
+          source_labels = ["__meta_kubernetes_node_name"]
+          regex         = env("NODE_NAME")
+          action        = "keep"
+        }
+
+        rule {
+          source_labels = ["__meta_kubernetes_node_labelpresent_node_role_kubernetes_io_control_plane"]
+          regex         = "true"
+          action        = "keep"
+        }
+      }
+
+      discovery.relabel "kube_scheduler_local" {
+        targets = discovery.relabel.self_control_plane.output
+
+        rule {
+          target_label = "__address__"
+          replacement  = "127.0.0.1:10259"
+        }
+
+        rule {
+          source_labels = ["__meta_kubernetes_node_name"]
+          target_label  = "node"
+        }
+
+        rule {
+          target_label = "job"
+          replacement  = "kube-scheduler"
+        }
+
+        rule {
+          target_label = "component"
+          replacement  = "kube-scheduler"
+        }
+
+        rule {
+          target_label = "cluster"
+          replacement  = "refit-k8s"
+        }
+
+        rule {
+          target_label = "environment"
+          replacement  = "prod"
+        }
+      }
+
+      prometheus.scrape "kube_scheduler_local" {
+        targets           = discovery.relabel.kube_scheduler_local.output
+        scheme            = "https"
+        scrape_interval   = "30s"
+        bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+        tls_config { insecure_skip_verify = true }
+        forward_to = [prometheus.relabel.infra.receiver]
+      }
+
+      discovery.relabel "kube_controller_manager_local" {
+        targets = discovery.relabel.self_control_plane.output
+
+        rule {
+          target_label = "__address__"
+          replacement  = "127.0.0.1:10257"
+        }
+
+        rule {
+          source_labels = ["__meta_kubernetes_node_name"]
+          target_label  = "node"
+        }
+
+        rule {
+          target_label = "job"
+          replacement  = "kube-controller-manager"
+        }
+
+        rule {
+          target_label = "component"
+          replacement  = "kube-controller-manager"
+        }
+
+        rule {
+          target_label = "cluster"
+          replacement  = "refit-k8s"
+        }
+
+        rule {
+          target_label = "environment"
+          replacement  = "prod"
+        }
+      }
+
+      prometheus.scrape "kube_controller_manager_local" {
+        targets           = discovery.relabel.kube_controller_manager_local.output
+        scheme            = "https"
+        scrape_interval   = "30s"
+        bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+        tls_config { insecure_skip_verify = true }
+        forward_to = [prometheus.relabel.infra.receiver]
+      }
+
+      discovery.relabel "etcd_local" {
+        targets = discovery.relabel.self_control_plane.output
+
+        rule {
+          target_label = "__address__"
+          replacement  = "127.0.0.1:2381"
+        }
+
+        rule {
+          source_labels = ["__meta_kubernetes_node_name"]
+          target_label  = "node"
+        }
+
+        rule {
+          target_label = "job"
+          replacement  = "etcd"
+        }
+
+        rule {
+          target_label = "component"
+          replacement  = "etcd"
+        }
+
+        rule {
+          target_label = "cluster"
+          replacement  = "refit-k8s"
+        }
+
+        rule {
+          target_label = "environment"
+          replacement  = "prod"
+        }
+      }
+
+      prometheus.scrape "etcd_local" {
+        targets         = discovery.relabel.etcd_local.output
+        scheme          = "http"
+        scrape_interval = "30s"
+        forward_to      = [prometheus.relabel.infra.receiver]
+      }
+
       prometheus.relabel "infra" {
         rule {
           target_label = "cluster"

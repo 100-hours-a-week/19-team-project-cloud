@@ -5,7 +5,7 @@ metadata:
   namespace: refit-app
 data:
   config.js: |
-    export const BASE_URL = 'http://refit-backend.refit-app.svc.cluster.local:8080';
+    export const BASE_URL = 'http://refit-backend-svc.refit-app.svc.cluster.local:8080';
     export const thresholds = {
       http_req_duration: ['p(95)<500', 'p(99)<1000'],
       http_req_failed:   ['rate<0.01'],
@@ -17,7 +17,7 @@ data:
     import { BASE_URL, thresholds } from './config.js';
     export const options = { vus: 5, duration: '3m', thresholds };
     export default function () {
-      const res = http.get(`${BASE_URL}/actuator/health`);
+      const res = http.get(`${BASE_URL}/actuator/health/readiness`);
       check(res, { 'status 200': (r) => r.status === 200 });
       sleep(1);
     }
@@ -35,7 +35,7 @@ data:
       thresholds,
     };
     export default function () {
-      const res = http.get(`${BASE_URL}/actuator/health`);
+      const res = http.get(`${BASE_URL}/actuator/health/readiness`);
       check(res, { 'status 200': (r) => r.status === 200 });
       sleep(1);
     }
@@ -55,7 +55,7 @@ data:
       thresholds,
     };
     export default function () {
-      const res = http.get(`${BASE_URL}/actuator/health`);
+      const res = http.get(`${BASE_URL}/actuator/health/readiness`);
       check(res, { 'status 200': (r) => r.status === 200 });
       sleep(1);
     }
@@ -74,7 +74,7 @@ data:
       thresholds,
     };
     export default function () {
-      const res = http.get(`${BASE_URL}/actuator/health`);
+      const res = http.get(`${BASE_URL}/actuator/health/readiness`);
       check(res, { 'status 200': (r) => r.status === 200 });
       sleep(1);
     }
