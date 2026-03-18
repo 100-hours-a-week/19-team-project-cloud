@@ -74,13 +74,18 @@ grafana:
     existingSecret: grafana-admin-secret
     userKey: admin-user
     passwordKey: admin-password
+  image:
+    tag: 11.6.0
+  plugins:
+    - https://storage.googleapis.com/integration-artifacts/grafana-lokiexplore-app/release/main/any/grafana-lokiexplore-app-main.zip;grafana-lokiexplore-app
+    - https://storage.googleapis.com/integration-artifacts/grafana-exploretraces-app/grafana-exploretraces-app-latest.zip;grafana-traces-app
   resources:
     requests:
       cpu: 50m
-      memory: 150Mi
+      memory: 200Mi
     limits:
       cpu: 200m
-      memory: 300Mi
+      memory: 512Mi
   sidecar:
     dashboards:
       folder: /var/lib/grafana/dashboards
