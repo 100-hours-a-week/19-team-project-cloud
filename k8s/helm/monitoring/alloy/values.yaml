@@ -149,8 +149,17 @@ alloy:
         sysfs_path  = "/host/sys"
       }
 
+      discovery.relabel "unix_node_compat" {
+        targets = prometheus.exporter.unix.node.targets
+
+        rule {
+          target_label = "job"
+          replacement  = "node-exporter"
+        }
+      }
+
       prometheus.scrape "unix_node" {
-        targets         = prometheus.exporter.unix.node.targets
+        targets         = discovery.relabel.unix_node_compat.output
         scrape_interval = "30s"
         forward_to      = [prometheus.remote_write.default.receiver]
       }
