@@ -380,6 +380,17 @@ alloy:
 
       loki.process "pods" {
         stage.cri {}
+        stage.regex {
+          source     = "filename"
+          expression = "^/var/log/pods/(?P<namespace>[^_]+)_(?P<pod>[^_]+)_(?P<pod_uid>[^/]+)/(?P<container>[^/]+)/(?P<restart>\\d+)\\.log$"
+        }
+        stage.labels {
+          values = {
+            namespace = "namespace",
+            pod       = "pod",
+            container = "container",
+          }
+        }
         stage.static_labels {
           values = {
             cluster     = "refit-k8s",

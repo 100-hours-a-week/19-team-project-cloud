@@ -115,7 +115,7 @@ data:
                 "uid": "loki"
               },
               "editorMode": "code",
-              "expr": "{namespace=\"refit-app\", service_name=\"refit-backend\"}",
+              "expr": "{k8s_namespace_name=\"refit-app\", k8s_deployment_name=\"refit-backend\"}",
               "legendFormat": "",
               "queryType": "range",
               "refId": "A"
@@ -264,7 +264,7 @@ data:
                 "uid": "loki"
               },
               "editorMode": "code",
-              "expr": "{namespace=\"refit-app\", service_name=\"refit-ai\"}",
+              "expr": "{namespace=\"refit-app\", pod=~\"refit-ai-.*\"}",
               "legendFormat": "",
               "queryType": "range",
               "refId": "A"
@@ -293,6 +293,293 @@ data:
       "title": "Re-Fit / Logs / AI",
       "uid": "refit-ai-logs-official",
       "version": 4,
+      "weekStart": ""
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-refit-operations-overview
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  refit-operations-overview.json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "grafana",
+              "uid": "-- Grafana --"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "type": "stat",
+          "title": "Backend Ready Pods",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 0
+          },
+          "targets": [
+            {
+              "expr": "kube_deployment_status_replicas_available{namespace=\"refit-app\",deployment=\"refit-backend\"}",
+              "refId": "A"
+            }
+          ],
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "type": "stat",
+          "title": "AI Ready Pods",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 0
+          },
+          "targets": [
+            {
+              "expr": "kube_deployment_status_replicas_available{namespace=\"refit-app\",deployment=\"refit-ai\"}",
+              "refId": "A"
+            }
+          ],
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Backend Error Logs (15m)",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 0
+          },
+          "targets": [
+            {
+              "expr": "sum(count_over_time({k8s_namespace_name=\"refit-app\", k8s_deployment_name=\"refit-backend\"} |~ \"(?i)error|exception\" [15m])) or vector(0)",
+              "queryType": "instant",
+              "refId": "A"
+            }
+          ],
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "type": "stat",
+          "title": "AI Error Logs (15m)",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 0
+          },
+          "targets": [
+            {
+              "expr": "sum(count_over_time({namespace=\"refit-app\", pod=~\"refit-ai-.*\"} |~ \"(?i)error|exception\" [15m])) or vector(0)",
+              "queryType": "instant",
+              "refId": "A"
+            }
+          ],
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "type": "text",
+          "title": "Quick Links",
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 4
+          },
+          "options": {
+            "content": "### Re-Fit Operations\n- [Backend Logs](/d/refit-backend-logs-official)\n- [AI Logs](/d/refit-ai-logs-official)\n- [Kubernetes Global](/d/k8s_views_global)\n- [HPA](/d/kubernetes-autoscaling-mixin-hpa-jkwq)\n- [Trace SPM](/d/bdnlnibi959fkb)\n- [k6](/d/ccbb2351-2ae2-462f-ae0e-f2c893ad1028)",
+            "mode": "markdown"
+          }
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 39,
+      "style": "dark",
+      "tags": [
+        "operations",
+        "overview"
+      ],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-30m",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "Re-Fit / Operations / Overview",
+      "uid": "refit-operations-overview",
+      "version": 1,
       "weekStart": ""
     }
 ---
