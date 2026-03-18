@@ -1,6 +1,6 @@
 image:
   repository: 807210685804.dkr.ecr.ap-northeast-2.amazonaws.com/refit-backend
-  tag: "develop-b0edd11"
+  tag: "production-6e063d2"
   pullPolicy: IfNotPresent
 
 replicaCount: 2
