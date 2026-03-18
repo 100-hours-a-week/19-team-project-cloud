@@ -17,7 +17,8 @@ kubeProxy:
   enabled: false
 
 # ---------------------------------------------------------------
-# node-exporter 비활성화
+# node-exporter DaemonSet은 띄우지 않고, Alloy의 unix exporter 라벨을
+# kube-prometheus 표준(job="node-exporter")에 맞춰 호환시킴
 # ---------------------------------------------------------------
 nodeExporter:
   enabled: false
@@ -124,64 +125,6 @@ grafana:
           datasourceUid: prometheus
         nodeGraph:
           enabled: true
-  dashboardProviders:
-    dashboardproviders.yaml:
-      apiVersion: 1
-      providers:
-        - name: kubernetes
-          orgId: 1
-          folder: Kubernetes
-          type: file
-          disableDeletion: false
-          editable: true
-          options:
-            path: /var/lib/grafana/dashboards/kubernetes
-        - name: loki
-          orgId: 1
-          folder: Loki
-          type: file
-          disableDeletion: false
-          editable: true
-          options:
-            path: /var/lib/grafana/dashboards/loki
-        - name: cilium
-          orgId: 1
-          folder: Cilium / Hubble
-          type: file
-          disableDeletion: false
-          editable: true
-          options:
-            path: /var/lib/grafana/dashboards/cilium
-  dashboards:
-    kubernetes:
-      kubernetes-all-in-one-kr:
-        gnetId: 23000
-        revision: 1
-        datasource:
-          - name: DS_PROMETHEUS
-            value: Prometheus
-    loki:
-      loki-logs:
-        gnetId: 13639
-        revision: 2
-        datasource:
-          - name: DS_LOKI
-            value: Loki
-      loki-kubernetes-events:
-        gnetId: 15141
-        revision: 1
-        datasource:
-          - name: DS_LOKI
-            value: Loki
-    cilium:
-      cilium-agent:
-        gnetId: 16611
-        revision: 2
-        datasource: Prometheus
-      cilium-operator:
-        gnetId: 16612
-        revision: 2
-        datasource: Prometheus
   nodeSelector:
     node-role.kubernetes.io/worker: ""
 
