@@ -121,7 +121,7 @@ alloy:
 
       otelcol.exporter.otlp "tempo" {
         client {
-          endpoint = "monitoring-tempo.monitoring.svc.cluster.local:4317"
+          endpoint = "monitoring-tempo-0.monitoring-tempo-headless.monitoring.svc.cluster.local:4317"
           tls {
             insecure = true
           }
