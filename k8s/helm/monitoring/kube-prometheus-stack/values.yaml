@@ -74,6 +74,9 @@ grafana:
     existingSecret: grafana-admin-secret
     userKey: admin-user
     passwordKey: admin-password
+  # existingSecret 사용 시 기본값이 valueFrom과 충돌하는 것을 방지
+  adminUser: ""
+  adminPassword: ""
   image:
     tag: 11.6.0
   plugins:
