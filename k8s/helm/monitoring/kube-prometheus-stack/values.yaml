@@ -156,3 +156,38 @@ kube-state-metrics:
       memory: 128Mi
   nodeSelector:
     node-role.kubernetes.io/worker: ""
+
+# ---------------------------------------------------------------
+# kubelet / cadvisor 계열 메트릭에 cluster 라벨 추가
+# 기본 Kubernetes mixin 대시보드 호환용
+# ---------------------------------------------------------------
+kubelet:
+  serviceMonitor:
+    relabelings:
+      - action: replace
+        sourceLabels: [__metrics_path__]
+        targetLabel: metrics_path
+      - action: replace
+        targetLabel: cluster
+        replacement: refit-k8s
+    cAdvisorRelabelings:
+      - action: replace
+        sourceLabels: [__metrics_path__]
+        targetLabel: metrics_path
+      - action: replace
+        targetLabel: cluster
+        replacement: refit-k8s
+    probesRelabelings:
+      - action: replace
+        sourceLabels: [__metrics_path__]
+        targetLabel: metrics_path
+      - action: replace
+        targetLabel: cluster
+        replacement: refit-k8s
+    resourceRelabelings:
+      - action: replace
+        sourceLabels: [__metrics_path__]
+        targetLabel: metrics_path
+      - action: replace
+        targetLabel: cluster
+        replacement: refit-k8s
