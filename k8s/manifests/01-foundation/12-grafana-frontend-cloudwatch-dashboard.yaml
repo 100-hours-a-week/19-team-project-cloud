@@ -6,7 +6,7 @@ metadata:
   labels:
     grafana_dashboard: "1"
   annotations:
-    grafana_folder: "Frontend"
+    
 data:
   frontend-cloudwatch.json: |
     {
@@ -1785,7 +1785,7 @@ data:
       },
       "timepicker": {},
       "timezone": "browser",
-      "title": "Frontend — SSR & CloudFront",
+      "title": "Re-Fit / Logs / Frontend",
       "uid": "refit-frontend-cloudwatch",
       "version": 1,
       "weekStart": ""

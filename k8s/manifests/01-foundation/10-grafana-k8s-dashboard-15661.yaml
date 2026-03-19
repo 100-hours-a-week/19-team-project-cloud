@@ -6720,7 +6720,7 @@ data:
         ]
       },
       "timezone": "browser",
-      "title": "K8S Dashboard",
+      "title": "Kubernetes / Resources / Overview",
       "version": 1,
       "uid": "k8s-dashboard-15661-refit"
     }
