@@ -17,7 +17,7 @@ kminion:
         scrapeMode: adminApi
         ignoredGroups:
           - console-consumer-.*
-      topicWatermarks:
+      topics:
         enabled: true
       endToEnd:
         enabled: true
@@ -25,12 +25,12 @@ kminion:
           enabled: true
           name: kminion-end-to-end
           replicationFactor: 1
-          partitions: 1
+          partitionCount: 1
         producer:
-          ackMode: all
+          requiredAcks: all
         consumer:
           commitSla: 2s
-        probeIntervalSeconds: 10
+        probeInterval: 10s
 
     exporter:
       host: 0.0.0.0
