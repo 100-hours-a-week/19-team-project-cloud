@@ -1085,8 +1085,8 @@ data:
         },
         {
           "type": "timeseries",
-          "title": "Offset Commit 속도",
-          "description": "컨슈머가 처리 완료를 Kafka에 commit하는 속도",
+          "title": "Consumer Lag 변화율",
+          "description": "컨슈머 lag 변화 속도. 음수(파란색)이면 소비 중, 양수이면 lag 누적 중",
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
@@ -1099,7 +1099,7 @@ data:
           },
           "fieldConfig": {
             "defaults": {
-              "unit": "ops",
+              "unit": "short",
               "custom": {
                 "lineInterpolation": "smooth",
                 "fillOpacity": 8,
@@ -1119,7 +1119,7 @@ data:
               "placement": "bottom",
               "calcs": [
                 "mean",
-                "max",
+                "min",
                 "lastNotNull"
               ]
             }
@@ -1130,8 +1130,8 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "rate(kminion_kafka_consumer_group_offset_commits_total{group_id=\"refit-backend-prod\"}[$__rate_interval])",
-              "legendFormat": "offset commits/s",
+              "expr": "deriv(kminion_kafka_consumer_group_topic_lag{group_id=\"refit-backend-prod\",topic_name=~\"resume\\.parse\\.requested|report\\.generate\\.requested|mentor\\.embedding\\.refresh\\.requested|chat\\.message\\.sent|chat\\.message\\.persist\\.requested|notification\\.requested|notification\\.push\\.requested\"}[5m])",
+              "legendFormat": "{{topic_name}}",
               "instant": false,
               "refId": "A",
               "editorMode": "code",
