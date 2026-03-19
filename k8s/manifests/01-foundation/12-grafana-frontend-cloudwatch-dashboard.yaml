@@ -689,6 +689,140 @@ data:
               "alias": "Duration p50"
             }
           ]
+        },
+
+        {
+          "type": "row",
+          "title": "Lambda SSR 로그 (CloudWatch Logs Insights)",
+          "collapsed": false,
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 40},
+          "id": 17,
+          "panels": []
+        },
+        {
+          "type": "logs",
+          "title": "SSR Server — 전체 로그",
+          "description": "OpenNext SSR Lambda 함수 로그 (re-fit-prod-ReFitWebServerApnortheast2Function)",
+          "datasource": {"type": "cloudwatch", "uid": "cloudwatch"},
+          "gridPos": {"h": 12, "w": 24, "x": 0, "y": 41},
+          "id": 18,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": true,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": true
+          },
+          "targets": [
+            {
+              "datasource": {"type": "cloudwatch", "uid": "cloudwatch"},
+              "expression": "fields @timestamp, @message, @logStream | sort @timestamp desc | limit 200",
+              "id": "",
+              "logGroupNames": ["/aws/lambda/re-fit-prod-ReFitWebServerApnortheast2Function-skfdzhbf"],
+              "queryMode": "Logs",
+              "refId": "A",
+              "region": "ap-northeast-2"
+            }
+          ]
+        },
+        {
+          "type": "logs",
+          "title": "SSR Server — 에러/예외 로그",
+          "description": "ERROR / Exception / 4xx-5xx 포함 로그만 필터링",
+          "datasource": {"type": "cloudwatch", "uid": "cloudwatch"},
+          "gridPos": {"h": 10, "w": 24, "x": 0, "y": 53},
+          "id": 19,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": true,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": true
+          },
+          "targets": [
+            {
+              "datasource": {"type": "cloudwatch", "uid": "cloudwatch"},
+              "expression": "fields @timestamp, @message, @logStream | filter @message like /(?i)(error|exception|fail|5[0-9][0-9]|4[0-9][0-9])/ | sort @timestamp desc | limit 100",
+              "id": "",
+              "logGroupNames": ["/aws/lambda/re-fit-prod-ReFitWebServerApnortheast2Function-skfdzhbf"],
+              "queryMode": "Logs",
+              "refId": "A",
+              "region": "ap-northeast-2"
+            }
+          ]
+        },
+
+        {
+          "type": "row",
+          "title": "Lambda 기타 함수 로그 (Image Optimizer / Revalidation)",
+          "collapsed": false,
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 63},
+          "id": 20,
+          "panels": []
+        },
+        {
+          "type": "logs",
+          "title": "Image Optimizer 로그",
+          "description": "이미지 최적화 Lambda 로그 (re-fit-prod-ReFitWebImageOptimizerFunction)",
+          "datasource": {"type": "cloudwatch", "uid": "cloudwatch"},
+          "gridPos": {"h": 10, "w": 12, "x": 0, "y": 64},
+          "id": 21,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": true,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": true
+          },
+          "targets": [
+            {
+              "datasource": {"type": "cloudwatch", "uid": "cloudwatch"},
+              "expression": "fields @timestamp, @message, @logStream | sort @timestamp desc | limit 100",
+              "id": "",
+              "logGroupNames": ["/aws/lambda/re-fit-prod-ReFitWebImageOptimizerFunction-burwwzrz"],
+              "queryMode": "Logs",
+              "refId": "A",
+              "region": "ap-northeast-2"
+            }
+          ]
+        },
+        {
+          "type": "logs",
+          "title": "Revalidation 로그",
+          "description": "ISR 재검증 Lambda 로그 (ReFitWebRevalidationEventsSubscriberBccdeaFunctionFunct)",
+          "datasource": {"type": "cloudwatch", "uid": "cloudwatch"},
+          "gridPos": {"h": 10, "w": 12, "x": 12, "y": 64},
+          "id": 22,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": true,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": true
+          },
+          "targets": [
+            {
+              "datasource": {"type": "cloudwatch", "uid": "cloudwatch"},
+              "expression": "fields @timestamp, @message, @logStream | sort @timestamp desc | limit 100",
+              "id": "",
+              "logGroupNames": ["/aws/lambda/ReFitWebRevalidationEventsSubscriberBccdeaFunctionFunct-vutztstw"],
+              "queryMode": "Logs",
+              "refId": "A",
+              "region": "ap-northeast-2"
+            }
+          ]
         }
       ]
     }
