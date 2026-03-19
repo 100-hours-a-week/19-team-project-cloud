@@ -6,7 +6,6 @@ metadata:
   labels:
     grafana_dashboard: "1"
   annotations:
-    
     refit.dev/dashboard-source: https://grafana.com/grafana/dashboards/14012-kminion-cluster-dashboard/
 data:
   kafka-kminion-14012.json: |
