@@ -173,6 +173,38 @@ spec:
       - CreateNamespace=true
       - ServerSideApply=true
 ---
+---
+# ---------------------------------------------------------------
+# KMinion — Kafka (MSK) 모니터링
+# JMX 없이 Kafka Client API로 메트릭 수집 → Prometheus scrape
+# ---------------------------------------------------------------
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring-kminion
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://raw.githubusercontent.com/cloudhut/charts/master/archives
+      chart: kminion
+      targetRevision: "0.*"
+      helm:
+        valueFiles:
+          - $values/k8s/helm/monitoring/kminion/values.yaml
+    - repoURL: https://github.com/100-hours-a-week/19-team-project-cloud.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
 # ---------------------------------------------------------------
 # Foundation & Workload
 # ---------------------------------------------------------------

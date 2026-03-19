@@ -4,6 +4,76 @@
 # - 모든 컴포넌트: worker 노드 전용
 
 # ---------------------------------------------------------------
+# Kafka (MSK) 알람 규칙
+# KMinion ServiceMonitor가 수집한 메트릭 기반
+# ---------------------------------------------------------------
+additionalPrometheusRulesMap:
+  kafka-rules:
+    groups:
+      - name: kafka.storage
+        rules:
+          - alert: KafkaBrokerDiskHigh
+            expr: |
+              kminion_kafka_broker_log_dir_size_total_bytes
+                / (20 * 1024 * 1024 * 1024)
+                * 100 > 75
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "MSK 브로커 디스크 사용량 75% 초과"
+              description: "브로커 {{ $labels.broker_id }} 디스크 사용량이 {{ $value | printf \"%.1f\" }}% 입니다 (EBS 20GB 기준). 파티션 정리 또는 용량 증설 필요."
+          - alert: KafkaBrokerDiskCritical
+            expr: |
+              kminion_kafka_broker_log_dir_size_total_bytes
+                / (20 * 1024 * 1024 * 1024)
+                * 100 > 90
+            for: 2m
+            labels:
+              severity: critical
+            annotations:
+              summary: "MSK 브로커 디스크 사용량 90% 초과 — 즉시 조치 필요"
+              description: "브로커 {{ $labels.broker_id }} 디스크 사용량이 {{ $value | printf \"%.1f\" }}% 입니다."
+
+      - name: kafka.consumer
+        rules:
+          - alert: KafkaConsumerLagHigh
+            expr: |
+              sum by (group, topic) (
+                kminion_kafka_consumer_group_topic_partition_lag
+              ) > 1000
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Kafka Consumer Lag 급증"
+              description: "Consumer group '{{ $labels.group }}', topic '{{ $labels.topic }}' lag이 {{ $value }} 입니다."
+          - alert: KafkaConsumerGroupDead
+            expr: |
+              kminion_kafka_consumer_group_empty_partitions_total > 0
+                unless kminion_kafka_consumer_group_members_count > 0
+            for: 3m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Kafka Consumer Group 멤버 없음"
+              description: "Consumer group '{{ $labels.group }}' 에 활성 멤버가 없습니다."
+
+      - name: kafka.e2e
+        rules:
+          - alert: KafkaE2ELatencyHigh
+            expr: |
+              histogram_quantile(0.99,
+                rate(kminion_end_to_end_produce_latency_seconds_bucket[5m])
+              ) > 1
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Kafka E2E produce 레이턴시 p99 > 1s"
+              description: "KMinion E2E 테스트 produce p99 레이턴시가 {{ $value | printf \"%.2f\" }}s 입니다."
+
+# ---------------------------------------------------------------
 # kubeadm HA control plane은 별도 Service/ServiceMonitor 매니페스트로 관리
 # (Cilium이 kube-proxy 대체이므로 kube-proxy는 제외)
 # ---------------------------------------------------------------

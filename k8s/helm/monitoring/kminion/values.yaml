@@ -1,0 +1,62 @@
+# KMinion — Kafka monitoring via Client API (JMX 없이 동작)
+# MSK: refit-kafka, Kafka 3.7.x, PLAINTEXT, Unauthenticated
+kafka:
+  brokers:
+    - b-1.refitkafka.cj233e.c2.kafka.ap-northeast-2.amazonaws.com:9092
+    - b-2.refitkafka.cj233e.c2.kafka.ap-northeast-2.amazonaws.com:9092
+  tls:
+    enabled: false
+  sasl:
+    enabled: false
+  clientId: kminion
+
+minion:
+  consumerGroups:
+    enabled: true
+    granularity: partition    # consumer lag을 partition 단위로 추적
+    scrapeMode: adminApi
+    allowedGroups: []         # 비어있으면 전체 그룹 수집
+    ignoredGroups:
+      - console-consumer-.*   # 임시 콘솔 컨슈머 제외
+  topicWatermarks:
+    enabled: true             # 브로커별 log end offset 추적
+  endToEnd:
+    enabled: true             # produce → consume 레이턴시 E2E 측정
+    topicManagement:
+      enabled: true
+      name: kminion-end-to-end  # 전용 테스트 토픽 (자동 생성)
+      replicationFactor: 1
+      partitions: 1
+    producer:
+      ackMode: all
+    consumer:
+      commitSla: 2s
+    probeIntervalSeconds: 10
+
+exporter:
+  host: 0.0.0.0
+  port: 8080
+
+# ---------------------------------------------------------------
+# Prometheus ServiceMonitor — kube-prometheus-stack이 자동 scrape
+# ---------------------------------------------------------------
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  scrapeTimeout: 25s
+  labels:
+    release: monitoring-prometheus   # kube-prometheus-stack release 명과 일치
+
+# ---------------------------------------------------------------
+# 리소스 / 스케줄링
+# ---------------------------------------------------------------
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+nodeSelector:
+  node-role.kubernetes.io/worker: ""
