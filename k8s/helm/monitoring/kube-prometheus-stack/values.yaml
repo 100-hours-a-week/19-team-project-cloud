@@ -2,6 +2,11 @@
 # - node-exporter 미사용: Alloy kubelet scrape로 대체
 # - admissionWebhooks 비활성화: kubeadm 소규모 클러스터
 # - 모든 컴포넌트: worker 노드 전용
+# - crds.enabled: false — CRD 스펙이 256KB를 초과해 ArgoCD SSA 패치 불가
+#   CRD는 최초 1회 수동 설치 후 ArgoCD 관리 대상에서 제외
+
+crds:
+  enabled: false
 
 # ---------------------------------------------------------------
 # Kafka (MSK) 알람 규칙
