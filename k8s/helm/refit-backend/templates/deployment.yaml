@@ -94,6 +94,22 @@ spec:
           value: "otlp"
         - name: OTEL_LOGS_EXPORTER
           value: "otlp"
+        # AWS SDK v2 자격증명 주입 (EnvironmentVariableCredentialsProvider 체인 지원)
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: AWS_SECRET_ACCESS_KEY
+        - name: AWS_REGION
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: AWS_REGION
         volumeMounts:
         - name: secret-config
           mountPath: /config/secret

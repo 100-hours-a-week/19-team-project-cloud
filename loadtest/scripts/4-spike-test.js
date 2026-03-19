@@ -31,8 +31,8 @@ import { vu } from 'k6/execution';
 import * as Config from './config.js';
 
 // ─── 테스트 데이터 로드 ───
-const users = JSON.parse(open(import.meta.resolve('../data/test-users.json')));
-const resumePDF = open(import.meta.resolve('../data/sample_resume_3mb.pdf'), 'b');
+const users = JSON.parse(open('../data/test-users.json'));
+const resumePDF = open('../data/sample_resume_3mb.pdf', 'b');
 const resumePDFSize = resumePDF.byteLength || resumePDF.length || 3145728;
 
 export const options = {
@@ -118,23 +118,78 @@ function uploadToS3(presignedUrl, fileBytes) {
 }
 
 function triggerLLMParsing(token, s3FileUrl) {
+  const startTime = Date.now();
+
   const res = http.post(
-    `${Config.BACKEND_URL}/api/v1/resumes/tasks`,
+    `${Config.BACKEND_URL}/api/v2/resumes/tasks`,
     JSON.stringify({
       file_url: s3FileUrl,
-      mode: 'sync',
     }),
     {
       headers: Config.authHeaders(token),
-      tags: { name: 'llm_parse' },
-      timeout: '30s',
+      tags: { name: 'llm_parse_submit' },
+      timeout: '10s',
     }
   );
-  
-  Config.metrics.llmParseDuration.add(res.timings.duration);
-  Config.checkLLMResponse(res);
-  
-  return res;
+
+  // v2 API는 task 생성 성공 시 201 반환
+  if (res.status !== 201 && res.status !== 202) {
+    Config.metrics.llmParseDuration.add(Date.now() - startTime);
+    Config.metrics.llmSuccessRate.add(0);
+    Config.metrics.llmErrors.add(1);
+    console.error(`⚠️ LLM 파싱 제출 실패 | VU ${__VU} | Status: ${res.status}`);
+    return null;
+  }
+
+  let taskId;
+  try {
+    const body = res.json();
+    taskId = body.data?.taskId || body.data?.task_id;
+  } catch (e) {}
+
+  if (!taskId) {
+    Config.metrics.llmParseDuration.add(Date.now() - startTime);
+    Config.metrics.llmSuccessRate.add(0);
+    Config.metrics.llmErrors.add(1);
+    return null;
+  }
+
+  sleep(8);
+  for (let i = 0; i < 5; i++) {
+    const pollRes = http.get(
+      `${Config.BACKEND_URL}/api/v2/resumes/tasks/${taskId}`,
+      {
+        headers: Config.authHeaders(token),
+        tags: { name: 'llm_parse_poll' },
+      }
+    );
+
+    let status;
+    try {
+      status = pollRes.json().data?.status;
+    } catch (e) { continue; }
+
+    if (status === 'COMPLETED') {
+      Config.metrics.llmParseDuration.add(Date.now() - startTime);
+      Config.metrics.llmSuccessRate.add(1);
+      return pollRes;
+    }
+
+    if (status === 'FAILED') {
+      Config.metrics.llmParseDuration.add(Date.now() - startTime);
+      Config.metrics.llmSuccessRate.add(0);
+      Config.metrics.llmErrors.add(1);
+      return null;
+    }
+
+    if (i < 4) sleep(5);
+  }
+
+  Config.metrics.llmParseDuration.add(Date.now() - startTime);
+  Config.metrics.llmSuccessRate.add(0);
+  Config.metrics.llmErrors.add(1);
+  console.error(`⚠️ LLM 폴링 타임아웃 | VU ${__VU} | taskId: ${taskId}`);
+  return null;
 }
 
 function searchExperts(token) {
