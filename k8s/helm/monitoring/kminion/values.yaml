@@ -36,10 +36,11 @@ kminion:
       port: 8080
 
 serviceMonitor:
-  enabled: true
+  create: true
   interval: 30s
   scrapeTimeout: 25s
-  labels:
+  honorLabels: false
+  additionalLabels:
     release: monitoring-prometheus
 
 resources:
