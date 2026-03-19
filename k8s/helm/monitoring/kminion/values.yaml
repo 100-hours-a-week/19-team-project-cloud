@@ -25,7 +25,6 @@ kminion:
           enabled: true
           name: kminion-end-to-end
           replicationFactor: 1
-          partitionCount: 1
         producer:
           requiredAcks: all
         consumer:
