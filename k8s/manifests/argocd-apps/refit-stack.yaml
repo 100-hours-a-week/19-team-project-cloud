@@ -186,9 +186,9 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: https://raw.githubusercontent.com/cloudhut/charts/master/archives
+    - repoURL: https://charts.redpanda.com/
       chart: kminion
-      targetRevision: "0.*"
+      targetRevision: "0.15.0"
       helm:
         valueFiles:
           - $values/k8s/helm/monitoring/kminion/values.yaml
