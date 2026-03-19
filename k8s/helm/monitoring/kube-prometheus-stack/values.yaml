@@ -152,6 +152,33 @@ grafana:
   plugins:
     - https://storage.googleapis.com/integration-artifacts/grafana-lokiexplore-app/release/main/any/grafana-lokiexplore-app-main.zip;grafana-lokiexplore-app
     - https://storage.googleapis.com/integration-artifacts/grafana-exploretraces-app/grafana-exploretraces-app-latest.zip;grafana-traces-app
+
+  # ---------------------------------------------------------------
+  # kubernetes-mixin 기본 대시보드 비활성화
+  # 필요한 것만 dashboardProviders + dashboards 로 명시적 관리
+  # ---------------------------------------------------------------
+  defaultDashboardsEnabled: false
+
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: kubernetes
+          orgId: 1
+          folder: Kubernetes
+          type: file
+          disableDeletion: true
+          options:
+            path: /var/lib/grafana/dashboards/kubernetes
+
+  # grafana.com gnetId 방식으로 필요한 대시보드만 로드
+  dashboards:
+    kubernetes:
+      # Kubernetes / API server (kube-prometheus-stack 호환)
+      k8s-system-apiserver:
+        gnetId: 15761
+        revision: 20
+        datasource: Prometheus
   resources:
     requests:
       cpu: 50m
@@ -177,6 +204,18 @@ grafana:
   service:
     type: ClusterIP
   additionalDataSources:
+    # ---------------------------------------------------------------
+    # AWS CloudWatch — CloudFront + Lambda 프론트엔드 모니터링
+    # 노드 IAM Role(RefitEC2SSMRole)에 CloudWatchReadOnlyAccess 이미 부여됨
+    # ---------------------------------------------------------------
+    - name: CloudWatch
+      type: cloudwatch
+      uid: cloudwatch
+      access: proxy
+      jsonData:
+        defaultRegion: ap-northeast-2
+        authType: default   # EC2 인스턴스 IAM Role 자동 사용
+
     - name: Loki
       type: loki
       uid: loki
