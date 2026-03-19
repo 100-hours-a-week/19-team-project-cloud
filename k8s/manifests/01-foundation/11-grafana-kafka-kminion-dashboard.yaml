@@ -464,7 +464,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum(kminion_kafka_topic_high_water_mark_sum{topic_name=~\"resume\\.parse\\.requested\\.dlq|report\\.generate\\.requested\\.dlq|mentor\\.embedding\\.refresh\\.requested\\.dlq|notification\\.requested\\.dlq|notification\\.push\\.requested\\.dlq|chat\\.message\\.persist\\.requested\\.dlq\"})",
+              "expr": "sum(kminion_kafka_topic_high_water_mark_sum{topic_name=~\"resume[.]parse[.]requested[.]dlq|report[.]generate[.]requested[.]dlq|mentor[.]embedding[.]refresh[.]requested[.]dlq|notification[.]requested[.]dlq|notification[.]push[.]requested[.]dlq|chat[.]message[.]persist[.]requested[.]dlq\"})",
               "legendFormat": "",
               "instant": true,
               "refId": "A",
@@ -696,7 +696,8 @@ data:
               "instant": true,
               "refId": "A",
               "editorMode": "code",
-              "range": false
+              "range": false,
+              "format": "table"
             }
           ]
         },
@@ -815,7 +816,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "deriv(kminion_kafka_topic_high_water_mark_sum{topic_name=~\"resume\\.parse\\.requested|report\\.generate\\.requested|mentor\\.embedding\\.refresh\\.requested|chat\\.message\\.sent|chat\\.message\\.persist\\.requested|notification\\.requested|notification\\.push\\.requested\"}[2m])",
+              "expr": "deriv(kminion_kafka_topic_high_water_mark_sum{topic_name=~\"resume[.]parse[.]requested|report[.]generate[.]requested|mentor[.]embedding[.]refresh[.]requested|chat[.]message[.]sent|chat[.]message[.]persist[.]requested|notification[.]requested|notification[.]push[.]requested\"}[2m])",
               "legendFormat": "{{topic_name}}",
               "instant": false,
               "refId": "A",
@@ -871,7 +872,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "kminion_kafka_topic_high_water_mark_sum{topic_name=~\"resume\\.parse\\.requested\\.dlq|report\\.generate\\.requested\\.dlq|mentor\\.embedding\\.refresh\\.requested\\.dlq|notification\\.requested\\.dlq|notification\\.push\\.requested\\.dlq|chat\\.message\\.persist\\.requested\\.dlq\"}",
+              "expr": "kminion_kafka_topic_high_water_mark_sum{topic_name=~\"resume[.]parse[.]requested[.]dlq|report[.]generate[.]requested[.]dlq|mentor[.]embedding[.]refresh[.]requested[.]dlq|notification[.]requested[.]dlq|notification[.]push[.]requested[.]dlq|chat[.]message[.]persist[.]requested[.]dlq\"}",
               "legendFormat": "{{topic_name}}",
               "instant": false,
               "refId": "A",
@@ -950,12 +951,13 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "kminion_kafka_topic_info{topic_name=~\"resume\\.parse\\.requested|report\\.generate\\.requested|mentor\\.embedding\\.refresh\\.requested|chat\\.message\\.sent|chat\\.message\\.persist\\.requested|notification\\.requested|notification\\.push\\.requested|resume\\.parse\\.requested\\.dlq|report\\.generate\\.requested\\.dlq|mentor\\.embedding\\.refresh\\.requested\\.dlq|notification\\.requested\\.dlq|notification\\.push\\.requested\\.dlq|chat\\.message\\.persist\\.requested\\.dlq\"}",
+              "expr": "kminion_kafka_topic_info{topic_name=~\"resume[.]parse[.]requested|report[.]generate[.]requested|mentor[.]embedding[.]refresh[.]requested|chat[.]message[.]sent|chat[.]message[.]persist[.]requested|notification[.]requested|notification[.]push[.]requested|resume[.]parse[.]requested[.]dlq|report[.]generate[.]requested[.]dlq|mentor[.]embedding[.]refresh[.]requested[.]dlq|notification[.]requested[.]dlq|notification[.]push[.]requested[.]dlq|chat[.]message[.]persist[.]requested[.]dlq\"}",
               "legendFormat": "",
               "instant": true,
               "refId": "A",
               "editorMode": "code",
-              "range": false
+              "range": false,
+              "format": "table"
             }
           ]
         },
@@ -1018,7 +1020,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "kminion_kafka_consumer_group_topic_lag{group_id=\"refit-backend-prod\",topic_name=~\"resume\\.parse\\.requested|report\\.generate\\.requested|mentor\\.embedding\\.refresh\\.requested|chat\\.message\\.sent|chat\\.message\\.persist\\.requested|notification\\.requested|notification\\.push\\.requested\"}",
+              "expr": "kminion_kafka_consumer_group_topic_lag{group_id=\"refit-backend-prod\",topic_name=~\"resume[.]parse[.]requested|report[.]generate[.]requested|mentor[.]embedding[.]refresh[.]requested|chat[.]message[.]sent|chat[.]message[.]persist[.]requested|notification[.]requested|notification[.]push[.]requested\"}",
               "legendFormat": "{{topic_name}}",
               "instant": false,
               "refId": "A",
@@ -1074,7 +1076,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "kminion_kafka_consumer_group_topic_partition_lag{group_id=\"refit-backend-prod\",topic_name=~\"resume\\.parse\\.requested|report\\.generate\\.requested|mentor\\.embedding\\.refresh\\.requested|chat\\.message\\.sent|chat\\.message\\.persist\\.requested|notification\\.requested|notification\\.push\\.requested\"}",
+              "expr": "kminion_kafka_consumer_group_topic_partition_lag{group_id=\"refit-backend-prod\",topic_name=~\"resume[.]parse[.]requested|report[.]generate[.]requested|mentor[.]embedding[.]refresh[.]requested|chat[.]message[.]sent|chat[.]message[.]persist[.]requested|notification[.]requested|notification[.]push[.]requested\"}",
               "legendFormat": "{{topic_name}}[p{{partition_id}}]",
               "instant": false,
               "refId": "A",
@@ -1130,7 +1132,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "deriv(kminion_kafka_consumer_group_topic_lag{group_id=\"refit-backend-prod\",topic_name=~\"resume\\.parse\\.requested|report\\.generate\\.requested|mentor\\.embedding\\.refresh\\.requested|chat\\.message\\.sent|chat\\.message\\.persist\\.requested|notification\\.requested|notification\\.push\\.requested\"}[5m])",
+              "expr": "deriv(kminion_kafka_consumer_group_topic_lag{group_id=\"refit-backend-prod\",topic_name=~\"resume[.]parse[.]requested|report[.]generate[.]requested|mentor[.]embedding[.]refresh[.]requested|chat[.]message[.]sent|chat[.]message[.]persist[.]requested|notification[.]requested|notification[.]push[.]requested\"}[5m])",
               "legendFormat": "{{topic_name}}",
               "instant": false,
               "refId": "A",
