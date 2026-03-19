@@ -1,15 +1,1468 @@
 apiVersion: v1
-data:
-  frontend-cloudwatch.json: "{\n  \"description\": \"re-fit.kr 프론트엔드 모니터링 — CloudFront + OpenNext Lambda\",\n  \"editable\": true,\n  \"fiscalYearStartMonth\": 0,\n  \"graphTooltip\": 1,\n  \"id\": null,\n  \"links\": [],\n  \"refresh\": \"1m\",\n  \"schemaVersion\": 38,\n  \"tags\": [\n    \"frontend\",\n    \"cloudfront\",\n    \"lambda\",\n    \"aws\"\n  ],\n  \"time\": {\n    \"from\": \"now-3h\",\n    \"to\": \"now\"\n  },\n  \"timepicker\": {},\n  \"timezone\": \"browser\",\n  \"title\": \"Frontend — CloudFront & Lambda (OpenNext)\",\n  \"uid\": \"refit-frontend-cloudwatch\",\n  \"version\": 1,\n  \"panels\": [\n    {\n      \"type\": \"row\",\n      \"title\": \"CloudFront Overview — re-fit.kr (E1FDJ51FF9EN5D)\",\n      \"collapsed\": false,\n      \"gridPos\": {\n        \"h\": 1,\n        \"w\": 24,\n        \"x\": 0,\n        \"y\": 0\n      },\n      \"id\": 1,\n      \"panels\": []\n    },\n    {\n      \"type\": \"stat\",\n      \"title\": \"총 요청 수\",\n      \"description\": \"선택 시간 범위의 CloudFront 누적 요청 수\",\n      \"datasource\": {\n        \"type\": \"cloudwatch\",\n        \"uid\": \"cloudwatch\"\n      },\n      \"gridPos\": {\n        \"h\": 4,\n        \"w\": 6,\n        \"x\": 0,\n        \"y\": 1\n      },\n      \"id\": 2,\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"short\",\n          \"noValue\": \"-\",\n          \"thresholds\": {\n            \"mode\": \"absolute\",\n            \"steps\": [\n              {\n                \"color\": \"blue\",\n                \"value\": null\n              }\n            ]\n          }\n        },\n        \"overrides\": []\n      },\n      \"options\": {\n        \"reduceOptions\": {\n          \"calcs\": [\n            \"sum\"\n          ],\n          \"fields\": \"\",\n          \"values\": false\n        },\n        \"colorMode\": \"value\",\n        \"graphMode\": \"area\",\n        \"textMode\": \"auto\",\n        \"orientation\": \"auto\"\n      },\n      \"targets\": [\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"dimensions\": {\n            \"DistributionId\": [\n              \"E1FDJ51FF9EN5D\"\n            ],\n            \"Region\": [\n              \"Global\"\n            ]\n          },\n          \"matchExact\": true,\n          \"metricEditorMode\": 0,\n          \"metricName\": \"Requests\",\n          \"metricQueryType\": 0,\n          \"namespace\": \"AWS/CloudFront\",\n          \"period\": \"\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"A\",\n          \"region\": \"us-east-1\",\n          \"statistic\": \"Sum\"\n        }\n      ]\n    },\n    {\n      \"type\": \"stat\",\n      \"title\": \"4xx 에러율\",\n      \"description\": \"클라이언트 에러 비율. 1% 초과 시 라우팅/권한 확인\",\n      \"datasource\": {\n        \"type\": \"cloudwatch\",\n        \"uid\": \"cloudwatch\"\n      },\n      \"gridPos\": {\n        \"h\": 4,\n        \"w\": 6,\n        \"x\": 6,\n        \"y\": 1\n      },\n      \"id\": 3,\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"percent\",\n          \"noValue\": \"-\",\n          \"thresholds\": {\n            \"mode\": \"absolute\",\n            \"steps\": [\n              {\n                \"color\": \"green\",\n                \"value\": null\n              },\n              {\n                \"color\": \"yellow\",\n                \"value\": 1\n              },\n              {\n                \"color\": \"red\",\n                \"value\": 5\n              }\n            ]\n          }\n        },\n        \"overrides\": []\n      },\n      \"options\": {\n        \"reduceOptions\": {\n          \"calcs\": [\n            \"lastNotNull\"\n          ],\n          \"fields\": \"\",\n          \"values\": false\n        },\n        \"colorMode\": \"background\",\n        \"graphMode\": \"none\",\n        \"textMode\": \"auto\",\n        \"orientation\": \"auto\"\n      },\n      \"targets\": [\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"dimensions\": {\n            \"DistributionId\": [\n              \"E1FDJ51FF9EN5D\"\n            ],\n            \"Region\": [\n              \"Global\"\n            ]\n          },\n          \"matchExact\": true,\n          \"metricEditorMode\": 0,\n          \"metricName\": \"4xxErrorRate\",\n          \"metricQueryType\": 0,\n          \"namespace\": \"AWS/CloudFront\",\n          \"period\": \"\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"A\",\n          \"region\": \"us-east-1\",\n          \"statistic\": \"Average\"\n        }\n      ]\n    },\n    {\n      \"type\": \"stat\",\n      \"title\": \"5xx 에러율\",\n      \"description\": \"서버/Lambda 에러 비율. 0.1% 초과 시 즉시 확인\",\n      \"datasource\": {\n        \"type\": \"cloudwatch\",\n        \"uid\": \"cloudwatch\"\n      },\n      \"gridPos\": {\n        \"h\": 4,\n        \"w\": 6,\n        \"x\": 12,\n        \"y\": 1\n      },\n      \"id\": 4,\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"percent\",\n          \"noValue\": \"-\",\n          \"thresholds\": {\n            \"mode\": \"absolute\",\n            \"steps\": [\n              {\n                \"color\": \"green\",\n                \"value\": null\n              },\n              {\n                \"color\": \"red\",\n                \"value\": 0.1\n              }\n            ]\n          }\n        },\n        \"overrides\": []\n      },\n      \"options\": {\n        \"reduceOptions\": {\n          \"calcs\": [\n            \"lastNotNull\"\n          ],\n          \"fields\": \"\",\n          \"values\": false\n        },\n        \"colorMode\": \"background\",\n        \"graphMode\": \"none\",\n        \"textMode\": \"auto\",\n        \"orientation\": \"auto\"\n      },\n      \"targets\": [\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"dimensions\": {\n            \"DistributionId\": [\n              \"E1FDJ51FF9EN5D\"\n            ],\n            \"Region\": [\n              \"Global\"\n            ]\n          },\n          \"matchExact\": true,\n          \"metricEditorMode\": 0,\n          \"metricName\": \"5xxErrorRate\",\n          \"metricQueryType\": 0,\n          \"namespace\": \"AWS/CloudFront\",\n          \"period\": \"\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"A\",\n          \"region\": \"us-east-1\",\n          \"statistic\": \"Average\"\n        }\n      ]\n    },\n    {\n      \"type\": \"stat\",\n      \"title\": \"캐시 히트율\",\n      \"description\": \"정적 파일 캐시 효율. 낮으면 Origin 부하 증가\",\n      \"datasource\": {\n        \"type\": \"cloudwatch\",\n        \"uid\": \"cloudwatch\"\n      },\n      \"gridPos\": {\n        \"h\": 4,\n        \"w\": 6,\n        \"x\": 18,\n        \"y\": 1\n      },\n      \"id\": 5,\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"percent\",\n          \"noValue\": \"-\",\n          \"thresholds\": {\n            \"mode\": \"absolute\",\n            \"steps\": [\n              {\n                \"color\": \"red\",\n                \"value\": null\n              },\n              {\n                \"color\": \"yellow\",\n                \"value\": 70\n              },\n              {\n                \"color\": \"green\",\n                \"value\": 85\n              }\n            ]\n          }\n        },\n        \"overrides\": []\n      },\n      \"options\": {\n        \"reduceOptions\": {\n          \"calcs\": [\n            \"lastNotNull\"\n          ],\n          \"fields\": \"\",\n          \"values\": false\n        },\n        \"colorMode\": \"background\",\n        \"graphMode\": \"none\",\n        \"textMode\": \"auto\",\n        \"orientation\": \"auto\"\n      },\n      \"targets\": [\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"dimensions\": {\n            \"DistributionId\": [\n              \"E1FDJ51FF9EN5D\"\n            ],\n            \"Region\": [\n              \"Global\"\n            ]\n          },\n          \"matchExact\": true,\n          \"metricEditorMode\": 0,\n          \"metricName\": \"CacheHitRate\",\n          \"metricQueryType\": 0,\n          \"namespace\": \"AWS/CloudFront\",\n          \"period\": \"\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"A\",\n          \"region\": \"us-east-1\",\n          \"statistic\": \"Average\"\n        }\n      ]\n    },\n    {\n      \"type\": \"row\",\n      \"title\": \"CloudFront 트래픽\",\n      \"collapsed\": false,\n      \"gridPos\": {\n        \"h\": 1,\n        \"w\": 24,\n        \"x\": 0,\n        \"y\": 5\n      },\n      \"id\": 6,\n      \"panels\": []\n    },\n    {\n      \"type\": \"timeseries\",\n      \"title\": \"요청 수 추이\",\n      \"description\": \"CloudFront 요청 수 (1분 단위)\",\n      \"datasource\": {\n        \"type\": \"cloudwatch\",\n        \"uid\": \"cloudwatch\"\n      },\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\": 0,\n        \"y\": 6\n      },\n      \"id\": 7,\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"short\",\n          \"custom\": {\n            \"lineInterpolation\": \"smooth\",\n            \"fillOpacity\": 8,\n            \"showPoints\": \"never\",\n            \"spanNulls\": true\n          }\n        },\n        \"overrides\": []\n      },\n      \"options\": {\n        \"tooltip\": {\n          \"mode\": \"multi\",\n          \"sort\": \"desc\"\n        },\n        \"legend\": {\n          \"displayMode\": \"table\",\n          \"placement\": \"bottom\",\n          \"calcs\": [\n            \"mean\",\n            \"max\"\n          ]\n        }\n      },\n      \"targets\":\
-    \ [\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"dimensions\": {\n            \"DistributionId\": [\n              \"E1FDJ51FF9EN5D\"\n            ],\n            \"Region\": [\n              \"Global\"\n            ]\n          },\n          \"matchExact\": true,\n          \"metricEditorMode\": 0,\n          \"metricName\": \"Requests\",\n          \"metricQueryType\": 0,\n          \"namespace\": \"AWS/CloudFront\",\n          \"period\": \"\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"A\",\n          \"region\": \"us-east-1\",\n          \"statistic\": \"Sum\",\n          \"alias\": \"Requests\"\n        }\n      ]\n    },\n    {\n      \"type\": \"timeseries\",\n      \"title\": \"에러율 추이 (4xx / 5xx)\",\n      \"description\": \"4xx = 클라이언트 에러, 5xx = 서버/Lambda 에러\",\n      \"datasource\": {\n        \"type\": \"cloudwatch\",\n        \"uid\": \"cloudwatch\"\n      },\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\": 12,\n        \"y\": 6\n      },\n      \"id\": 8,\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"percent\",\n          \"custom\": {\n            \"lineInterpolation\": \"smooth\",\n            \"fillOpacity\": 8,\n            \"showPoints\": \"never\",\n            \"spanNulls\": true\n          }\n        },\n        \"overrides\": [\n          {\n            \"matcher\": {\n              \"id\": \"byName\",\n              \"options\": \"5xx Error Rate\"\n            },\n            \"properties\": [\n              {\n                \"id\": \"color\",\n                \"value\": {\n                  \"mode\": \"fixed\",\n                  \"fixedColor\": \"red\"\n                }\n              }\n            ]\n          },\n          {\n            \"matcher\": {\n              \"id\": \"byName\",\n              \"options\": \"4xx Error Rate\"\n            },\n            \"properties\": [\n              {\n                \"id\": \"color\",\n                \"value\": {\n                  \"mode\": \"fixed\",\n                  \"fixedColor\": \"orange\"\n                }\n              }\n            ]\n          }\n        ]\n      },\n      \"options\": {\n        \"tooltip\": {\n          \"mode\": \"multi\",\n          \"sort\": \"desc\"\n        },\n        \"legend\": {\n          \"displayMode\": \"table\",\n          \"placement\": \"bottom\",\n          \"calcs\": [\n            \"mean\",\n            \"max\"\n          ]\n        }\n      },\n      \"targets\": [\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"dimensions\": {\n            \"DistributionId\": [\n              \"E1FDJ51FF9EN5D\"\n            ],\n            \"Region\": [\n              \"Global\"\n            ]\n          },\n          \"matchExact\": true,\n          \"metricEditorMode\": 0,\n          \"metricName\": \"4xxErrorRate\",\n          \"metricQueryType\": 0,\n          \"namespace\": \"AWS/CloudFront\",\n          \"period\": \"\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"A\",\n          \"region\": \"us-east-1\",\n          \"statistic\": \"Average\",\n          \"alias\": \"4xx Error Rate\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"dimensions\": {\n            \"DistributionId\": [\n              \"E1FDJ51FF9EN5D\"\n            ],\n            \"Region\": [\n              \"Global\"\n            ]\n          },\n          \"matchExact\": true,\n          \"metricEditorMode\": 0,\n          \"metricName\": \"5xxErrorRate\",\n          \"metricQueryType\": 0,\n          \"namespace\": \"AWS/CloudFront\",\n          \"period\": \"\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"B\",\n          \"region\": \"us-east-1\",\n          \"statistic\": \"Average\",\n          \"alias\": \"5xx Error Rate\"\n        }\n      ]\n    },\n    {\n      \"type\": \"timeseries\",\n      \"title\": \"캐시 히트율 & Origin Latency\",\n      \"description\": \"Origin Latency는 CloudFront Additional Metrics 활성화 필요\",\n      \"datasource\": {\n        \"type\": \"cloudwatch\",\n        \"uid\": \"cloudwatch\"\n      },\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 24,\n        \"x\": 0,\n        \"y\": 14\n      },\n      \"id\": 9,\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"custom\": {\n            \"lineInterpolation\": \"smooth\",\n            \"fillOpacity\": 8,\n            \"showPoints\": \"never\",\n            \"spanNulls\": true\n          }\n        },\n        \"overrides\": [\n          {\n            \"matcher\": {\n              \"id\": \"byName\",\n              \"options\": \"Cache Hit Rate\"\n            },\n            \"properties\": [\n              {\n                \"id\": \"unit\",\n                \"value\": \"percent\"\n              },\n              {\n                \"id\": \"custom.axisPlacement\",\n                \"value\": \"left\"\n              }\n            ]\n          },\n          {\n            \"matcher\": {\n              \"id\": \"byName\",\n              \"options\": \"Origin Latency p99\"\n            },\n            \"properties\": [\n              {\n                \"id\": \"unit\",\n                \"value\": \"ms\"\n              },\n              {\n                \"id\": \"custom.axisPlacement\",\n                \"value\": \"right\"\n              },\n              {\n                \"id\": \"color\",\n                \"value\": {\n                  \"mode\": \"fixed\",\n                  \"fixedColor\": \"purple\"\n                }\n              }\n            ]\n          }\n        ]\n      },\n      \"options\": {\n        \"tooltip\": {\n          \"mode\": \"multi\",\n          \"sort\": \"desc\"\n        },\n        \"legend\": {\n          \"displayMode\": \"table\",\n          \"placement\": \"bottom\",\n          \"calcs\": [\n            \"mean\",\n            \"min\",\n            \"max\"\n          ]\n        }\n      },\n      \"targets\": [\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"dimensions\": {\n            \"DistributionId\": [\n              \"E1FDJ51FF9EN5D\"\n            ],\n            \"Region\": [\n              \"Global\"\n            ]\n          },\n          \"matchExact\": true,\n          \"metricEditorMode\": 0,\n          \"metricName\": \"CacheHitRate\",\n          \"metricQueryType\": 0,\n          \"namespace\": \"AWS/CloudFront\",\n          \"period\": \"\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"A\",\n          \"region\": \"us-east-1\",\n          \"statistic\": \"Average\",\n          \"alias\": \"Cache Hit Rate\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"dimensions\": {\n            \"DistributionId\": [\n              \"E1FDJ51FF9EN5D\"\n            ],\n            \"Region\": [\n              \"Global\"\n            ]\n          },\n          \"matchExact\": true,\n          \"metricEditorMode\": 0,\n          \"metricName\": \"OriginLatency\",\n          \"metricQueryType\": 0,\n          \"namespace\": \"AWS/CloudFront\",\n          \"period\": \"\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"B\",\n          \"region\": \"us-east-1\",\n          \"statistic\": \"p99\",\n          \"alias\": \"Origin Latency p99\"\n        }\n      ]\n    },\n    {\n      \"type\": \"row\",\n      \"title\": \"Lambda — SSR Server (re-fit-prod-ReFitWebServerApnortheast2Function)\",\n      \"collapsed\": false,\n      \"gridPos\": {\n        \"h\": 1,\n        \"w\": 24,\n        \"x\": 0,\n        \"y\": 22\n      },\n      \"id\": 10,\n      \"panels\": []\n    },\n    {\n      \"type\": \"timeseries\",\n      \"title\": \"Invocations & Errors\",\n      \"description\": \"SSR 함수 호출 수 및 에러 수\",\n      \"datasource\": {\n        \"type\": \"cloudwatch\",\n        \"uid\": \"cloudwatch\"\n      },\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 8,\n        \"x\": 0,\n        \"y\": 23\n      },\n      \"id\": 11,\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"short\",\n          \"custom\": {\n            \"lineInterpolation\": \"smooth\",\n            \"fillOpacity\": 8,\n            \"showPoints\": \"never\",\n            \"spanNulls\": true\n          }\n        },\n        \"overrides\": [\n          {\n            \"matcher\": {\n              \"id\": \"byName\",\n              \"options\": \"Errors\"\n            },\n            \"properties\": [\n              {\n                \"id\": \"color\",\n                \"value\": {\n                  \"mode\": \"fixed\",\n                  \"fixedColor\": \"red\"\n                }\n              }\n            ]\n          }\n        ]\n      },\n      \"options\": {\n        \"tooltip\": {\n          \"mode\": \"multi\",\n          \"sort\": \"desc\"\n        },\n        \"legend\": {\n          \"displayMode\": \"table\",\n          \"placement\": \"bottom\",\n          \"calcs\": [\n            \"sum\",\n            \"max\"\n          ]\n        }\n      },\n      \"targets\": [\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"expression\": \"SELECT SUM(Invocations) FROM SCHEMA(\\\"AWS/Lambda\\\", FunctionName) WHERE FunctionName LIKE 're-fit-prod-ReFitWebServerApnortheast2Function%'\",\n          \"id\": \"A\",\n          \"matchExact\": true,\n          \"metricEditorMode\": 1,\n          \"metricQueryType\": 1,\n          \"namespace\": \"AWS/Lambda\",\n \
-    \         \"period\": \"300\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"A\",\n          \"region\": \"ap-northeast-2\",\n          \"alias\": \"Invocations\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"expression\": \"SELECT SUM(Errors) FROM SCHEMA(\\\"AWS/Lambda\\\", FunctionName) WHERE FunctionName LIKE 're-fit-prod-ReFitWebServerApnortheast2Function%'\",\n          \"id\": \"B\",\n          \"matchExact\": true,\n          \"metricEditorMode\": 1,\n          \"metricQueryType\": 1,\n          \"namespace\": \"AWS/Lambda\",\n          \"period\": \"300\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"B\",\n          \"region\": \"ap-northeast-2\",\n          \"alias\": \"Errors\"\n        }\n      ]\n    },\n    {\n      \"type\": \"timeseries\",\n      \"title\": \"SSR 응답 시간 (p50 / p95 / p99)\",\n      \"description\": \"Lambda Duration. p99 > 3s이면 Cold Start 또는 과부하 의심\",\n      \"datasource\": {\n        \"type\": \"cloudwatch\",\n        \"uid\": \"cloudwatch\"\n      },\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 8,\n        \"x\": 8,\n        \"y\": 23\n      },\n      \"id\": 12,\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"ms\",\n          \"custom\": {\n            \"lineInterpolation\": \"smooth\",\n            \"fillOpacity\": 8,\n            \"showPoints\": \"never\",\n            \"spanNulls\": true\n          }\n        },\n        \"overrides\": []\n      },\n      \"options\": {\n        \"tooltip\": {\n          \"mode\": \"multi\",\n          \"sort\": \"desc\"\n        },\n        \"legend\": {\n          \"displayMode\": \"table\",\n          \"placement\": \"bottom\",\n          \"calcs\": [\n            \"mean\",\n            \"max\"\n          ]\n        }\n      },\n      \"targets\": [\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"expression\": \"SELECT p50(Duration) FROM SCHEMA(\\\"AWS/Lambda\\\", FunctionName) WHERE FunctionName LIKE 're-fit-prod-ReFitWebServerApnortheast2Function%'\",\n          \"id\": \"A\",\n          \"matchExact\": true,\n          \"metricEditorMode\": 1,\n          \"metricQueryType\": 1,\n          \"namespace\": \"AWS/Lambda\",\n          \"period\": \"300\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"A\",\n          \"region\": \"ap-northeast-2\",\n          \"alias\": \"Duration p50\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"expression\": \"SELECT p95(Duration) FROM SCHEMA(\\\"AWS/Lambda\\\", FunctionName) WHERE FunctionName LIKE 're-fit-prod-ReFitWebServerApnortheast2Function%'\",\n          \"id\": \"B\",\n          \"matchExact\": true,\n          \"metricEditorMode\": 1,\n          \"metricQueryType\": 1,\n          \"namespace\": \"AWS/Lambda\",\n          \"period\": \"300\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"B\",\n          \"region\": \"ap-northeast-2\",\n          \"alias\": \"Duration p95\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"expression\": \"SELECT p99(Duration) FROM SCHEMA(\\\"AWS/Lambda\\\", FunctionName) WHERE FunctionName LIKE 're-fit-prod-ReFitWebServerApnortheast2Function%'\",\n          \"id\": \"C\",\n          \"matchExact\": true,\n          \"metricEditorMode\": 1,\n          \"metricQueryType\": 1,\n          \"namespace\": \"AWS/Lambda\",\n          \"period\": \"300\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"C\",\n          \"region\": \"ap-northeast-2\",\n          \"alias\": \"Duration p99\"\n        }\n      ]\n    },\n    {\n      \"type\": \"timeseries\",\n      \"title\": \"Throttles & ConcurrentExecutions\",\n      \"description\": \"Throttle 발생 시 Lambda 동시 실행 한도 초과. Concurrent가 지속 높으면 reserved concurrency 조정 필요\",\n      \"datasource\": {\n        \"type\": \"cloudwatch\",\n        \"uid\": \"cloudwatch\"\n      },\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 8,\n        \"x\": 16,\n        \"y\": 23\n      },\n      \"id\": 13,\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"short\",\n          \"custom\": {\n            \"lineInterpolation\": \"smooth\",\n            \"fillOpacity\": 8,\n            \"showPoints\": \"never\",\n            \"spanNulls\": true\n          }\n        },\n        \"overrides\": [\n          {\n            \"matcher\": {\n              \"id\": \"byName\",\n              \"options\": \"Throttles\"\n            },\n            \"properties\": [\n              {\n                \"id\": \"color\",\n                \"value\": {\n                  \"mode\": \"fixed\",\n                  \"fixedColor\": \"red\"\n                }\n              }\n            ]\n          }\n        ]\n      },\n      \"options\": {\n        \"tooltip\": {\n          \"mode\": \"multi\",\n          \"sort\": \"desc\"\n        },\n        \"legend\": {\n          \"displayMode\": \"table\",\n          \"placement\": \"bottom\",\n          \"calcs\": [\n            \"sum\",\n            \"max\"\n          ]\n        }\n      },\n      \"targets\": [\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"expression\": \"SELECT SUM(Throttles) FROM SCHEMA(\\\"AWS/Lambda\\\", FunctionName) WHERE FunctionName LIKE 're-fit-prod-ReFitWebServerApnortheast2Function%'\",\n          \"id\": \"A\",\n          \"matchExact\": true,\n          \"metricEditorMode\": 1,\n          \"metricQueryType\": 1,\n          \"namespace\": \"AWS/Lambda\",\n          \"period\": \"300\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"A\",\n          \"region\": \"ap-northeast-2\",\n          \"alias\": \"Throttles\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"expression\": \"SELECT MAX(ConcurrentExecutions) FROM SCHEMA(\\\"AWS/Lambda\\\", FunctionName) WHERE FunctionName LIKE 're-fit-prod-ReFitWebServerApnortheast2Function%'\",\n          \"id\": \"B\",\n          \"matchExact\": true,\n          \"metricEditorMode\": 1,\n          \"metricQueryType\": 1,\n          \"namespace\": \"AWS/Lambda\",\n          \"period\": \"300\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"B\",\n          \"region\": \"ap-northeast-2\",\n          \"alias\": \"ConcurrentExecutions\"\n        }\n      ]\n    },\n    {\n      \"type\": \"row\",\n      \"title\": \"Lambda — Image Optimizer & Revalidation (ISR)\",\n      \"collapsed\": false,\n      \"gridPos\": {\n        \"h\": 1,\n        \"w\": 24,\n        \"x\": 0,\n        \"y\": 31\n      },\n      \"id\": 14,\n      \"panels\": []\n    },\n    {\n      \"type\": \"timeseries\",\n      \"title\": \"Image Optimizer\",\n      \"description\": \"이미지 최적화 Lambda. Duration 높으면 이미지 크기 또는 변환 복잡도 확인\",\n      \"datasource\": {\n        \"type\": \"cloudwatch\",\n        \"uid\": \"cloudwatch\"\n      },\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\": 0,\n        \"y\": 32\n      },\n      \"id\": 15,\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"custom\": {\n            \"lineInterpolation\": \"smooth\",\n            \"fillOpacity\": 8,\n            \"showPoints\": \"never\",\n            \"spanNulls\": true\n          }\n        },\n        \"overrides\": [\n          {\n            \"matcher\": {\n              \"id\": \"byName\",\n              \"options\": \"Invocations\"\n            },\n            \"properties\": [\n              {\n                \"id\": \"unit\",\n                \"value\": \"short\"\n              },\n              {\n                \"id\": \"custom.axisPlacement\",\n                \"value\": \"left\"\n              }\n            ]\n          },\n          {\n            \"matcher\": {\n              \"id\": \"byName\",\n              \"options\": \"Duration p95\"\n            },\n            \"properties\": [\n              {\n                \"id\": \"unit\",\n                \"value\": \"ms\"\n              },\n              {\n                \"id\": \"custom.axisPlacement\",\n                \"value\": \"right\"\n              },\n              {\n                \"id\": \"color\",\n                \"value\": {\n                  \"mode\": \"fixed\",\n                  \"fixedColor\": \"orange\"\n                }\n              }\n            ]\n          },\n          {\n            \"matcher\": {\n              \"id\": \"byName\",\n              \"options\": \"Errors\"\n            },\n            \"properties\": [\n              {\n                \"id\": \"unit\",\n                \"value\": \"short\"\n              },\n              {\n                \"id\": \"color\",\n                \"value\": {\n                  \"mode\": \"fixed\",\n                  \"fixedColor\": \"red\"\n                }\n              }\n            ]\n          }\n        ]\n      },\n      \"options\": {\n        \"tooltip\": {\n          \"mode\": \"multi\",\n          \"sort\": \"desc\"\n        },\n        \"legend\": {\n          \"displayMode\": \"table\",\n          \"placement\": \"bottom\",\n          \"calcs\": [\n            \"sum\",\n            \"max\"\n          ]\n        }\n      },\n      \"targets\": [\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"expression\": \"SELECT SUM(Invocations) FROM SCHEMA(\\\"AWS/Lambda\\\", FunctionName) WHERE FunctionName LIKE 're-fit-prod-ReFitWebImageOptimizerFunction%'\"\
-    ,\n          \"id\": \"A\",\n          \"matchExact\": true,\n          \"metricEditorMode\": 1,\n          \"metricQueryType\": 1,\n          \"namespace\": \"AWS/Lambda\",\n          \"period\": \"300\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"A\",\n          \"region\": \"ap-northeast-2\",\n          \"alias\": \"Invocations\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"expression\": \"SELECT p95(Duration) FROM SCHEMA(\\\"AWS/Lambda\\\", FunctionName) WHERE FunctionName LIKE 're-fit-prod-ReFitWebImageOptimizerFunction%'\",\n          \"id\": \"B\",\n          \"matchExact\": true,\n          \"metricEditorMode\": 1,\n          \"metricQueryType\": 1,\n          \"namespace\": \"AWS/Lambda\",\n          \"period\": \"300\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"B\",\n          \"region\": \"ap-northeast-2\",\n          \"alias\": \"Duration p95\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"expression\": \"SELECT SUM(Errors) FROM SCHEMA(\\\"AWS/Lambda\\\", FunctionName) WHERE FunctionName LIKE 're-fit-prod-ReFitWebImageOptimizerFunction%'\",\n          \"id\": \"C\",\n          \"matchExact\": true,\n          \"metricEditorMode\": 1,\n          \"metricQueryType\": 1,\n          \"namespace\": \"AWS/Lambda\",\n          \"period\": \"300\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"C\",\n          \"region\": \"ap-northeast-2\",\n          \"alias\": \"Errors\"\n        }\n      ]\n    },\n    {\n      \"type\": \"timeseries\",\n      \"title\": \"Revalidation (ISR)\",\n      \"description\": \"Next.js ISR 재검증 Lambda. 호출 빈도로 페이지 캐시 갱신 주기 파악 가능\",\n      \"datasource\": {\n        \"type\": \"cloudwatch\",\n        \"uid\": \"cloudwatch\"\n      },\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\": 12,\n        \"y\": 32\n      },\n      \"id\": 16,\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"custom\": {\n            \"lineInterpolation\": \"smooth\",\n            \"fillOpacity\": 8,\n            \"showPoints\": \"never\",\n            \"spanNulls\": true\n          }\n        },\n        \"overrides\": [\n          {\n            \"matcher\": {\n              \"id\": \"byName\",\n              \"options\": \"Revalidation Invocations\"\n            },\n            \"properties\": [\n              {\n                \"id\": \"unit\",\n                \"value\": \"short\"\n              },\n              {\n                \"id\": \"custom.axisPlacement\",\n                \"value\": \"left\"\n              }\n            ]\n          },\n          {\n            \"matcher\": {\n              \"id\": \"byName\",\n              \"options\": \"Seeder Invocations\"\n            },\n            \"properties\": [\n              {\n                \"id\": \"unit\",\n                \"value\": \"short\"\n              },\n              {\n                \"id\": \"custom.axisPlacement\",\n                \"value\": \"left\"\n              },\n              {\n                \"id\": \"color\",\n                \"value\": {\n                  \"mode\": \"fixed\",\n                  \"fixedColor\": \"green\"\n                }\n              }\n            ]\n          },\n          {\n            \"matcher\": {\n              \"id\": \"byName\",\n              \"options\": \"Duration p50\"\n            },\n            \"properties\": [\n              {\n                \"id\": \"unit\",\n                \"value\": \"ms\"\n              },\n              {\n                \"id\": \"custom.axisPlacement\",\n                \"value\": \"right\"\n              }\n            ]\n          }\n        ]\n      },\n      \"options\": {\n        \"tooltip\": {\n          \"mode\": \"multi\",\n          \"sort\": \"desc\"\n        },\n        \"legend\": {\n          \"displayMode\": \"table\",\n          \"placement\": \"bottom\",\n          \"calcs\": [\n            \"sum\",\n            \"max\"\n          ]\n        }\n      },\n      \"targets\": [\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"expression\": \"SELECT SUM(Invocations) FROM SCHEMA(\\\"AWS/Lambda\\\", FunctionName) WHERE FunctionName LIKE 'ReFitWebRevalidationEventsSubscriberBccdeaFunctionFunct%'\",\n          \"id\": \"A\",\n          \"matchExact\": true,\n          \"metricEditorMode\": 1,\n          \"metricQueryType\": 1,\n          \"namespace\": \"AWS/Lambda\",\n          \"period\": \"300\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"A\",\n          \"region\": \"ap-northeast-2\",\n          \"alias\": \"Revalidation Invocations\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"expression\": \"SELECT SUM(Invocations) FROM SCHEMA(\\\"AWS/Lambda\\\", FunctionName) WHERE FunctionName LIKE 're-fit-prod-ReFitWebRevalidationSeederFunction%'\",\n          \"id\": \"B\",\n          \"matchExact\": true,\n          \"metricEditorMode\": 1,\n          \"metricQueryType\": 1,\n          \"namespace\": \"AWS/Lambda\",\n          \"period\": \"300\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"B\",\n          \"region\": \"ap-northeast-2\",\n          \"alias\": \"Seeder Invocations\"\n        },\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"expression\": \"SELECT p50(Duration) FROM SCHEMA(\\\"AWS/Lambda\\\", FunctionName) WHERE FunctionName LIKE 'ReFitWebRevalidationEventsSubscriberBccdeaFunctionFunct%'\",\n          \"id\": \"C\",\n          \"matchExact\": true,\n          \"metricEditorMode\": 1,\n          \"metricQueryType\": 1,\n          \"namespace\": \"AWS/Lambda\",\n          \"period\": \"300\",\n          \"queryMode\": \"Metrics\",\n          \"refId\": \"C\",\n          \"region\": \"ap-northeast-2\",\n          \"alias\": \"Duration p50\"\n        }\n      ]\n    },\n    {\n      \"type\": \"row\",\n      \"title\": \"Lambda SSR 로그 (CloudWatch Logs Insights)\",\n      \"collapsed\": false,\n      \"gridPos\": {\n        \"h\": 1,\n        \"w\": 24,\n        \"x\": 0,\n        \"y\": 40\n      },\n      \"id\": 17,\n      \"panels\": []\n    },\n    {\n      \"type\": \"logs\",\n      \"title\": \"SSR Server — 전체 로그\",\n      \"description\": \"OpenNext SSR Lambda 함수 로그 (re-fit-prod-ReFitWebServerApnortheast2Function)\",\n      \"datasource\": {\n        \"type\": \"cloudwatch\",\n        \"uid\": \"cloudwatch\"\n      },\n      \"gridPos\": {\n        \"h\": 12,\n        \"w\": 24,\n        \"x\": 0,\n        \"y\": 41\n      },\n      \"id\": 18,\n      \"options\": {\n        \"dedupStrategy\": \"none\",\n        \"enableLogDetails\": true,\n        \"prettifyLogMessage\": false,\n        \"showCommonLabels\": false,\n        \"showLabels\": true,\n        \"showTime\": true,\n        \"sortOrder\": \"Descending\",\n        \"wrapLogMessage\": true\n      },\n      \"targets\": [\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"expression\": \"fields @timestamp, @message, @logStream | sort @timestamp desc | limit 200\",\n          \"id\": \"\",\n          \"logGroupNamePattern\": \"re-fit-prod-ReFitWebServerApnortheast2Function\",\n          \"queryMode\": \"Logs\",\n          \"refId\": \"A\",\n          \"region\": \"ap-northeast-2\"\n        }\n      ]\n    },\n    {\n      \"type\": \"logs\",\n      \"title\": \"SSR Server — 에러/예외 로그\",\n      \"description\": \"ERROR / Exception / 4xx-5xx 포함 로그만 필터링\",\n      \"datasource\": {\n        \"type\": \"cloudwatch\",\n        \"uid\": \"cloudwatch\"\n      },\n      \"gridPos\": {\n        \"h\": 10,\n        \"w\": 24,\n        \"x\": 0,\n        \"y\": 53\n      },\n      \"id\": 19,\n      \"options\": {\n        \"dedupStrategy\": \"none\",\n        \"enableLogDetails\": true,\n        \"prettifyLogMessage\": false,\n        \"showCommonLabels\": false,\n        \"showLabels\": true,\n        \"showTime\": true,\n        \"sortOrder\": \"Descending\",\n        \"wrapLogMessage\": true\n      },\n      \"targets\": [\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"expression\": \"fields @timestamp, @message, @logStream | filter @message like /(?i)(error|exception|fail)/ | sort @timestamp desc | limit 100\",\n          \"id\": \"\",\n          \"logGroupNamePattern\": \"re-fit-prod-ReFitWebServerApnortheast2Function\",\n          \"queryMode\": \"Logs\",\n          \"refId\": \"A\",\n          \"region\": \"ap-northeast-2\"\n        }\n      ]\n    },\n    {\n      \"type\": \"row\",\n      \"title\": \"Lambda 기타 함수 로그 (Image Optimizer / Revalidation)\",\n      \"collapsed\": false,\n      \"gridPos\": {\n        \"h\": 1,\n        \"w\": 24,\n        \"x\": 0,\n        \"y\": 63\n      },\n      \"id\": 20,\n      \"panels\": []\n    },\n    {\n      \"type\": \"logs\",\n      \"title\": \"Image Optimizer 로그\",\n      \"description\": \"이미지 최적화 Lambda 로그 (re-fit-prod-ReFitWebImageOptimizerFunction)\",\n      \"datasource\": {\n        \"type\": \"cloudwatch\",\n        \"uid\": \"cloudwatch\"\n      },\n      \"gridPos\": {\n        \"h\": 10,\n        \"w\": 12,\n        \"x\": 0,\n        \"y\": 64\n      },\n      \"id\": 21,\n      \"options\": {\n        \"dedupStrategy\": \"none\",\n        \"enableLogDetails\": true,\n        \"prettifyLogMessage\": false,\n        \"showCommonLabels\": false,\n        \"showLabels\": true,\n        \"\
-    showTime\": true,\n        \"sortOrder\": \"Descending\",\n        \"wrapLogMessage\": true\n      },\n      \"targets\": [\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"expression\": \"fields @timestamp, @message, @logStream | sort @timestamp desc | limit 100\",\n          \"id\": \"\",\n          \"logGroupNamePattern\": \"re-fit-prod-ReFitWebImageOptimizerFunction\",\n          \"queryMode\": \"Logs\",\n          \"refId\": \"A\",\n          \"region\": \"ap-northeast-2\"\n        }\n      ]\n    },\n    {\n      \"type\": \"logs\",\n      \"title\": \"Revalidation 로그\",\n      \"description\": \"ISR 재검증 Lambda 로그 (ReFitWebRevalidationEventsSubscriberBccdeaFunctionFunct)\",\n      \"datasource\": {\n        \"type\": \"cloudwatch\",\n        \"uid\": \"cloudwatch\"\n      },\n      \"gridPos\": {\n        \"h\": 10,\n        \"w\": 12,\n        \"x\": 12,\n        \"y\": 64\n      },\n      \"id\": 22,\n      \"options\": {\n        \"dedupStrategy\": \"none\",\n        \"enableLogDetails\": true,\n        \"prettifyLogMessage\": false,\n        \"showCommonLabels\": false,\n        \"showLabels\": true,\n        \"showTime\": true,\n        \"sortOrder\": \"Descending\",\n        \"wrapLogMessage\": true\n      },\n      \"targets\": [\n        {\n          \"datasource\": {\n            \"type\": \"cloudwatch\",\n            \"uid\": \"cloudwatch\"\n          },\n          \"expression\": \"fields @timestamp, @message, @logStream | sort @timestamp desc | limit 100\",\n          \"id\": \"\",\n          \"logGroupNamePattern\": \"ReFitWebRevalidationEventsSubscriberBccdeaFunctionFunct\",\n          \"queryMode\": \"Logs\",\n          \"refId\": \"A\",\n          \"region\": \"ap-northeast-2\"\n        }\n      ]\n    }\n  ]\n}"
 kind: ConfigMap
 metadata:
-  annotations:
-    grafana_folder: Frontend
-  labels:
-    grafana_dashboard: '1'
   name: grafana-dashboard-frontend-cloudwatch
   namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Frontend"
+data:
+  frontend-cloudwatch.json: |
+    {
+      "description": "re-fit.kr 프론트엔드 모니터링 — CloudFront + OpenNext Lambda",
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "refresh": "1m",
+      "schemaVersion": 38,
+      "tags": [
+        "frontend",
+        "cloudfront",
+        "lambda",
+        "aws"
+      ],
+      "time": {
+        "from": "now-3h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "Frontend — CloudFront & Lambda (OpenNext)",
+      "uid": "refit-frontend-cloudwatch",
+      "version": 1,
+      "panels": [
+        {
+          "type": "row",
+          "title": "CloudFront Overview — re-fit.kr (E1FDJ51FF9EN5D)",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 1,
+          "panels": []
+        },
+        {
+          "type": "stat",
+          "title": "총 요청 수",
+          "description": "선택 시간 범위의 CloudFront 누적 요청 수",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 1
+          },
+          "id": 2,
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "noValue": "-",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "blue",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "sum"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "area",
+            "textMode": "auto",
+            "orientation": "auto"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "dimensions": {
+                "DistributionId": [
+                  "E1FDJ51FF9EN5D"
+                ],
+                "Region": [
+                  "Global"
+                ]
+              },
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "Requests",
+              "metricQueryType": 0,
+              "namespace": "AWS/CloudFront",
+              "period": "",
+              "queryMode": "Metrics",
+              "refId": "A",
+              "region": "us-east-1",
+              "statistic": "Sum"
+            }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "4xx 에러율",
+          "description": "클라이언트 에러 비율. 1% 초과 시 라우팅/권한 확인",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 1
+          },
+          "id": 3,
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "noValue": "-",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "textMode": "auto",
+            "orientation": "auto"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "dimensions": {
+                "DistributionId": [
+                  "E1FDJ51FF9EN5D"
+                ],
+                "Region": [
+                  "Global"
+                ]
+              },
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "4xxErrorRate",
+              "metricQueryType": 0,
+              "namespace": "AWS/CloudFront",
+              "period": "",
+              "queryMode": "Metrics",
+              "refId": "A",
+              "region": "us-east-1",
+              "statistic": "Average"
+            }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "5xx 에러율",
+          "description": "서버/Lambda 에러 비율. 0.1% 초과 시 즉시 확인",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 1
+          },
+          "id": 4,
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "noValue": "-",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 0.1
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "textMode": "auto",
+            "orientation": "auto"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "dimensions": {
+                "DistributionId": [
+                  "E1FDJ51FF9EN5D"
+                ],
+                "Region": [
+                  "Global"
+                ]
+              },
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "5xxErrorRate",
+              "metricQueryType": 0,
+              "namespace": "AWS/CloudFront",
+              "period": "",
+              "queryMode": "Metrics",
+              "refId": "A",
+              "region": "us-east-1",
+              "statistic": "Average"
+            }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "캐시 히트율",
+          "description": "정적 파일 캐시 효율. 낮으면 Origin 부하 증가",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 1
+          },
+          "id": 5,
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "noValue": "-",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 70
+                  },
+                  {
+                    "color": "green",
+                    "value": 85
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "textMode": "auto",
+            "orientation": "auto"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "dimensions": {
+                "DistributionId": [
+                  "E1FDJ51FF9EN5D"
+                ],
+                "Region": [
+                  "Global"
+                ]
+              },
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "CacheHitRate",
+              "metricQueryType": 0,
+              "namespace": "AWS/CloudFront",
+              "period": "",
+              "queryMode": "Metrics",
+              "refId": "A",
+              "region": "us-east-1",
+              "statistic": "Average"
+            }
+          ]
+        },
+        {
+          "type": "row",
+          "title": "CloudFront 트래픽",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 5
+          },
+          "id": 6,
+          "panels": []
+        },
+        {
+          "type": "timeseries",
+          "title": "요청 수 추이",
+          "description": "CloudFront 요청 수 (1분 단위)",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 6
+          },
+          "id": 7,
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "custom": {
+                "lineInterpolation": "smooth",
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": true
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "mean",
+                "max"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "dimensions": {
+                "DistributionId": [
+                  "E1FDJ51FF9EN5D"
+                ],
+                "Region": [
+                  "Global"
+                ]
+              },
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "Requests",
+              "metricQueryType": 0,
+              "namespace": "AWS/CloudFront",
+              "period": "",
+              "queryMode": "Metrics",
+              "refId": "A",
+              "region": "us-east-1",
+              "statistic": "Sum",
+              "alias": "Requests"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "에러율 추이 (4xx / 5xx)",
+          "description": "4xx = 클라이언트 에러, 5xx = 서버/Lambda 에러",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 6
+          },
+          "id": 8,
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "custom": {
+                "lineInterpolation": "smooth",
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": true
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "5xx Error Rate"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "red"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "4xx Error Rate"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "orange"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "mean",
+                "max"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "dimensions": {
+                "DistributionId": [
+                  "E1FDJ51FF9EN5D"
+                ],
+                "Region": [
+                  "Global"
+                ]
+              },
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "4xxErrorRate",
+              "metricQueryType": 0,
+              "namespace": "AWS/CloudFront",
+              "period": "",
+              "queryMode": "Metrics",
+              "refId": "A",
+              "region": "us-east-1",
+              "statistic": "Average",
+              "alias": "4xx Error Rate"
+            },
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "dimensions": {
+                "DistributionId": [
+                  "E1FDJ51FF9EN5D"
+                ],
+                "Region": [
+                  "Global"
+                ]
+              },
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "5xxErrorRate",
+              "metricQueryType": 0,
+              "namespace": "AWS/CloudFront",
+              "period": "",
+              "queryMode": "Metrics",
+              "refId": "B",
+              "region": "us-east-1",
+              "statistic": "Average",
+              "alias": "5xx Error Rate"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "캐시 히트율 & Origin Latency",
+          "description": "Origin Latency는 CloudFront Additional Metrics 활성화 필요",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 14
+          },
+          "id": 9,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "lineInterpolation": "smooth",
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": true
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Cache Hit Rate"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "percent"
+                  },
+                  {
+                    "id": "custom.axisPlacement",
+                    "value": "left"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Origin Latency p99"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  },
+                  {
+                    "id": "custom.axisPlacement",
+                    "value": "right"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "purple"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "mean",
+                "min",
+                "max"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "dimensions": {
+                "DistributionId": [
+                  "E1FDJ51FF9EN5D"
+                ],
+                "Region": [
+                  "Global"
+                ]
+              },
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "CacheHitRate",
+              "metricQueryType": 0,
+              "namespace": "AWS/CloudFront",
+              "period": "",
+              "queryMode": "Metrics",
+              "refId": "A",
+              "region": "us-east-1",
+              "statistic": "Average",
+              "alias": "Cache Hit Rate"
+            },
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "dimensions": {
+                "DistributionId": [
+                  "E1FDJ51FF9EN5D"
+                ],
+                "Region": [
+                  "Global"
+                ]
+              },
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "OriginLatency",
+              "metricQueryType": 0,
+              "namespace": "AWS/CloudFront",
+              "period": "",
+              "queryMode": "Metrics",
+              "refId": "B",
+              "region": "us-east-1",
+              "statistic": "p99",
+              "alias": "Origin Latency p99"
+            }
+          ]
+        },
+        {
+          "type": "row",
+          "title": "Lambda — SSR Server (re-fit-prod-ReFitWebServerApnortheast2Function)",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 22
+          },
+          "id": 10,
+          "panels": []
+        },
+        {
+          "type": "timeseries",
+          "title": "Invocations & Errors",
+          "description": "SSR 함수 호출 수 및 에러 수",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 0,
+            "y": 23
+          },
+          "id": 11,
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "custom": {
+                "lineInterpolation": "smooth",
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": true
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Errors"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "red"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "sum",
+                "max"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "expression": "SEARCH('{AWS/Lambda,FunctionName} re-fit-prod-ReFitWebServerApnortheast2Function Invocations', 'Sum', 300)",
+              "hide": false,
+              "id": "A",
+              "metricEditorMode": 1,
+              "metricQueryType": 0,
+              "queryMode": "Metrics",
+              "refId": "A",
+              "region": "ap-northeast-2",
+              "alias": "Invocations"
+            },
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "expression": "SEARCH('{AWS/Lambda,FunctionName} re-fit-prod-ReFitWebServerApnortheast2Function Errors', 'Sum', 300)",
+              "hide": false,
+              "id": "B",
+              "metricEditorMode": 1,
+              "metricQueryType": 0,
+              "queryMode": "Metrics",
+              "refId": "B",
+              "region": "ap-northeast-2",
+              "alias": "Errors"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "SSR 응답 시간 (p50 / p95 / p99)",
+          "description": "Lambda Duration. p99 > 3s이면 Cold Start 또는 과부하 의심",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 8,
+            "y": 23
+          },
+          "id": 12,
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "custom": {
+                "lineInterpolation": "smooth",
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": true
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "mean",
+                "max"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "expression": "SEARCH('{AWS/Lambda,FunctionName} re-fit-prod-ReFitWebServerApnortheast2Function Duration', 'p50', 300)",
+              "hide": false,
+              "id": "A",
+              "metricEditorMode": 1,
+              "metricQueryType": 0,
+              "queryMode": "Metrics",
+              "refId": "A",
+              "region": "ap-northeast-2",
+              "alias": "Duration p50"
+            },
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "expression": "SEARCH('{AWS/Lambda,FunctionName} re-fit-prod-ReFitWebServerApnortheast2Function Duration', 'p95', 300)",
+              "hide": false,
+              "id": "B",
+              "metricEditorMode": 1,
+              "metricQueryType": 0,
+              "queryMode": "Metrics",
+              "refId": "B",
+              "region": "ap-northeast-2",
+              "alias": "Duration p95"
+            },
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "expression": "SEARCH('{AWS/Lambda,FunctionName} re-fit-prod-ReFitWebServerApnortheast2Function Duration', 'p99', 300)",
+              "hide": false,
+              "id": "C",
+              "metricEditorMode": 1,
+              "metricQueryType": 0,
+              "queryMode": "Metrics",
+              "refId": "C",
+              "region": "ap-northeast-2",
+              "alias": "Duration p99"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Throttles & ConcurrentExecutions",
+          "description": "Throttle 발생 시 Lambda 동시 실행 한도 초과. Concurrent가 지속 높으면 reserved concurrency 조정 필요",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 16,
+            "y": 23
+          },
+          "id": 13,
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "custom": {
+                "lineInterpolation": "smooth",
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": true
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Throttles"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "red"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "sum",
+                "max"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "expression": "SEARCH('{AWS/Lambda,FunctionName} re-fit-prod-ReFitWebServerApnortheast2Function Throttles', 'Sum', 300)",
+              "hide": false,
+              "id": "A",
+              "metricEditorMode": 1,
+              "metricQueryType": 0,
+              "queryMode": "Metrics",
+              "refId": "A",
+              "region": "ap-northeast-2",
+              "alias": "Throttles"
+            },
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "expression": "SEARCH('{AWS/Lambda,FunctionName} re-fit-prod-ReFitWebServerApnortheast2Function ConcurrentExecutions', 'Max', 300)",
+              "hide": false,
+              "id": "B",
+              "metricEditorMode": 1,
+              "metricQueryType": 0,
+              "queryMode": "Metrics",
+              "refId": "B",
+              "region": "ap-northeast-2",
+              "alias": "ConcurrentExecutions"
+            }
+          ]
+        },
+        {
+          "type": "row",
+          "title": "Lambda — Image Optimizer & Revalidation (ISR)",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 31
+          },
+          "id": 14,
+          "panels": []
+        },
+        {
+          "type": "timeseries",
+          "title": "Image Optimizer",
+          "description": "이미지 최적화 Lambda. Duration 높으면 이미지 크기 또는 변환 복잡도 확인",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 32
+          },
+          "id": 15,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "lineInterpolation": "smooth",
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": true
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Invocations"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "short"
+                  },
+                  {
+                    "id": "custom.axisPlacement",
+                    "value": "left"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Duration p95"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  },
+                  {
+                    "id": "custom.axisPlacement",
+                    "value": "right"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "orange"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Errors"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "short"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "red"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "sum",
+                "max"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "expression": "SEARCH('{AWS/Lambda,FunctionName} re-fit-prod-ReFitWebImageOptimizerFunction Invocations', 'Sum', 300)",
+              "hide": false,
+              "id": "A",
+              "metricEditorMode": 1,
+              "metricQueryType": 0,
+              "queryMode": "Metrics",
+              "refId": "A",
+              "region": "ap-northeast-2",
+              "alias": "Invocations"
+            },
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "expression": "SEARCH('{AWS/Lambda,FunctionName} re-fit-prod-ReFitWebImageOptimizerFunction Duration', 'p95', 300)",
+              "hide": false,
+              "id": "B",
+              "metricEditorMode": 1,
+              "metricQueryType": 0,
+              "queryMode": "Metrics",
+              "refId": "B",
+              "region": "ap-northeast-2",
+              "alias": "Duration p95"
+            },
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "expression": "SEARCH('{AWS/Lambda,FunctionName} re-fit-prod-ReFitWebImageOptimizerFunction Errors', 'Sum', 300)",
+              "hide": false,
+              "id": "C",
+              "metricEditorMode": 1,
+              "metricQueryType": 0,
+              "queryMode": "Metrics",
+              "refId": "C",
+              "region": "ap-northeast-2",
+              "alias": "Errors"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Revalidation (ISR)",
+          "description": "Next.js ISR 재검증 Lambda. 호출 빈도로 페이지 캐시 갱신 주기 파악 가능",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 32
+          },
+          "id": 16,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "lineInterpolation": "smooth",
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": true
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Revalidation Invocations"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "short"
+                  },
+                  {
+                    "id": "custom.axisPlacement",
+                    "value": "left"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Seeder Invocations"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "short"
+                  },
+                  {
+                    "id": "custom.axisPlacement",
+                    "value": "left"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "green"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Duration p50"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  },
+                  {
+                    "id": "custom.axisPlacement",
+                    "value": "right"
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "sum",
+                "max"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "expression": "SEARCH('{AWS/Lambda,FunctionName} ReFitWebRevalidationEventsSubscriberBccdeaFunctionFunct Invocations', 'Sum', 300)",
+              "hide": false,
+              "id": "A",
+              "metricEditorMode": 1,
+              "metricQueryType": 0,
+              "queryMode": "Metrics",
+              "refId": "A",
+              "region": "ap-northeast-2",
+              "alias": "Revalidation Invocations"
+            },
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "expression": "SEARCH('{AWS/Lambda,FunctionName} re-fit-prod-ReFitWebRevalidationSeederFunction Invocations', 'Sum', 300)",
+              "hide": false,
+              "id": "B",
+              "metricEditorMode": 1,
+              "metricQueryType": 0,
+              "queryMode": "Metrics",
+              "refId": "B",
+              "region": "ap-northeast-2",
+              "alias": "Seeder Invocations"
+            },
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "expression": "SEARCH('{AWS/Lambda,FunctionName} ReFitWebRevalidationEventsSubscriberBccdeaFunctionFunct Duration', 'p50', 300)",
+              "hide": false,
+              "id": "C",
+              "metricEditorMode": 1,
+              "metricQueryType": 0,
+              "queryMode": "Metrics",
+              "refId": "C",
+              "region": "ap-northeast-2",
+              "alias": "Duration p50"
+            }
+          ]
+        },
+        {
+          "type": "row",
+          "title": "Lambda SSR 로그 (CloudWatch Logs Insights)",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 40
+          },
+          "id": 17,
+          "panels": []
+        },
+        {
+          "type": "logs",
+          "title": "SSR Server — 전체 로그",
+          "description": "OpenNext SSR Lambda 함수 로그 (re-fit-prod-ReFitWebServerApnortheast2Function)",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 41
+          },
+          "id": 18,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": true,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": true
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "expression": "fields @timestamp, @message, @logStream | sort @timestamp desc | limit 200",
+              "id": "",
+              "logGroupNamePattern": "re-fit-prod-ReFitWebServerApnortheast2Function",
+              "queryMode": "Logs",
+              "refId": "A",
+              "region": "ap-northeast-2"
+            }
+          ]
+        },
+        {
+          "type": "logs",
+          "title": "SSR Server — 에러/예외 로그",
+          "description": "ERROR / Exception / 4xx-5xx 포함 로그만 필터링",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 53
+          },
+          "id": 19,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": true,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": true
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "expression": "fields @timestamp, @message, @logStream | filter @message like /(?i)(error|exception|fail)/ | sort @timestamp desc | limit 100",
+              "id": "",
+              "logGroupNamePattern": "re-fit-prod-ReFitWebServerApnortheast2Function",
+              "queryMode": "Logs",
+              "refId": "A",
+              "region": "ap-northeast-2"
+            }
+          ]
+        },
+        {
+          "type": "row",
+          "title": "Lambda 기타 함수 로그 (Image Optimizer / Revalidation)",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 63
+          },
+          "id": 20,
+          "panels": []
+        },
+        {
+          "type": "logs",
+          "title": "Image Optimizer 로그",
+          "description": "이미지 최적화 Lambda 로그 (re-fit-prod-ReFitWebImageOptimizerFunction)",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 64
+          },
+          "id": 21,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": true,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": true
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "expression": "fields @timestamp, @message, @logStream | sort @timestamp desc | limit 100",
+              "id": "",
+              "logGroupNamePattern": "re-fit-prod-ReFitWebImageOptimizerFunction",
+              "queryMode": "Logs",
+              "refId": "A",
+              "region": "ap-northeast-2"
+            }
+          ]
+        },
+        {
+          "type": "logs",
+          "title": "Revalidation 로그",
+          "description": "ISR 재검증 Lambda 로그 (ReFitWebRevalidationEventsSubscriberBccdeaFunctionFunct)",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 64
+          },
+          "id": 22,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": true,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": true
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "cloudwatch"
+              },
+              "expression": "fields @timestamp, @message, @logStream | sort @timestamp desc | limit 100",
+              "id": "",
+              "logGroupNamePattern": "ReFitWebRevalidationEventsSubscriberBccdeaFunctionFunct",
+              "queryMode": "Logs",
+              "refId": "A",
+              "region": "ap-northeast-2"
+            }
+          ]
+        }
+      ]
+    }
