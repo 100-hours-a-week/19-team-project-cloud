@@ -23,18 +23,6 @@ data:
       ],
       "__requires": [
         {
-          "type": "grafana",
-          "id": "grafana",
-          "name": "Grafana",
-          "version": "7.3.6"
-        },
-        {
-          "type": "panel",
-          "id": "graph",
-          "name": "Graph",
-          "version": ""
-        },
-        {
           "type": "datasource",
           "id": "prometheus",
           "name": "Prometheus",
@@ -42,8 +30,14 @@ data:
         },
         {
           "type": "panel",
-          "id": "singlestat",
-          "name": "Singlestat",
+          "id": "timeseries",
+          "name": "Time series",
+          "version": ""
+        },
+        {
+          "type": "panel",
+          "id": "stat",
+          "name": "Stat",
           "version": ""
         },
         {
@@ -51,231 +45,387 @@ data:
           "id": "table",
           "name": "Table",
           "version": ""
+        },
+        {
+          "type": "panel",
+          "id": "row",
+          "name": "Row",
+          "version": ""
         }
       ],
       "annotations": {
-        "list": [
-          {
-            "builtIn": 1,
-            "datasource": "-- Grafana --",
-            "enable": true,
-            "hide": true,
-            "iconColor": "rgba(0, 211, 255, 1)",
-            "name": "Annotations & Alerts",
-            "type": "dashboard"
-          }
-        ]
+        "list": []
       },
-      "description": "Cluster wide metrics exported by KMinion",
+      "description": "MSK refit-kafka 클러스터 모니터링 — KMinion 기반\nConsumer Group: refit-backend-prod\nTopics: resume.parse.*, report.generate.*, mentor.embedding.*, chat.message.*, notification.*",
       "editable": true,
-      "gnetId": 14012,
-      "graphTooltip": 0,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
       "id": null,
-      "iteration": 1614981106152,
       "links": [],
       "panels": [
         {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "${DS_CORTEX}",
-          "description": "Summed delta between High and Low watermark of all partitions in the given topic. Therefore not accurate for compacted topics that contain compacted records.",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
+          "type": "row",
+          "title": "클러스터 Overview",
+          "collapsed": false,
           "gridPos": {
-            "h": 8,
-            "w": 8,
+            "h": 1,
+            "w": 24,
             "x": 0,
             "y": 0
           },
-          "hiddenSeries": false,
-          "id": 16,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": false,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 2,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "7.3.6",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "sum by (kubernetes_pod_name) (rate(kminion_kafka_topic_high_water_mark_sum[$__rate_interval]))",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Messages in/sec",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "$$hashKey": "object:545",
-              "decimals": 0,
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": "0",
-              "show": true
-            },
-            {
-              "$$hashKey": "object:546",
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
+          "panels": []
         },
         {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": false,
-          "colors": [
-            "#299c46",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "${DS_CORTEX}",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
+          "type": "stat",
+          "title": "Kafka 버전",
+          "description": "MSK Kafka 버전",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
           },
           "gridPos": {
             "h": 4,
-            "w": 4,
-            "x": 8,
-            "y": 0
+            "w": 3,
+            "x": 0,
+            "y": 1
           },
-          "id": 11,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "$$hashKey": "object:221",
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "$$hashKey": "object:222",
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false
-          },
-          "tableColumn": "cluster_version",
-          "targets": [
-            {
-              "expr": "kminion_kafka_cluster_info",
-              "format": "table",
-              "instant": true,
-              "interval": "",
-              "intervalFactor": 1,
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "thresholds": "",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Cluster Version",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "$$hashKey": "object:224",
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "current"
-        },
-        {
-          "datasource": "${DS_CORTEX}",
           "fieldConfig": {
             "defaults": {
-              "custom": {
-                "align": null,
-                "filterable": false
+              "unit": "short",
+              "noValue": "-",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
               },
-              "mappings": [],
+              "color": {
+                "mode": "thresholds"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "none",
+            "graphMode": "none",
+            "textMode": "auto",
+            "orientation": "auto"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "kminion_kafka_cluster_info",
+              "legendFormat": "{{cluster_version}}",
+              "instant": true,
+              "refId": "A",
+              "editorMode": "code",
+              "range": false
+            }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "브로커 Online",
+          "description": "온라인 브로커 수 (정상: 2)",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 3,
+            "x": 3,
+            "y": 1
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "noValue": "-",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 1
+                  },
+                  {
+                    "color": "green",
+                    "value": 2
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "textMode": "auto",
+            "orientation": "auto"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "count(kminion_kafka_broker_info)",
+              "legendFormat": "",
+              "instant": true,
+              "refId": "A",
+              "editorMode": "code",
+              "range": false
+            }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "총 Consumer Lag",
+          "description": "refit-backend-prod 전체 lag 합산",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 3,
+            "x": 6,
+            "y": 1
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "noValue": "-",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 100
+                  },
+                  {
+                    "color": "red",
+                    "value": 1000
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "textMode": "auto",
+            "orientation": "auto"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum(kminion_kafka_consumer_group_topic_partition_lag{group_id=\"refit-backend-prod\"})",
+              "legendFormat": "",
+              "instant": true,
+              "refId": "A",
+              "editorMode": "code",
+              "range": false
+            }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "Consumer 멤버 수",
+          "description": "refit-backend-prod 활성 컨슈머 스레드 수",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 3,
+            "x": 9,
+            "y": 1
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "noValue": "-",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 1
+                  },
+                  {
+                    "color": "green",
+                    "value": 2
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "textMode": "auto",
+            "orientation": "auto"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "kminion_kafka_consumer_group_members{group_id=\"refit-backend-prod\"}",
+              "legendFormat": "",
+              "instant": true,
+              "refId": "A",
+              "editorMode": "code",
+              "range": false
+            }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "Consumer Group 상태",
+          "description": "Stable=정상 / Empty·Dead·PreparingRebalance=이상",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 3,
+            "x": 12,
+            "y": 1
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "noValue": "-",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "textMode": "auto",
+            "orientation": "auto"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "kminion_kafka_consumer_group_info{group_id=\"refit-backend-prod\"}",
+              "legendFormat": "{{state}}",
+              "instant": true,
+              "refId": "A",
+              "editorMode": "code",
+              "range": false
+            }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "DLQ 메시지",
+          "description": "DLQ 누적 메시지 수 (0이어야 정상)",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 3,
+            "x": 15,
+            "y": 1
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "noValue": "-",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -285,642 +435,1056 @@ data:
                   },
                   {
                     "color": "red",
-                    "value": 80
+                    "value": 1
                   }
                 ]
+              },
+              "color": {
+                "mode": "thresholds"
               }
             },
             "overrides": []
           },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 0
-          },
-          "id": 10,
           "options": {
-            "showHeader": true,
-            "sortBy": [
-              {
-                "desc": false,
-                "displayName": "Address"
-              }
-            ]
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "textMode": "auto",
+            "orientation": "auto"
           },
-          "pluginVersion": "7.3.6",
           "targets": [
             {
-              "expr": "kminion_kafka_broker_info",
-              "format": "table",
-              "instant": true,
-              "interval": "",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum(kminion_kafka_topic_high_water_mark_sum{topic_name=~\"resume\\.parse\\.requested\\.dlq|report\\.generate\\.requested\\.dlq|mentor\\.embedding\\.refresh\\.requested\\.dlq|notification\\.requested\\.dlq|notification\\.push\\.requested\\.dlq|chat\\.message\\.persist\\.requested\\.dlq\"})",
               "legendFormat": "",
-              "refId": "A"
+              "instant": true,
+              "refId": "A",
+              "editorMode": "code",
+              "range": false
             }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Brokers",
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "E2E Roundtrip p99",
+          "description": "KMinion E2E 왕복 레이턴시 p99",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 3,
+            "x": 18,
+            "y": 1
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "noValue": "-",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 0.5
+                  },
+                  {
+                    "color": "red",
+                    "value": 1.0
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "textMode": "auto",
+            "orientation": "auto"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "histogram_quantile(0.99, sum(rate(kminion_end_to_end_roundtrip_latency_seconds_bucket[5m])) by (le))",
+              "legendFormat": "",
+              "instant": false,
+              "refId": "A",
+              "editorMode": "code",
+              "range": true
+            }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "KMinion 상태",
+          "description": "1=정상, 0=수집 실패",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 3,
+            "x": 21,
+            "y": 1
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "noValue": "-",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "background",
+            "graphMode": "none",
+            "textMode": "auto",
+            "orientation": "auto"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "kminion_exporter_up",
+              "legendFormat": "",
+              "instant": true,
+              "refId": "A",
+              "editorMode": "code",
+              "range": false
+            }
+          ]
+        },
+        {
+          "type": "row",
+          "title": "브로커",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 5
+          },
+          "panels": []
+        },
+        {
+          "type": "table",
+          "title": "브로커 정보",
+          "description": "broker_id · 주소 · Controller 여부 · AZ",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 12,
+            "x": 0,
+            "y": 6
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto",
+                "filterable": true
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "frameIndex": 0,
+            "showHeader": true,
+            "footer": {
+              "show": false,
+              "reducer": [
+                "sum"
+              ]
+            }
+          },
           "transformations": [
+            {
+              "id": "labelsToFields",
+              "options": {
+                "mode": "columns"
+              }
+            },
             {
               "id": "organize",
               "options": {
                 "excludeByName": {
                   "Time": true,
-                  "Value": true,
-                  "__cluster__": true,
                   "__name__": true,
-                  "instance": true,
-                  "job": true,
-                  "kubernetes_namespace": true,
-                  "kubernetes_pod_name": true
-                },
-                "indexByName": {
-                  "Time": 0,
-                  "Value": 12,
-                  "__cluster__": 1,
-                  "__name__": 2,
-                  "address": 4,
-                  "broker_id": 3,
-                  "instance": 6,
-                  "is_controller": 8,
-                  "job": 9,
-                  "kubernetes_namespace": 10,
-                  "kubernetes_pod_name": 11,
-                  "port": 5,
-                  "rack_id": 7
+                  "Value": true
                 },
                 "renameByName": {
+                  "broker_id": "Broker ID",
                   "address": "Address",
-                  "broker_id": "BrokerID",
-                  "instance": "",
-                  "is_controller": "Is Controller",
+                  "is_controller": "Controller",
                   "port": "Port",
-                  "rack_id": "RackID"
+                  "rack_id": "AZ"
+                },
+                "indexByName": {
+                  "broker_id": 0,
+                  "address": 1,
+                  "is_controller": 2,
+                  "port": 3,
+                  "rack_id": 4
                 }
               }
             }
           ],
-          "type": "table"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": false,
-          "colors": [
-            "#299c46",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "${DS_CORTEX}",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
-          "gridPos": {
-            "h": 4,
-            "w": 4,
-            "x": 8,
-            "y": 4
-          },
-          "id": 7,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "$$hashKey": "object:221",
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "$$hashKey": "object:222",
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false
-          },
-          "tableColumn": "broker_count",
           "targets": [
             {
-              "expr": "kminion_kafka_cluster_info",
-              "format": "table",
-              "instant": true,
-              "interval": "",
-              "intervalFactor": 1,
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "kminion_kafka_broker_info",
               "legendFormat": "",
-              "refId": "A"
+              "instant": true,
+              "refId": "A",
+              "editorMode": "code",
+              "range": false
             }
-          ],
-          "thresholds": "",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Brokers Online",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "$$hashKey": "object:224",
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "current"
+          ]
         },
         {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "${DS_CORTEX}",
-          "description": "Log dir size across all log dirs, topics and partitions for a given broker.",
+          "type": "timeseries",
+          "title": "브로커별 디스크 사용량",
+          "description": "EBS 20GB 기준. 15GB(75%) 초과 시 경보",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 12,
+            "x": 12,
+            "y": 6
+          },
           "fieldConfig": {
             "defaults": {
-              "custom": {}
+              "unit": "bytes",
+              "custom": {
+                "lineInterpolation": "smooth",
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": true
+              }
             },
             "overrides": []
           },
-          "fill": 1,
-          "fillGradient": 0,
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "mean",
+                "max",
+                "lastNotNull"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "kminion_kafka_broker_log_dir_size_total_bytes",
+              "legendFormat": "broker-{{broker_id}} ({{rack_id}})",
+              "instant": false,
+              "refId": "A",
+              "editorMode": "code",
+              "range": true
+            }
+          ]
+        },
+        {
+          "type": "row",
+          "title": "비즈니스 토픽 처리량",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 11
+          },
+          "panels": []
+        },
+        {
+          "type": "timeseries",
+          "title": "토픽별 메시지 유입률 (msgs/s)",
+          "description": "HWM 증분 기반 메시지 유입 속도. 음수는 leader election 등 일시 현상",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 12
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ops",
+              "custom": {
+                "lineInterpolation": "smooth",
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": true
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "mean",
+                "max",
+                "lastNotNull"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "deriv(kminion_kafka_topic_high_water_mark_sum{topic_name=~\"resume\\.parse\\.requested|report\\.generate\\.requested|mentor\\.embedding\\.refresh\\.requested|chat\\.message\\.sent|chat\\.message\\.persist\\.requested|notification\\.requested|notification\\.push\\.requested\"}[2m])",
+              "legendFormat": "{{topic_name}}",
+              "instant": false,
+              "refId": "A",
+              "editorMode": "code",
+              "range": true
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "DLQ 토픽 High Water Mark",
+          "description": "DLQ 누적 메시지 수. 증가하면 처리 실패 발생 중",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 12
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "custom": {
+                "lineInterpolation": "smooth",
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": true
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "mean",
+                "max",
+                "lastNotNull"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "kminion_kafka_topic_high_water_mark_sum{topic_name=~\"resume\\.parse\\.requested\\.dlq|report\\.generate\\.requested\\.dlq|mentor\\.embedding\\.refresh\\.requested\\.dlq|notification\\.requested\\.dlq|notification\\.push\\.requested\\.dlq|chat\\.message\\.persist\\.requested\\.dlq\"}",
+              "legendFormat": "{{topic_name}}",
+              "instant": false,
+              "refId": "A",
+              "editorMode": "code",
+              "range": true
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "업무 토픽 파티션 정보",
+          "description": "파티션 수 / 복제 팩터 / cleanup policy",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 20
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto",
+                "filterable": true
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "frameIndex": 0,
+            "showHeader": true,
+            "footer": {
+              "show": false,
+              "reducer": [
+                "sum"
+              ]
+            }
+          },
+          "transformations": [
+            {
+              "id": "labelsToFields",
+              "options": {
+                "mode": "columns"
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "Value": true
+                },
+                "renameByName": {
+                  "topic_name": "Topic",
+                  "partition_count": "Partitions",
+                  "replication_factor": "Replication",
+                  "cleanup_policy": "Cleanup"
+                },
+                "indexByName": {
+                  "topic_name": 0,
+                  "partition_count": 1,
+                  "replication_factor": 2,
+                  "cleanup_policy": 3
+                }
+              }
+            }
+          ],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "kminion_kafka_topic_info{topic_name=~\"resume\\.parse\\.requested|report\\.generate\\.requested|mentor\\.embedding\\.refresh\\.requested|chat\\.message\\.sent|chat\\.message\\.persist\\.requested|notification\\.requested|notification\\.push\\.requested|resume\\.parse\\.requested\\.dlq|report\\.generate\\.requested\\.dlq|mentor\\.embedding\\.refresh\\.requested\\.dlq|notification\\.requested\\.dlq|notification\\.push\\.requested\\.dlq|chat\\.message\\.persist\\.requested\\.dlq\"}",
+              "legendFormat": "",
+              "instant": true,
+              "refId": "A",
+              "editorMode": "code",
+              "range": false
+            }
+          ]
+        },
+        {
+          "type": "row",
+          "title": "Consumer Group — refit-backend-prod",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 26
+          },
+          "panels": []
+        },
+        {
+          "type": "timeseries",
+          "title": "토픽별 Consumer Lag",
+          "description": "group_id=refit-backend-prod 토픽별 lag. 지속 증가 시 컨슈머 처리 속도 문제",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 27
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "custom": {
+                "lineInterpolation": "smooth",
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": true
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "mean",
+                "max",
+                "lastNotNull"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "kminion_kafka_consumer_group_topic_lag{group_id=\"refit-backend-prod\",topic_name=~\"resume\\.parse\\.requested|report\\.generate\\.requested|mentor\\.embedding\\.refresh\\.requested|chat\\.message\\.sent|chat\\.message\\.persist\\.requested|notification\\.requested|notification\\.push\\.requested\"}",
+              "legendFormat": "{{topic_name}}",
+              "instant": false,
+              "refId": "A",
+              "editorMode": "code",
+              "range": true
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "파티션별 Consumer Lag",
+          "description": "파티션 단위 lag — 특정 파티션에만 쏠림 감지용",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 27
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "custom": {
+                "lineInterpolation": "smooth",
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": true
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "mean",
+                "max",
+                "lastNotNull"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "kminion_kafka_consumer_group_topic_partition_lag{group_id=\"refit-backend-prod\",topic_name=~\"resume\\.parse\\.requested|report\\.generate\\.requested|mentor\\.embedding\\.refresh\\.requested|chat\\.message\\.sent|chat\\.message\\.persist\\.requested|notification\\.requested|notification\\.push\\.requested\"}",
+              "legendFormat": "{{topic_name}}[p{{partition_id}}]",
+              "instant": false,
+              "refId": "A",
+              "editorMode": "code",
+              "range": true
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Offset Commit 속도",
+          "description": "컨슈머가 처리 완료를 Kafka에 commit하는 속도",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 35
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ops",
+              "custom": {
+                "lineInterpolation": "smooth",
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": true
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "mean",
+                "max",
+                "lastNotNull"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "rate(kminion_kafka_consumer_group_offset_commits_total{group_id=\"refit-backend-prod\"}[$__rate_interval])",
+              "legendFormat": "offset commits/s",
+              "instant": false,
+              "refId": "A",
+              "editorMode": "code",
+              "range": true
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "DLQ Consumer Lag",
+          "description": "group_id=refit-backend-prod-dlq DLQ 컨슈머 백로그",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 35
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "custom": {
+                "lineInterpolation": "smooth",
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": true
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "mean",
+                "max",
+                "lastNotNull"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "kminion_kafka_consumer_group_topic_lag{group_id=\"refit-backend-prod-dlq\"}",
+              "legendFormat": "{{topic_name}}",
+              "instant": false,
+              "refId": "A",
+              "editorMode": "code",
+              "range": true
+            }
+          ]
+        },
+        {
+          "type": "row",
+          "title": "E2E Kafka 헬스",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 43
+          },
+          "panels": []
+        },
+        {
+          "type": "timeseries",
+          "title": "Produce 레이턴시 (p50 / p95 / p99)",
+          "description": "브로커 ack 응답 속도. p99 > 500ms 이상이면 브로커 부하",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 8,
             "w": 8,
             "x": 0,
-            "y": 8
+            "y": 44
           },
-          "hiddenSeries": false,
-          "id": 14,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": false,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 2,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "7.3.6",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "avg by (broker_id) (kminion_kafka_broker_log_dir_size_total_bytes)",
-              "interval": "",
-              "legendFormat": "Broker {{broker_id}}",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Log Dir Size by Broker",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "$$hashKey": "object:545",
-              "decimals": 0,
-              "format": "bytes",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": "0",
-              "show": true
-            },
-            {
-              "$$hashKey": "object:546",
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "${DS_CORTEX}",
-          "description": "",
           "fieldConfig": {
             "defaults": {
-              "custom": {}
+              "unit": "s",
+              "custom": {
+                "lineInterpolation": "smooth",
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": true
+              }
             },
             "overrides": []
           },
-          "fill": 1,
-          "fillGradient": 0,
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "mean",
+                "max",
+                "lastNotNull"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "histogram_quantile(0.50, sum(rate(kminion_end_to_end_produce_latency_seconds_bucket[$__rate_interval])) by (le))",
+              "legendFormat": "p50",
+              "instant": false,
+              "refId": "A",
+              "editorMode": "code",
+              "range": true
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "histogram_quantile(0.95, sum(rate(kminion_end_to_end_produce_latency_seconds_bucket[$__rate_interval])) by (le))",
+              "legendFormat": "p95",
+              "instant": false,
+              "refId": "B",
+              "editorMode": "code",
+              "range": true
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "histogram_quantile(0.99, sum(rate(kminion_end_to_end_produce_latency_seconds_bucket[$__rate_interval])) by (le))",
+              "legendFormat": "p99",
+              "instant": false,
+              "refId": "C",
+              "editorMode": "code",
+              "range": true
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Roundtrip 레이턴시 (p50 / p95 / p99)",
+          "description": "produce → consume 전체 왕복 레이턴시. p99 > 1s 이상이면 이상",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 8,
             "w": 8,
             "x": 8,
-            "y": 8
+            "y": 44
           },
-          "hiddenSeries": false,
-          "id": 2,
-          "legend": {
-            "alignAsTable": true,
-            "avg": true,
-            "current": false,
-            "max": true,
-            "min": false,
-            "show": true,
-            "sort": "avg",
-            "sortDesc": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 2,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "7.3.6",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "avg by (topic_name) (rate(kminion_kafka_topic_high_water_mark_sum{topic_name=~\"$highThroughputTopics\"}[$__rate_interval]))",
-              "interval": "",
-              "legendFormat": "{{topic_name}}",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Messages in/sec by topic [Top 15]",
-          "tooltip": {
-            "shared": true,
-            "sort": 2,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "$$hashKey": "object:39",
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": "0",
-              "show": true
-            },
-            {
-              "$$hashKey": "object:40",
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "${DS_CORTEX}",
-          "description": "",
           "fieldConfig": {
             "defaults": {
-              "custom": {}
+              "unit": "s",
+              "custom": {
+                "lineInterpolation": "smooth",
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": true
+              }
             },
             "overrides": []
           },
-          "fill": 1,
-          "fillGradient": 0,
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "mean",
+                "max",
+                "lastNotNull"
+              ]
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "histogram_quantile(0.50, sum(rate(kminion_end_to_end_roundtrip_latency_seconds_bucket[$__rate_interval])) by (le))",
+              "legendFormat": "p50",
+              "instant": false,
+              "refId": "A",
+              "editorMode": "code",
+              "range": true
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "histogram_quantile(0.95, sum(rate(kminion_end_to_end_roundtrip_latency_seconds_bucket[$__rate_interval])) by (le))",
+              "legendFormat": "p95",
+              "instant": false,
+              "refId": "B",
+              "editorMode": "code",
+              "range": true
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "histogram_quantile(0.99, sum(rate(kminion_end_to_end_roundtrip_latency_seconds_bucket[$__rate_interval])) by (le))",
+              "legendFormat": "p99",
+              "instant": false,
+              "refId": "C",
+              "editorMode": "code",
+              "range": true
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "E2E 메시지 유실 / Produce 실패",
+          "description": "0이어야 정상. 값 존재 시 브로커 이상 또는 네트워크 문제",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 8,
             "w": 8,
             "x": 16,
-            "y": 8
+            "y": 44
           },
-          "hiddenSeries": false,
-          "id": 17,
-          "legend": {
-            "alignAsTable": true,
-            "avg": true,
-            "current": false,
-            "max": true,
-            "min": false,
-            "show": true,
-            "sort": "avg",
-            "sortDesc": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 2,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "7.3.6",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "avg by (group_id) (rate(kminion_kafka_consumer_group_offset_commits_total{group_id=~\"$topOffsetCommitters\"}[$__rate_interval]))",
-              "interval": "",
-              "legendFormat": "{{group_id}}",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Top Offset Committers [Top 5]",
-          "tooltip": {
-            "shared": true,
-            "sort": 2,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "$$hashKey": "object:39",
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": "0",
-              "show": true
-            },
-            {
-              "$$hashKey": "object:40",
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "${DS_CORTEX}",
           "fieldConfig": {
             "defaults": {
-              "custom": {},
-              "links": []
+              "unit": "ops",
+              "custom": {
+                "lineInterpolation": "smooth",
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": true
+              }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "lost/s"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "red",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "produce-failed/s"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "orange",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              }
+            ]
           },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 7,
-            "w": 24,
-            "x": 0,
-            "y": 16
-          },
-          "hiddenSeries": false,
-          "id": 4,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 2,
-          "links": [],
-          "nullPointMode": "null",
           "options": {
-            "alertThreshold": true
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "mean",
+                "max",
+                "lastNotNull"
+              ]
+            }
           },
-          "percentage": false,
-          "pluginVersion": "7.3.6",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
           "targets": [
             {
-              "expr": "avg by (kubernetes_pod_name) (rate(kminion_exporter_offset_consumer_records_consumed_total[$__rate_interval]))",
-              "format": "time_series",
-              "interval": "",
-              "intervalFactor": 1,
-              "legendFormat": "{{kubernetes_pod_name}}",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Offset commits processed",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "$$hashKey": "object:163",
-              "format": "short",
-              "label": "Messages/s",
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum(rate(kminion_end_to_end_messages_lost_total[$__rate_interval]))",
+              "legendFormat": "lost/s",
+              "instant": false,
+              "refId": "A",
+              "editorMode": "code",
+              "range": true
             },
             {
-              "$$hashKey": "object:164",
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum(rate(kminion_end_to_end_messages_produced_failed_total[$__rate_interval]))",
+              "legendFormat": "produce-failed/s",
+              "instant": false,
+              "refId": "B",
+              "editorMode": "code",
+              "range": true
             }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
+          ]
         }
       ],
-      "schemaVersion": 26,
-      "style": "dark",
-      "tags": [],
+      "refresh": "30s",
+      "schemaVersion": 39,
+      "tags": [
+        "kafka",
+        "kminion",
+        "msk",
+        "refit"
+      ],
       "templating": {
-        "list": [
-          {
-            "allValue": null,
-            "current": {},
-            "datasource": "${DS_CORTEX}",
-            "definition": "query_result(topk(15, avg by (topic_name) (avg_over_time(kminion_kafka_topic_high_water_mark_sum[${__range_s}s]))))",
-            "error": null,
-            "hide": 2,
-            "includeAll": true,
-            "label": null,
-            "multi": true,
-            "name": "highThroughputTopics",
-            "options": [],
-            "query": "query_result(topk(15, avg by (topic_name) (avg_over_time(kminion_kafka_topic_high_water_mark_sum[${__range_s}s]))))",
-            "refresh": 1,
-            "regex": ".*topic_name=\"(.*?)\".*",
-            "skipUrlSync": false,
-            "sort": 0,
-            "tagValuesQuery": "",
-            "tags": [],
-            "tagsQuery": "",
-            "type": "query",
-            "useTags": false
-          },
-          {
-            "allValue": null,
-            "current": {},
-            "datasource": "${DS_CORTEX}",
-            "definition": "query_result(topk(5, avg by (group_id) (avg_over_time(kminion_kafka_consumer_group_offset_commits_total[${__range_s}s]))))",
-            "error": null,
-            "hide": 2,
-            "includeAll": true,
-            "label": null,
-            "multi": true,
-            "name": "topOffsetCommitters",
-            "options": [],
-            "query": "query_result(topk(5, avg by (group_id) (avg_over_time(kminion_kafka_consumer_group_offset_commits_total[${__range_s}s]))))",
-            "refresh": 1,
-            "regex": ".*group_id=\"(.*?)\".*",
-            "skipUrlSync": false,
-            "sort": 0,
-            "tagValuesQuery": "",
-            "tags": [],
-            "tagsQuery": "",
-            "type": "query",
-            "useTags": false
-          }
-        ]
+        "list": []
       },
       "time": {
-        "from": "now-6h",
+        "from": "now-1h",
         "to": "now"
       },
       "timepicker": {},
-      "timezone": "",
-      "title": "KMinion Cluster Dashboard - Prometheus Exporter for Apache Kafka",
-      "uid": "Ax-9LJsGz",
-      "version": 25
+      "timezone": "browser",
+      "title": "Kafka / KMinion — refit-kafka (MSK)",
+      "uid": "kminion-refit-kafka-v2",
+      "version": 1
     }
