@@ -12,10 +12,14 @@
 #   4. Load Test (7분)
 #   5. Stress Test (28분)
 #   6. Spike Test (9분)
-#   7. Cleanup (5분)
-#   8. 결과 아카이브
+#   7. AI Agent Test (10분)
+#   8. HPA Validation Test (22분)
+#   9. Cleanup (5분)
+#  10. 결과 아카이브
 #
-# 총 소요시간: 약 60분
+# 총 소요시간: 약 95분
+# 참고: Self-Healing Test는 kubectl 대화형 확인이 필요하므로
+#       run-single-test.sh 옵션 7로 별도 실행하세요.
 #
 # 사용법:
 #   chmod +x run-all-tests.sh
@@ -28,6 +32,12 @@ set -e  # 에러 발생 시 즉시 중단
 # 스크립트 디렉토리로 이동 (loadTest 폴더)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
+
+# ════════════════════════════════════════════════════════════════════════════
+# 환경 설정
+# ════════════════════════════════════════════════════════════════════════════
+
+export BACKEND_URL="${BACKEND_URL:-https://api-k8s.re-fit.kr}"
 
 # ════════════════════════════════════════════════════════════════════════════
 # 색상 정의
@@ -114,10 +124,13 @@ print_success "k6 $(k6 version 2>/dev/null | head -1 || echo 'installed')"
 # 2. 토큰 생성
 # ════════════════════════════════════════════════════════════════════════════
 
-print_header "🔐 토큰 생성"
-print_step "JWT 토큰 생성 중..."
-node generate-tokens.js
-print_success "토큰 생성 완료"
+print_header "🔐 토큰 확인"
+print_step "data/test-users.json 사용 (pre-generated tokens)"
+if [ ! -f "data/test-users.json" ]; then
+  print_error "data/test-users.json 파일이 없습니다."
+  exit 1
+fi
+print_success "토큰 파일 확인 완료"
 
 # ════════════════════════════════════════════════════════════════════════════
 # 3. Baseline Test
@@ -152,7 +165,28 @@ k6 run scripts/4-spike-test.js
 print_success "Spike Test 완료"
 
 # ════════════════════════════════════════════════════════════════════════════
-# 7. Cleanup
+# 7. AI Agent Test
+# ════════════════════════════════════════════════════════════════════════════
+
+print_header "🤖 AI Agent Test (10분)"
+k6 run scripts/5-ai-agent-test.js
+print_success "AI Agent Test 완료"
+
+# ════════════════════════════════════════════════════════════════════════════
+# 8. HPA Validation Test
+# ════════════════════════════════════════════════════════════════════════════
+
+print_header "⚡ HPA Validation Test (22분)"
+print_warning "kubectl watch를 별도 터미널에서 실행하는 것을 권장합니다:"
+echo "  watch -n5 kubectl get hpa -n refit-app"
+echo "  watch -n5 kubectl get pods -n refit-app"
+echo ""
+wait_with_countdown 10 "10초 후 HPA Validation Test를 시작합니다..."
+k6 run scripts/6-hpa-validation.js
+print_success "HPA Validation Test 완료"
+
+# ════════════════════════════════════════════════════════════════════════════
+# 9. Cleanup
 # ════════════════════════════════════════════════════════════════════════════
 
 print_header "🧹 Cleanup (테스트 데이터 정리)"
@@ -165,4 +199,7 @@ print_success "Cleanup 완료"
 
 print_header "✅ 전체 부하테스트 완료!"
 echo "결과는 ./results/ 폴더에 저장되었습니다."
+echo ""
+echo "Self-Healing 테스트가 필요하면:"
+echo "  ./run-single-test.sh → 옵션 7 선택"
 echo ""

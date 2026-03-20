@@ -156,9 +156,9 @@ function triggerLLMParsing(token, s3FileUrl) {
     return null;
   }
 
-  // 2. 완료 폴링: 초기 8초 대기 후 5초 간격 최대 5회 (실제 FCM 기반 트래픽 근사)
+  // 2. 완료 폴링: 초기 8초 대기 후 5초 간격 최대 15회 (실제 FCM 기반 트래픽 근사)
   sleep(8);
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 15; i++) {
     const pollRes = http.get(
       `${Config.BACKEND_URL}/api/v2/resumes/tasks/${taskId}`,
       {
@@ -188,7 +188,7 @@ function triggerLLMParsing(token, s3FileUrl) {
       return null;
     }
 
-    if (i < 4) sleep(5);
+    if (i < 14) sleep(5);
   }
 
   // 타임아웃 (총 ~33초)

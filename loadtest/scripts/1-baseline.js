@@ -23,7 +23,7 @@ import { vu } from 'k6/execution';
 import * as Config from './config.js';
 
 // ─── 테스트 데이터 로드 ───
-const users = JSON.parse(open(import.meta.resolve('../data/test-users.json')));
+const users = JSON.parse(open('../data/test-users.json'));
 
 export const options = {
   scenarios: {

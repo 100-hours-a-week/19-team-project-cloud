@@ -142,7 +142,7 @@ function triggerLLMParsing(token, s3FileUrl) {
 
   // HPA 검증 목적: 폴링보다 CPU 부하 지속이 중요하므로 초기 대기 후 1회만 확인
   sleep(8);
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 15; i++) {
     const pollRes = http.get(
       `${Config.BACKEND_URL}/api/v2/resumes/tasks/${taskId}`,
       {
@@ -169,7 +169,7 @@ function triggerLLMParsing(token, s3FileUrl) {
       return null;
     }
 
-    if (i < 4) sleep(5);
+    if (i < 14) sleep(5);
   }
 
   Config.metrics.llmParseDuration.add(Date.now() - startTime);

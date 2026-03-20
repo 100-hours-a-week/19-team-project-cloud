@@ -16,7 +16,12 @@
     "test:baseline:grafana": "k6 run --out influxdb=http://localhost:8086/k6db scripts/1-baseline.js",
     "test:load:grafana": "k6 run --out influxdb=http://localhost:8086/k6db scripts/2-load-test.js",
     "test:stress:grafana": "k6 run --out influxdb=http://localhost:8086/k6db scripts/3-stress-test.js",
-    "test:spike:grafana": "k6 run --out influxdb=http://localhost:8086/k6db scripts/4-spike-test.js"
+    "test:spike:grafana": "k6 run --out influxdb=http://localhost:8086/k6db scripts/4-spike-test.js",
+    "test:ai-agent": "k6 run scripts/5-ai-agent-test.js",
+    "test:hpa": "k6 run scripts/6-hpa-validation.js",
+    "test:self-healing": "bash scripts/k8s-self-healing-test.sh",
+    "test:ai-agent:grafana": "k6 run --out influxdb=http://localhost:8086/k6db scripts/5-ai-agent-test.js",
+    "test:hpa:grafana": "k6 run --out influxdb=http://localhost:8086/k6db scripts/6-hpa-validation.js"
   },
   "dependencies": {
     "dotenv": "^16.4.5"

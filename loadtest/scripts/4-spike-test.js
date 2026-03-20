@@ -155,7 +155,7 @@ function triggerLLMParsing(token, s3FileUrl) {
   }
 
   sleep(8);
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 15; i++) {
     const pollRes = http.get(
       `${Config.BACKEND_URL}/api/v2/resumes/tasks/${taskId}`,
       {
@@ -182,7 +182,7 @@ function triggerLLMParsing(token, s3FileUrl) {
       return null;
     }
 
-    if (i < 4) sleep(5);
+    if (i < 14) sleep(5);
   }
 
   Config.metrics.llmParseDuration.add(Date.now() - startTime);

@@ -70,8 +70,11 @@ kubectl create secret generic refit-eso-credentials \
 
 ### 6단계: ArgoCD Gateway 커스텀 헬스체크 설정
 
-Cilium Gateway 서비스는 AWS LBC가 없으면 외부 IP가 `<pending>` 상태를 유지합니다.
-ArgoCD가 이를 Progressing으로 계속 판단하지 않도록 커스텀 헬스체크를 적용합니다.
+Cilium Gateway 리소스는 AWS LBC가 없으면 외부 IP가 `<pending>` 상태를 유지합니다.
+ArgoCD가 이를 Progressing으로 계속 판단하지 않도록 Gateway 리소스에 커스텀 헬스체크를 적용합니다.
+
+> Service 타입에는 커스텀 헬스체크를 적용하지 않습니다.
+> ClusterIP Service의 Unknown 상태는 무해하며, Gateway 앱 헬스는 Gateway 리소스 헬스체크가 커버합니다.
 
 ```bash
 kubectl -n argocd patch configmap argocd-cm --type merge -p "$(cat <<'EOF'

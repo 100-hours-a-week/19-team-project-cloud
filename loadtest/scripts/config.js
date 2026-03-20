@@ -14,7 +14,7 @@ import { Trend, Counter, Rate } from 'k6/metrics';
 // 🌍 환경 설정
 // ════════════════════════════════════════════════════════════════════
 
-export const BACKEND_URL = __ENV.BACKEND_URL || 'https://dev.re-fit.kr';
+export const BACKEND_URL = __ENV.BACKEND_URL || 'https://api-k8s.re-fit.kr';
 
 // ════════════════════════════════════════════════════════════════════
 // 📊 Custom Metrics (모든 테스트에서 공통 사용)
@@ -37,6 +37,12 @@ export const metrics = {
   // 성공률
   llmSuccessRate: new Rate('llm_parse_success_rate'),
   apiSuccessRate: new Rate('api_success_rate'),
+
+  // AI Agent 메트릭
+  agentSessionDuration: new Trend('agent_session_duration'),
+  agentReplyDuration: new Trend('agent_reply_duration'),
+  agentReplySuccess: new Rate('agent_reply_success'),
+  agentErrors: new Counter('agent_errors'),
 };
 
 // ════════════════════════════════════════════════════════════════════
@@ -52,7 +58,7 @@ export function getToken(users, vuIndex) {
     console.error(`❌ User not found at index ${idx}`);
     return '';
   }
-  return users[idx].token;
+  return users[idx].access_token || users[idx].token || '';
 }
 
 /**
@@ -108,24 +114,36 @@ export const SEARCH_PARAMS = {
 // ════════════════════════════════════════════════════════════════════
 
 export const SLO = {
-  // 일반 API
+  // 일반 API (baseline P95 ~96ms 기준 × 5배 여유)
   normalAPI: {
-    p95: 2000,    // 2초
-    p99: 3000,    // 3초
+    p95: 500,     // 500ms
+    p99: 1000,    // 1초
     errorRate: 0.02,  // 2%
   },
-  
-  // LLM 파싱
+
+  // LLM 파싱 (외부 AI 호출 포함, 기존 유지)
   llmParsing: {
     p95: 7000,    // 7초
     p99: 10000,   // 10초
     errorRate: 0.05,  // 5%
   },
-  
-  // 파일 업로드
+
+  // 파일 업로드 (S3, 기존 유지)
   fileUpload: {
     p95: 5000,    // 5초
     errorRate: 0.01,  // 1%
+  },
+
+  // AI Agent 챗봇
+  aiAgent: {
+    sessionCreate: {
+      p95: 3000,   // 3초
+    },
+    reply: {
+      p95: 30000,  // 30초 (SSE 전체 스트림)
+      p99: 45000,  // 45초
+      errorRate: 0.10,  // 10% (LLM 기반, 허용치 높임)
+    },
   },
 };
 
@@ -171,6 +189,28 @@ export function checkLLMResponse(res) {
   return success;
 }
 
+/**
+ * AI Agent SSE 응답 검증
+ */
+export function checkAgentReplyResponse(res, events) {
+  const hasDone = events.some(e => e.type === 'done');
+  const hasText = events.some(e => e.type === 'text');
+
+  const success = check(res, {
+    'AI 에이전트 - 상태코드 200': (r) => r.status === 200,
+    'AI 에이전트 - done 이벤트': () => hasDone,
+    'AI 에이전트 - text 이벤트': () => hasText,
+    'AI 에이전트 - 응답시간 < 45초': (r) => r.timings.duration < 45000,
+  });
+
+  metrics.agentReplySuccess.add(success ? 1 : 0);
+  if (!success) {
+    metrics.agentErrors.add(1);
+    console.error(`❌ AI 에이전트 실패 | VU ${__VU} | Status: ${res.status} | done: ${hasDone}`);
+  }
+  return success;
+}
+
 // ════════════════════════════════════════════════════════════════════
 // 📊 Summary 헬퍼
 // ════════════════════════════════════════════════════════════════════
@@ -210,6 +250,8 @@ export function printSummary(testName, data) {
   printMetric(data, 'resume_list_duration', '이력서 목록');
   printMetric(data, 'llm_parse_duration', 'LLM 파싱');
   printMetric(data, 'chat_create_duration', '채팅방 생성');
+  printMetric(data, 'agent_session_duration', 'AI 세션 생성');
+  printMetric(data, 'agent_reply_duration', 'AI 에이전트 답변');
   console.log('');
   
   // 성공률
