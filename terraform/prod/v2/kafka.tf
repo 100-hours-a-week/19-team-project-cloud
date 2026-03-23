@@ -1,5 +1,5 @@
 # -----------------------------------------------------
-# Kafka EC2 (A존 2대, C존 1대 = 총 3대, ASG 없음)
+# Kafka EC2 (단일 노드, ASG 없음)
 # Spring Boot와 분리된 전용 인스턴스
 # -----------------------------------------------------
 
@@ -24,12 +24,12 @@ data "aws_ami" "prod_v2_kafka_ubuntu" {
 }
 
 resource "aws_instance" "prod_v2_kafka" {
-  count         = 3
+  count         = 1
   ami           = data.aws_ami.prod_v2_kafka_ubuntu.id
   instance_type = var.kafka_instance_type
   key_name      = var.key_name
-  subnet_id     = count.index < 2 ? local.private_backend_subnet_ids[0] : local.private_backend_subnet_ids[1]
-  private_ip    = var.kafka_broker_private_ips[count.index]
+  subnet_id     = local.private_backend_subnet_ids[0]
+  private_ip    = var.kafka_private_ip
 
   iam_instance_profile   = aws_iam_instance_profile.prod_v2_kafka.name
   vpc_security_group_ids = [aws_security_group.prod_v2_kafka.id]
@@ -42,7 +42,7 @@ resource "aws_instance" "prod_v2_kafka" {
   }
 
   volume_tags = {
-    Name = "${local.name}-kafka-${count.index + 1}-root"
+    Name = "${local.name}-kafka-1-root"
     tier = local.tier_kafka
   }
 
@@ -62,7 +62,7 @@ systemctl enable docker && systemctl start docker
   )
 
   tags = {
-    Name = "${local.name}-kafka-${count.index + 1}"
+    Name = "${local.name}-kafka-1"
     tier = local.tier_kafka
   }
 }

@@ -17,12 +17,17 @@ locals {
   tier_backend      = "backend"
   tier_frontend     = "frontend"
   tier_kafka        = "kafka"
+  tier_ai           = "ai"
+  tier_monitoring   = "monitoring"
   tier_alb_ext      = "alb-external"
   tier_alb_int      = "alb-internal"
   tier_rds          = "rds"
   tier_rds_replica  = "rds-replica"
   tier_elasticache  = "elasticache"
   tier_deploy       = "deploy"
+
+  # Monitoring 서브넷: 명시적으로 지정하면 그 값을, 아니면 private_backend_subnet_ids[0] 사용
+  monitoring_subnet_id = var.existing_monitoring_subnet_id != "" ? var.existing_monitoring_subnet_id : local.private_backend_subnet_ids[0]
 
   # 시크릿: SSM 파라미터 경로가 지정되면 SSM에서 조회, 아니면 변수 값 사용
   db_username         = var.ssm_parameter_db_username != "" ? data.aws_ssm_parameter.db_username[0].value : var.db_username

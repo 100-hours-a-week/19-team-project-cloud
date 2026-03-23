@@ -32,11 +32,6 @@ output "external_alb_zone_id" {
   value       = aws_lb.prod_v2_external.zone_id
 }
 
-output "internal_alb_dns_name" {
-  description = "Internal ALB DNS name (for Frontend SSR -> Backend)"
-  value       = aws_lb.prod_v2_internal.dns_name
-}
-
 output "backend_target_group_arn" {
   description = "Backend target group ARN"
   value       = aws_lb_target_group.prod_v2_backend.arn
@@ -45,11 +40,6 @@ output "backend_target_group_arn" {
 output "frontend_target_group_arn" {
   description = "Frontend target group ARN"
   value       = aws_lb_target_group.prod_v2_frontend.arn
-}
-
-output "frontend_asg_name" {
-  description = "Frontend ASG name"
-  value       = aws_autoscaling_group.prod_v2_frontend.name
 }
 
 output "rds_endpoint" {
@@ -117,8 +107,33 @@ output "backend_asg_name" {
 }
 
 output "kafka_instance_ids" {
-  description = "Kafka EC2 instance IDs (A존 2, C존 1)"
+  description = "Kafka EC2 instance IDs"
   value       = aws_instance.prod_v2_kafka[*].id
+}
+
+output "ai_instance_id" {
+  description = "AI EC2 instance ID"
+  value       = aws_instance.prod_v2_ai.id
+}
+
+output "monitoring_instance_id" {
+  description = "Monitoring EC2 instance ID"
+  value       = aws_instance.prod_v2_monitoring.id
+}
+
+output "ai_target_group_arn" {
+  description = "AI target group ARN"
+  value       = aws_lb_target_group.prod_v2_ai.arn
+}
+
+output "monitoring_target_group_arn" {
+  description = "Monitoring target group ARN"
+  value       = aws_lb_target_group.prod_v2_monitoring.arn
+}
+
+output "codedeploy_ai_app_name" {
+  description = "CodeDeploy AI application name"
+  value       = aws_codedeploy_app.prod_v2_ai.name
 }
 
 # -----------------------------------------------------

@@ -227,7 +227,7 @@ variable "asg_min_size" {
 variable "asg_max_size" {
   description = "Maximum number of instances in Backend ASG"
   type        = number
-  default     = 2
+  default     = 1
 }
 
 variable "asg_desired_capacity" {
@@ -249,37 +249,41 @@ variable "root_volume_size" {
 }
 
 # -----------------------------------------------------
-# ASG (Frontend - Next.js)
+# AI EC2 (standalone)
 # -----------------------------------------------------
 
-variable "frontend_asg_min_size" {
-  description = "Minimum number of instances in Frontend ASG"
-  type        = number
-  default     = 1
-}
-
-variable "frontend_asg_max_size" {
-  description = "Maximum number of instances in Frontend ASG"
-  type        = number
-  default     = 2
-}
-
-variable "frontend_asg_desired_capacity" {
-  description = "Desired number of instances in Frontend ASG"
-  type        = number
-  default     = 1
-}
-
-variable "frontend_instance_type" {
-  description = "EC2 instance type for Frontend ASG (Next.js)"
+variable "ai_instance_type" {
+  description = "EC2 instance type for AI standalone instance"
   type        = string
-  default     = "t4g.small"
+  default     = "t4g.medium"
 }
 
-variable "frontend_root_volume_size" {
-  description = "Root EBS volume size in GB for Frontend"
+variable "ai_root_volume_size" {
+  description = "Root EBS volume size in GB for AI instance"
   type        = number
-  default     = 20
+  default     = 30
+}
+
+# -----------------------------------------------------
+# Monitoring EC2 (standalone)
+# -----------------------------------------------------
+
+variable "monitoring_instance_type" {
+  description = "EC2 instance type for Monitoring standalone instance"
+  type        = string
+  default     = "t4g.medium"
+}
+
+variable "monitoring_root_volume_size" {
+  description = "Root EBS volume size in GB for Monitoring instance"
+  type        = number
+  default     = 30
+}
+
+variable "existing_monitoring_subnet_id" {
+  description = "기존 모니터링 EC2 서브넷 ID (private-monitoring-a 등). 비우면 private_backend_subnet_ids[0] 사용"
+  type        = string
+  default     = ""
 }
 
 # -----------------------------------------------------
@@ -301,13 +305,19 @@ variable "db_instance_identifier" {
 variable "db_instance_class" {
   description = "RDS instance class"
   type        = string
-  default     = "db.t4g.small"
+  default     = "db.t4g.medium"
 }
 
 variable "db_allocated_storage" {
   description = "RDS allocated storage in GB"
   type        = number
-  default     = 20
+  default     = 30
+}
+
+variable "db_backup_retention_period" {
+  description = "RDS backup retention period in days"
+  type        = number
+  default     = 4
 }
 
 variable "db_engine_version" {
@@ -361,13 +371,13 @@ variable "rds_proxy_enabled" {
 variable "elasticache_node_type" {
   description = "ElastiCache node type"
   type        = string
-  default     = "cache.t3.medium"
+  default     = "cache.t4g.medium"
 }
 
 variable "elasticache_num_cache_clusters" {
-  description = "Number of cache nodes (2 = primary + replica per design)"
+  description = "Number of cache nodes (1 = single node)"
   type        = number
-  default     = 2
+  default     = 1
 }
 
 # -----------------------------------------------------
@@ -377,18 +387,24 @@ variable "elasticache_num_cache_clusters" {
 variable "kafka_instance_type" {
   description = "EC2 instance type for Kafka"
   type        = string
-  default     = "t4g.small"
+  default     = "t4g.medium"
 }
 
 variable "kafka_root_volume_size" {
   description = "Root EBS volume size in GB for Kafka"
   type        = number
-  default     = 30
+  default     = 50
 }
 
-variable "kafka_broker_private_ips" {
-  description = "Kafka broker 고정 Private IP (KRaft CONTROLLER_QUORUM_VOTERS·ADVERTISED_LISTENERS용). private-subnet-a-01 2개, private-subnet-c-01 1개 순서"
-  type        = list(string)
-  default     = ["10.0.2.20", "10.0.2.21", "10.0.5.20"]
+variable "kafka_private_ip" {
+  description = "Kafka 브로커 고정 Private IP (단일 노드)"
+  type        = string
+  default     = "10.0.2.25"
+}
+
+variable "k8s_vpc_cidr" {
+  description = "K8s VPC CIDR for VPC peering routes"
+  type        = string
+  default     = "10.2.0.0/16"
 }
 

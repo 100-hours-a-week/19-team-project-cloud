@@ -1,5 +1,5 @@
 # -----------------------------------------------------
-# ALB - External (Public) + Internal (refit-prod-v2)
+# ALB - External (Public) only (refit-prod-v2)
 # Listener rules from Caddyfile
 # -----------------------------------------------------
 
@@ -55,16 +55,39 @@ resource "aws_lb_target_group" "prod_v2_frontend" {
   }
 }
 
-# Internal ALB 전용 Backend Target Group (TG는 1개 LB에만 연결 가능)
-resource "aws_lb_target_group" "prod_v2_backend_internal" {
-  name     = "${local.name}-be-int-tg"
-  port     = 8080
+resource "aws_lb_target_group" "prod_v2_ai" {
+  name     = "${local.name}-ai-tg"
+  port     = 8000
   protocol = "HTTP"
   vpc_id   = local.vpc_id
 
   health_check {
     enabled             = true
-    path                = "/actuator/health"
+    path                = "/health"
+    protocol            = "HTTP"
+    interval            = 30
+    timeout             = 10
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+  }
+
+  deregistration_delay = 30
+
+  tags = {
+    Name = "${local.name}-ai-tg"
+    tier = local.tier_ai
+  }
+}
+
+resource "aws_lb_target_group" "prod_v2_monitoring" {
+  name     = "${local.name}-monitoring-tg"
+  port     = 3000
+  protocol = "HTTP"
+  vpc_id   = local.vpc_id
+
+  health_check {
+    enabled             = true
+    path                = "/"
     protocol            = "HTTP"
     interval            = 30
     timeout             = 5
@@ -75,8 +98,8 @@ resource "aws_lb_target_group" "prod_v2_backend_internal" {
   deregistration_delay = 30
 
   tags = {
-    Name = "${local.name}-be-int-tg"
-    tier = local.tier_backend
+    Name = "${local.name}-monitoring-tg"
+    tier = local.tier_monitoring
   }
 }
 
@@ -113,18 +136,18 @@ resource "aws_lb_listener" "prod_v2_external_https" {
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_frontend.arn
+    target_group_arn = aws_lb_target_group.prod_v2_backend.arn
   }
 }
 
-# API/Backend path rules (order = priority) - 나머지는 Backend로
+# API/Backend path rules (order = priority)
 resource "aws_lb_listener_rule" "prod_v2_external_api_ai" {
   listener_arn = aws_lb_listener.prod_v2_external_https.arn
   priority     = 1
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend.arn
+    target_group_arn = aws_lb_target_group.prod_v2_ai.arn
   }
 
   condition {
@@ -262,7 +285,21 @@ resource "aws_lb_listener_rule" "prod_v2_external_dev" {
   }
 }
 
-# Default already forwards to Backend (1차). When Frontend ASG exists, change default to Frontend TG.
+resource "aws_lb_listener_rule" "prod_v2_external_monitoring" {
+  listener_arn = aws_lb_listener.prod_v2_external_https.arn
+  priority     = 10
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.prod_v2_monitoring.arn
+  }
+
+  condition {
+    host_header {
+      values = ["monitoring-v2.re-fit.kr"]
+    }
+  }
+}
 
 resource "aws_lb_listener" "prod_v2_external_http" {
   load_balancer_arn = aws_lb.prod_v2_external.arn
@@ -317,179 +354,6 @@ resource "aws_lb_listener_rule" "prod_v2_external_http_cloudfront_frontend" {
     http_header {
       http_header_name = "x-forwarded-proto"
       values           = ["https"]
-    }
-  }
-}
-
-# -----------------------------------------------------
-# Internal ALB (VPC internal, Frontend -> Backend)
-# -----------------------------------------------------
-
-resource "aws_lb" "prod_v2_internal" {
-  name               = "${local.name}-internal-alb"
-  internal           = true
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.prod_v2_alb_internal.id]
-  subnets            = local.private_backend_subnet_ids
-
-  tags = {
-    Name = "${local.name}-internal-alb"
-    tier = local.tier_alb_int
-  }
-}
-
-resource "aws_lb_listener" "prod_v2_internal_http" {
-  load_balancer_arn = aws_lb.prod_v2_internal.arn
-  port              = "80"
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
-  }
-}
-
-# Internal ALB path rules (same as Caddyfile, all to Backend)
-resource "aws_lb_listener_rule" "prod_v2_internal_api_ai" {
-  listener_arn = aws_lb_listener.prod_v2_internal_http.arn
-  priority     = 1
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/api/ai/*"]
-    }
-  }
-}
-
-resource "aws_lb_listener_rule" "prod_v2_internal_ai" {
-  listener_arn = aws_lb_listener.prod_v2_internal_http.arn
-  priority     = 2
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/ai/*"]
-    }
-  }
-}
-
-resource "aws_lb_listener_rule" "prod_v2_internal_swagger" {
-  listener_arn = aws_lb_listener.prod_v2_internal_http.arn
-  priority     = 3
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/swagger-ui/*"]
-    }
-  }
-}
-
-resource "aws_lb_listener_rule" "prod_v2_internal_v3_docs" {
-  listener_arn = aws_lb_listener.prod_v2_internal_http.arn
-  priority     = 4
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/v3/api-docs*"]
-    }
-  }
-}
-
-resource "aws_lb_listener_rule" "prod_v2_internal_actuator" {
-  listener_arn = aws_lb_listener.prod_v2_internal_http.arn
-  priority     = 5
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/actuator/*"]
-    }
-  }
-}
-
-resource "aws_lb_listener_rule" "prod_v2_internal_ws" {
-  listener_arn = aws_lb_listener.prod_v2_internal_http.arn
-  priority     = 6
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/ws*"]
-    }
-  }
-}
-
-resource "aws_lb_listener_rule" "prod_v2_internal_api_ws" {
-  listener_arn = aws_lb_listener.prod_v2_internal_http.arn
-  priority     = 7
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/api/ws*"]
-    }
-  }
-}
-
-resource "aws_lb_listener_rule" "prod_v2_internal_api" {
-  listener_arn = aws_lb_listener.prod_v2_internal_http.arn
-  priority     = 8
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/api/*"]
-    }
-  }
-}
-
-resource "aws_lb_listener_rule" "prod_v2_internal_dev" {
-  listener_arn = aws_lb_listener.prod_v2_internal_http.arn
-  priority     = 9
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.prod_v2_backend_internal.arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/dev/*"]
     }
   }
 }

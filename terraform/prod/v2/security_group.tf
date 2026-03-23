@@ -53,13 +53,40 @@ resource "aws_vpc_security_group_egress_rule" "prod_v2_alb_external_backend" {
   referenced_security_group_id = aws_security_group.prod_v2_backend.id
 }
 
+resource "aws_vpc_security_group_egress_rule" "prod_v2_alb_external_ai" {
+  security_group_id            = aws_security_group.prod_v2_alb_external.id
+  description                  = "To AI (port 8000)"
+  ip_protocol                  = "tcp"
+  from_port                    = 8000
+  to_port                      = 8000
+  referenced_security_group_id = aws_security_group.prod_v2_ai.id
+}
+
+resource "aws_vpc_security_group_egress_rule" "prod_v2_alb_external_monitoring" {
+  security_group_id            = aws_security_group.prod_v2_alb_external.id
+  description                  = "To Monitoring Grafana (port 3000)"
+  ip_protocol                  = "tcp"
+  from_port                    = 3000
+  to_port                      = 3000
+  referenced_security_group_id = aws_security_group.prod_v2_monitoring.id
+}
+
+resource "aws_vpc_security_group_egress_rule" "prod_v2_alb_external_k8s_nodeport" {
+  security_group_id = aws_security_group.prod_v2_alb_external.id
+  description       = "To K8s NodePort via VPC peering"
+  ip_protocol       = "tcp"
+  from_port         = 32678
+  to_port           = 32678
+  cidr_ipv4         = var.k8s_vpc_cidr
+}
+
 # -----------------------------------------------------
-# Frontend ASG SG (Next.js, port 3000)
+# Frontend SG (Next.js, port 3000) - kept for CodeDeploy
 # -----------------------------------------------------
 
 resource "aws_security_group" "prod_v2_frontend" {
   name        = "${local.name}-frontend-sg"
-  description = "Security group for Frontend ASG Next.js (refit prod v2)"
+  description = "Security group for Frontend (refit prod v2, used for CodeDeploy)"
   vpc_id      = local.vpc_id
 
   tags = {
@@ -99,51 +126,9 @@ resource "aws_vpc_security_group_ingress_rule" "prod_v2_frontend_ssh_bastion" {
 
 resource "aws_vpc_security_group_egress_rule" "prod_v2_frontend_all" {
   security_group_id = aws_security_group.prod_v2_frontend.id
-  description       = "All outbound (Internal ALB, internet for npm etc)"
+  description       = "All outbound"
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
-}
-
-# -----------------------------------------------------
-# Internal ALB SG (VPC internal)
-# -----------------------------------------------------
-
-resource "aws_security_group" "prod_v2_alb_internal" {
-  name        = "${local.name}-alb-internal-sg"
-  description = "Security group for Internal ALB (refit prod v2)"
-  vpc_id      = local.vpc_id
-
-  tags = {
-    Name = "${local.name}-alb-internal-sg"
-    tier = local.tier_alb_int
-  }
-}
-
-resource "aws_vpc_security_group_ingress_rule" "prod_v2_alb_internal_http" {
-  security_group_id = aws_security_group.prod_v2_alb_internal.id
-  description       = "HTTP from VPC"
-  ip_protocol       = "tcp"
-  from_port         = 80
-  to_port           = 80
-  cidr_ipv4         = var.vpc_cidr
-}
-
-resource "aws_vpc_security_group_egress_rule" "prod_v2_alb_internal_backend" {
-  security_group_id            = aws_security_group.prod_v2_alb_internal.id
-  description                  = "To Backend"
-  ip_protocol                  = "tcp"
-  from_port                    = 8080
-  to_port                      = 8080
-  referenced_security_group_id = aws_security_group.prod_v2_backend.id
-}
-
-resource "aws_vpc_security_group_ingress_rule" "prod_v2_alb_internal_frontend" {
-  security_group_id            = aws_security_group.prod_v2_alb_internal.id
-  description                  = "HTTP from Frontend SSR to Backend"
-  ip_protocol                  = "tcp"
-  from_port                    = 80
-  to_port                      = 80
-  referenced_security_group_id = aws_security_group.prod_v2_frontend.id
 }
 
 # -----------------------------------------------------
@@ -170,15 +155,6 @@ resource "aws_vpc_security_group_ingress_rule" "prod_v2_backend_8080_external_al
   referenced_security_group_id = aws_security_group.prod_v2_alb_external.id
 }
 
-resource "aws_vpc_security_group_ingress_rule" "prod_v2_backend_8080_internal_alb" {
-  security_group_id            = aws_security_group.prod_v2_backend.id
-  description                  = "Backend from Internal ALB"
-  ip_protocol                  = "tcp"
-  from_port                    = 8080
-  to_port                      = 8080
-  referenced_security_group_id = aws_security_group.prod_v2_alb_internal.id
-}
-
 resource "aws_vpc_security_group_ingress_rule" "prod_v2_backend_ssh_bastion" {
   count = var.existing_bastion_security_group_id != "" ? 1 : 0
 
@@ -192,6 +168,203 @@ resource "aws_vpc_security_group_ingress_rule" "prod_v2_backend_ssh_bastion" {
 
 resource "aws_vpc_security_group_egress_rule" "prod_v2_backend_all" {
   security_group_id = aws_security_group.prod_v2_backend.id
+  description       = "All outbound"
+  ip_protocol       = "-1"
+  cidr_ipv4         = "0.0.0.0/0"
+}
+
+# -----------------------------------------------------
+# AI EC2 SG
+# -----------------------------------------------------
+
+resource "aws_security_group" "prod_v2_ai" {
+  name        = "${local.name}-ai-sg"
+  description = "Security group for AI EC2 (refit prod v2)"
+  vpc_id      = local.vpc_id
+
+  tags = {
+    Name = "${local.name}-ai-sg"
+    tier = local.tier_ai
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_ai_8000_external_alb" {
+  security_group_id            = aws_security_group.prod_v2_ai.id
+  description                  = "AI from External ALB"
+  ip_protocol                  = "tcp"
+  from_port                    = 8000
+  to_port                      = 8000
+  referenced_security_group_id = aws_security_group.prod_v2_alb_external.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_ai_8000_monitoring" {
+  security_group_id            = aws_security_group.prod_v2_ai.id
+  description                  = "AI from Monitoring"
+  ip_protocol                  = "tcp"
+  from_port                    = 8000
+  to_port                      = 8000
+  referenced_security_group_id = aws_security_group.prod_v2_monitoring.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_ai_ssh" {
+  security_group_id = aws_security_group.prod_v2_ai.id
+  description       = "SSH"
+  ip_protocol       = "tcp"
+  from_port         = 22
+  to_port           = 22
+  cidr_ipv4         = "0.0.0.0/0"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_ai_9100_monitoring" {
+  security_group_id            = aws_security_group.prod_v2_ai.id
+  description                  = "Node Exporter from Monitoring"
+  ip_protocol                  = "tcp"
+  from_port                    = 9100
+  to_port                      = 9100
+  referenced_security_group_id = aws_security_group.prod_v2_monitoring.id
+}
+
+resource "aws_vpc_security_group_egress_rule" "prod_v2_ai_all" {
+  security_group_id = aws_security_group.prod_v2_ai.id
+  description       = "All outbound"
+  ip_protocol       = "-1"
+  cidr_ipv4         = "0.0.0.0/0"
+}
+
+# -----------------------------------------------------
+# Monitoring EC2 SG
+# -----------------------------------------------------
+
+resource "aws_security_group" "prod_v2_monitoring" {
+  name        = "refit-v2-monitoring-sg"
+  description = "Security group for Monitoring EC2 (refit prod v2)"
+  vpc_id      = local.vpc_id
+
+  tags = {
+    Name = "refit-v2-monitoring-sg"
+    tier = local.tier_monitoring
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_monitoring_3000_external_alb" {
+  security_group_id            = aws_security_group.prod_v2_monitoring.id
+  description                  = "Grafana from External ALB"
+  ip_protocol                  = "tcp"
+  from_port                    = 3000
+  to_port                      = 3000
+  referenced_security_group_id = aws_security_group.prod_v2_alb_external.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_monitoring_4317_backend" {
+  security_group_id            = aws_security_group.prod_v2_monitoring.id
+  description                  = "OTLP gRPC from Backend"
+  ip_protocol                  = "tcp"
+  from_port                    = 4317
+  to_port                      = 4317
+  referenced_security_group_id = aws_security_group.prod_v2_backend.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_monitoring_4317_frontend" {
+  security_group_id            = aws_security_group.prod_v2_monitoring.id
+  description                  = "OTLP gRPC from Frontend"
+  ip_protocol                  = "tcp"
+  from_port                    = 4317
+  to_port                      = 4317
+  referenced_security_group_id = aws_security_group.prod_v2_frontend.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_monitoring_4317_ai" {
+  security_group_id            = aws_security_group.prod_v2_monitoring.id
+  description                  = "OTLP gRPC from AI"
+  ip_protocol                  = "tcp"
+  from_port                    = 4317
+  to_port                      = 4317
+  referenced_security_group_id = aws_security_group.prod_v2_ai.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_monitoring_4318_backend" {
+  security_group_id            = aws_security_group.prod_v2_monitoring.id
+  description                  = "OTLP HTTP from Backend"
+  ip_protocol                  = "tcp"
+  from_port                    = 4318
+  to_port                      = 4318
+  referenced_security_group_id = aws_security_group.prod_v2_backend.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_monitoring_4318_frontend" {
+  security_group_id            = aws_security_group.prod_v2_monitoring.id
+  description                  = "OTLP HTTP from Frontend"
+  ip_protocol                  = "tcp"
+  from_port                    = 4318
+  to_port                      = 4318
+  referenced_security_group_id = aws_security_group.prod_v2_frontend.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_monitoring_4318_ai" {
+  security_group_id            = aws_security_group.prod_v2_monitoring.id
+  description                  = "OTLP HTTP from AI"
+  ip_protocol                  = "tcp"
+  from_port                    = 4318
+  to_port                      = 4318
+  referenced_security_group_id = aws_security_group.prod_v2_ai.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_monitoring_9091_external_alb" {
+  security_group_id            = aws_security_group.prod_v2_monitoring.id
+  description                  = "k6 Prometheus remote-write from External ALB"
+  ip_protocol                  = "tcp"
+  from_port                    = 9091
+  to_port                      = 9091
+  referenced_security_group_id = aws_security_group.prod_v2_alb_external.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_monitoring_9091_backend" {
+  security_group_id            = aws_security_group.prod_v2_monitoring.id
+  description                  = "k6 remote-write from Backend"
+  ip_protocol                  = "tcp"
+  from_port                    = 9091
+  to_port                      = 9091
+  referenced_security_group_id = aws_security_group.prod_v2_backend.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_monitoring_9125_backend" {
+  security_group_id            = aws_security_group.prod_v2_monitoring.id
+  description                  = "k6 StatsD UDP from Backend"
+  ip_protocol                  = "udp"
+  from_port                    = 9125
+  to_port                      = 9125
+  referenced_security_group_id = aws_security_group.prod_v2_backend.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_monitoring_3100_external_alb" {
+  security_group_id            = aws_security_group.prod_v2_monitoring.id
+  description                  = "Loki from External ALB"
+  ip_protocol                  = "tcp"
+  from_port                    = 3100
+  to_port                      = 3100
+  referenced_security_group_id = aws_security_group.prod_v2_alb_external.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_monitoring_3100_ai" {
+  security_group_id            = aws_security_group.prod_v2_monitoring.id
+  description                  = "Loki from AI"
+  ip_protocol                  = "tcp"
+  from_port                    = 3100
+  to_port                      = 3100
+  referenced_security_group_id = aws_security_group.prod_v2_ai.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prod_v2_monitoring_ssh" {
+  security_group_id = aws_security_group.prod_v2_monitoring.id
+  description       = "SSH"
+  ip_protocol       = "tcp"
+  from_port         = 22
+  to_port           = 22
+  cidr_ipv4         = "0.0.0.0/0"
+}
+
+resource "aws_vpc_security_group_egress_rule" "prod_v2_monitoring_all" {
+  security_group_id = aws_security_group.prod_v2_monitoring.id
   description       = "All outbound"
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
@@ -246,7 +419,7 @@ resource "aws_vpc_security_group_ingress_rule" "prod_v2_elasticache_6379" {
 }
 
 # -----------------------------------------------------
-# Kafka SG (설계도: Kafka 별도 EC2 3대, ASG 없음)
+# Kafka SG (단일 EC2, ASG 없음)
 # -----------------------------------------------------
 
 resource "aws_security_group" "prod_v2_kafka" {
@@ -302,4 +475,3 @@ resource "aws_vpc_security_group_egress_rule" "prod_v2_kafka_all" {
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
 }
-

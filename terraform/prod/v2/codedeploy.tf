@@ -104,3 +104,48 @@ resource "aws_codedeploy_deployment_group" "prod_v2_frontend" {
     tier = local.tier_deploy
   }
 }
+
+# -----------------------------------------------------
+# AI CodeDeploy
+# -----------------------------------------------------
+
+resource "aws_codedeploy_app" "prod_v2_ai" {
+  name             = "${local.name}-ai"
+  compute_platform = "Server"
+
+  tags = {
+    Name = "${local.name}-ai"
+    tier = local.tier_ai
+  }
+}
+
+resource "aws_codedeploy_deployment_group" "prod_v2_ai" {
+  app_name              = aws_codedeploy_app.prod_v2_ai.name
+  deployment_group_name = "${local.name}-ai-dg"
+  service_role_arn      = aws_iam_role.prod_v2_codedeploy.arn
+
+  deployment_config_name = "CodeDeployDefault.OneAtATime"
+
+  ec2_tag_set {
+    ec2_tag_filter {
+      key   = "tier"
+      type  = "KEY_AND_VALUE"
+      value = local.tier_ai
+    }
+  }
+
+  deployment_style {
+    deployment_type   = "IN_PLACE"
+    deployment_option = "WITHOUT_TRAFFIC_CONTROL"
+  }
+
+  auto_rollback_configuration {
+    enabled = true
+    events  = ["DEPLOYMENT_FAILURE"]
+  }
+
+  tags = {
+    Name = "${local.name}-ai-dg"
+    tier = local.tier_deploy
+  }
+}

@@ -16,8 +16,8 @@ metadata:
   namespace: monitoring
 spec:
   hard:
-    requests.memory: "8Gi"
-    limits.memory: "16Gi"
+    requests.memory: "5Gi"   # 실측 ~3Gi + 여유 2Gi
+    limits.memory: "16Gi"    # Prometheus 4Gi + Tempo 3Gi + Loki 1Gi + Alloy×6 1.2Gi + 기타
     pods: "25"
 ---
 apiVersion: v1
