@@ -26,20 +26,6 @@ spec:
       {{- end }}
       imagePullSecrets:
       - name: ecr-secret
-      initContainers:
-      - name: otel-javaagent
-        image: curlimages/curl:8.12.1
-        imagePullPolicy: IfNotPresent
-        command:
-        - /bin/sh
-        - -c
-        - >
-          curl -fsSL
-          -o /otel/opentelemetry-javaagent.jar
-          https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
-        volumeMounts:
-        - name: otel-javaagent
-          mountPath: /otel
       containers:
       - name: backend
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -72,7 +58,7 @@ spec:
             memory: {{ .Values.resources.limits.memory }}
         env:
         - name: JAVA_TOOL_OPTIONS
-          value: {{ printf "%s -javaagent:/otel/opentelemetry-javaagent.jar" .Values.env.javaToolOptions | quote }}
+          value: {{ printf "%s -javaagent:/app/opentelemetry-javaagent.jar" .Values.env.javaToolOptions | quote }}
         - name: SPRING_CONFIG_IMPORT
           value: "optional:file:/config/secret/application-secret.yml"
         # OTel — 같은 노드의 DaemonSet Collector로 전송
@@ -114,12 +100,7 @@ spec:
         - name: secret-config
           mountPath: /config/secret
           readOnly: true
-        - name: otel-javaagent
-          mountPath: /otel
-          readOnly: true
       volumes:
       - name: secret-config
         secret:
           secretName: {{ .Values.secretName }}
-      - name: otel-javaagent
-        emptyDir: {}
