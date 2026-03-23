@@ -61,7 +61,6 @@ chunksCache:
 resultsCache:
   enabled: false
 
-# nginx gateway: resolver를 IP로 지정 (hostname 지정 시 proxy_pass DNS 조회 실패 → 모든 요청 hang)
+# nginx gateway 비활성화 — Alloy가 Loki에 직접 접속
 gateway:
-  nginxConfig:
-    resolver: 10.96.0.10
+  enabled: false
