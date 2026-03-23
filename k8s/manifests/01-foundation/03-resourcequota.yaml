@@ -16,8 +16,8 @@ metadata:
   namespace: monitoring
 spec:
   hard:
-    requests.memory: "5Gi"
-    limits.memory: "12Gi"
+    requests.memory: "8Gi"
+    limits.memory: "16Gi"
     pods: "25"
 ---
 apiVersion: v1
