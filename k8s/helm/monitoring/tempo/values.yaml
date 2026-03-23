@@ -9,8 +9,8 @@ tempo:
       cpu: 100m
       memory: 512Mi
     limits:
-      cpu: 300m
-      memory: 2Gi
+      cpu: 500m
+      memory: 3Gi
   storage:
     trace:
       backend: local
