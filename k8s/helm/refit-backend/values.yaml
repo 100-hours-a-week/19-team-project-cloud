@@ -33,7 +33,7 @@ resources:
     cpu: "250m"
     memory: "300Mi"
   limits:
-    cpu: "500m"
+    cpu: "2000m"
     memory: "768Mi"
 
 env:
