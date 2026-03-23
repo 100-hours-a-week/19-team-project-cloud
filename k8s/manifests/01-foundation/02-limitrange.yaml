@@ -1,7 +1,7 @@
-# refit-app: 앱 파드가 limits 미지정 시 default 자동 적용을 위해 LimitRange 유지
-# monitoring/argocd: 모든 컴포넌트가 Helm values에서 직접 limits 정의하므로 LimitRange 불필요
-#   → per-container max가 인프라 컴포넌트(Tempo, Loki 등)의 정상 기동을 차단하는 문제 방지
-#   → namespace 총량은 ResourceQuota로 제한
+# refit-app: 앱 파드 limits 미지정 시 default 자동 적용
+# monitoring: limits 미지정 sidecar(config-reloader 등)에 default 자동 적용
+#   max 미설정 — Prometheus/Tempo/Loki 등 대용량 컴포넌트 차단 방지
+#   총량은 ResourceQuota(requests.memory + pods)로 제한
 apiVersion: v1
 kind: LimitRange
 metadata:
@@ -19,3 +19,18 @@ spec:
     max:
       cpu: "2"
       memory: 4Gi
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: monitoring-limits
+  namespace: monitoring
+spec:
+  limits:
+  - type: Container
+    default:
+      cpu: 200m
+      memory: 256Mi
+    defaultRequest:
+      cpu: 50m
+      memory: 64Mi

@@ -439,6 +439,15 @@ alloy:
       cpu: 300m
       memory: 200Mi
 
+configReloader:
+  resources:
+    requests:
+      cpu: 1m
+      memory: 5Mi
+    limits:
+      cpu: 10m
+      memory: 20Mi
+
 controller:
   type: daemonset
   hostNetwork: true
