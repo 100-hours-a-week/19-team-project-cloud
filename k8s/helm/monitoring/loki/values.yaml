@@ -60,3 +60,8 @@ chunksCache:
   enabled: false
 resultsCache:
   enabled: false
+
+# nginx gateway: resolver를 IP로 지정 (hostname 지정 시 proxy_pass DNS 조회 실패 → 모든 요청 hang)
+gateway:
+  nginxConfig:
+    resolver: 10.96.0.10
