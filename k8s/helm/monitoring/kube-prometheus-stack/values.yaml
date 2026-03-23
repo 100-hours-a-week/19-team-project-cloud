@@ -224,7 +224,7 @@ grafana:
     - name: Loki
       type: loki
       uid: loki
-      url: http://monitoring-loki-gateway.monitoring.svc.cluster.local
+      url: http://monitoring-loki.monitoring.svc.cluster.local:3100
       access: proxy
       jsonData:
         derivedFields:
