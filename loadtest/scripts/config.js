@@ -16,6 +16,11 @@ import { Trend, Counter, Rate } from 'k6/metrics';
 
 export const BACKEND_URL = __ENV.BACKEND_URL || 'https://api-k8s.re-fit.kr';
 
+// Prometheus remote write: k6 실행 시 아래 환경변수 설정 필요
+//   K6_PROMETHEUS_RW_SERVER_URL=http://<prometheus-host>:9090/api/v1/write
+//   실행: k6 run --out experimental-prometheus-rw scripts/<script>.js
+export const PROMETHEUS_RW_URL = __ENV.K6_PROMETHEUS_RW_SERVER_URL || '';
+
 // ════════════════════════════════════════════════════════════════════
 // 📊 Custom Metrics (모든 테스트에서 공통 사용)
 // ════════════════════════════════════════════════════════════════════
