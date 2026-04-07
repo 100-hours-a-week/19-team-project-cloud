@@ -1,0 +1,22 @@
+# -------------------------------------------------------
+# terraform.tfvars.example
+# 이 파일을 terraform.tfvars로 복사한 뒤 실제 값을 채워넣으세요.
+# terraform.tfvars는 .gitignore에 추가해 커밋하지 마세요.
+# -------------------------------------------------------
+
+# SSH 접근 허용 IP 목록 (팀원 IP / 사무실 IP)
+ssh_allowed_cidrs = [
+  "x.x.x.x/32",
+  "y.y.y.y/32",
+]
+
+# 마스터 노드 추가 SSH 허용 IP (선택)
+ssh_allowed_cidrs_master_extra = [
+  # "z.z.z.z/32",
+]
+
+# Route53 Hosted Zone ID (re-fit.kr)
+route53_zone_id = "ZXXXXXXXXXXXXXXXXXXXX"
+
+# prod-v2 VPC ID (VPC 피어링 대상)
+prod_v2_vpc_id = "vpc-xxxxxxxxxxxxxxxxx"
